@@ -1,0 +1,30 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-I",
+      "include/",
+      "-c",
+      "-o",
+      "build/main.o",
+      "src/main.cpp"
+    ],
+    "directory": "/home/yoyobara/School/beekDB",
+    "file": "/home/yoyobara/School/beekDB/src/main.cpp",
+    "output": "/home/yoyobara/School/beekDB/build/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-I",
+      "include/",
+      "-c",
+      "-o",
+      "build/cpp_socket.o",
+      "src/cpp_socket.cpp"
+    ],
+    "directory": "/home/yoyobara/School/beekDB",
+    "file": "/home/yoyobara/School/beekDB/src/cpp_socket.cpp",
+    "output": "/home/yoyobara/School/beekDB/build/cpp_socket.o"
+  }
+]
