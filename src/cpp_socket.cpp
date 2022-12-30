@@ -1,9 +1,9 @@
 #include "cpp_socket.h"
-#include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <cstring>
+#include <vector>
 
 // socket error implementation
 socket_error::socket_error(const char* message) : msg(message){}
@@ -64,4 +64,22 @@ void Socket::connect(const std::string& ip_address, uint16_t port) const
 	int result = ::connect(m_sockfd, (struct sockaddr*)&addr, sizeof addr);
 	if (result < 0)
 		throw socket_error("connecting error");
+}
+
+ssize_t Socket::send(const std::string& data) const
+{
+	int res = ::send(m_sockfd, data.c_str(), data.length(), 0);
+	
+	if (res < 0)
+		throw socket_error("send error!");
+
+	return res;
+}
+
+std::string Socket::recv(size_t length) const
+{
+	std::vector<char> buffer(length);
+	::recv(m_sockfd, buffer.data(), buffer.size(), 0);
+
+	return std::string(buffer.begin(), buffer.end());
 }
