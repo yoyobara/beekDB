@@ -1,22 +1,27 @@
 CC = g++
 
+SOURCE_DIR = src
+BUILD_DIR = build
+INCLUDE_DIR = include
+
+SOURCES := $(wildcard $(SOURCE_DIR)/*.cpp)
+OBJECTS := $(patsubst $(SOURCE_DIR)/%.cpp,$(BUILD_DIR)/%.o, $(SOURCES))
+
 GTEST_LINK = -lgtest -lgtest_main
-INCLUDE = -I include/
 
-objects = build/main.o build/cpp_socket.o
+EXECUTABLE = beekDB
 
-APP = beekDB
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) -o $(EXECUTABLE) $(OBJECTS)
 
-beekDB: $(objects)
-	$(CC) -o $(APP) $(objects)
+$(BUILD_DIR)/main.o: $(SOURCE_DIR)/main.cpp
+	@mkdir -p build
+	$(CC) -I $(INCLUDE_DIR) -c $< -o $@
 
-build/cpp_socket.o: src/cpp_socket.cpp include/cpp_socket.h
-	mkdir -p build
-	$(CC) $(INCLUDE) -c src/cpp_socket.cpp -o build/cpp_socket.o
+$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.cpp $(INCLUDE_DIR)/%.h 
+	@mkdir -p build
+	$(CC) -I $(INCLUDE_DIR) -c $< -o $@
 
-build/main.o: src/main.cpp
-	mkdir -p build
-	$(CC) $(INCLUDE) -c src/main.cpp -o build/main.o
 
 clean:
-	rm -rf build $(APP)
+	rm -rf $(BUILD_DIR) $(EXECUTABLE)
