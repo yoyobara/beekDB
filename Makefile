@@ -14,12 +14,8 @@ EXECUTABLE = beekDB
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) -o $(EXECUTABLE) $(OBJECTS)
 
-$(BUILD_DIR)/main.o: $(SOURCE_DIR)/main.cpp
-	@mkdir -p build
-	$(CC) -I $(INCLUDE_DIR) -c $< -o $@
-
-$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.cpp $(INCLUDE_DIR)/%.h 
-	@mkdir -p build
+$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.cpp
+	@mkdir -p $(BUILD_DIR)
 	$(CC) -I $(INCLUDE_DIR) -c $< -o $@
 
 
