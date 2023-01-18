@@ -1,5 +1,6 @@
+#include <cstdlib>
 
 int main()
 {
-	return 2;
+	return EXIT_SUCCESS;
 }

@@ -1,23 +1,21 @@
-CC = g++
+EXECUTABLE = ./beekDB
 
-SOURCE_DIR = src
-BUILD_DIR = build
-INCLUDE_DIR = include
+SRC_DIR = ./src
+BUILD_DIR = ./build
+HEADERS_DIR = ./include
 
-SOURCES := $(wildcard $(SOURCE_DIR)/*.cpp)
-OBJECTS := $(patsubst $(SOURCE_DIR)/%.cpp,$(BUILD_DIR)/%.o, $(SOURCES))
+sources := $(shell find $(SRC_DIR) -name "*.cpp")
+objects := $(sources:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
+deps := $(objects:.o=.d)
 
-GTEST_LINK = -lgtest -lgtest_main
+$(EXECUTABLE): $(objects)
+	$(CXX) $(objects) -o $@
 
-EXECUTABLE = beekDB
-
-$(EXECUTABLE): $(OBJECTS)
-	$(CC) -o $(EXECUTABLE) $(OBJECTS)
-
-$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.cpp
+$(objects): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(BUILD_DIR)
-	$(CC) -I $(INCLUDE_DIR) -c $< -o $@
-
+	$(CXX) -I $(HEADERS_DIR) -MMD -MP -c $< -o $@
 
 clean:
 	rm -rf $(BUILD_DIR) $(EXECUTABLE)
+
+-include $(deps)
