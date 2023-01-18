@@ -7,7 +7,7 @@
 
 // socket error implementation
 socket_error::socket_error(const char* message) : msg(message){}
-const char* socket_error::what(){ return msg;}
+const char* socket_error::what() const noexcept{ return msg;}
 
 Socket::Socket()
 {
@@ -68,7 +68,7 @@ void Socket::connect(const std::string& ip_address, uint16_t port) const
 
 ssize_t Socket::send(const std::string& data) const
 {
-	int res = ::send(m_sockfd, data.c_str(), data.length(), 0);
+	int res = ::send(m_sockfd, data.c_str(), data.length(), MSG_NOSIGNAL);
 	
 	if (res < 0)
 		throw socket_error("send error!");

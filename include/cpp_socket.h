@@ -15,7 +15,7 @@ class socket_error : public std::exception
 
 	public:
 		socket_error(const char* message);
-		const char * what();
+		const char * what() const noexcept override;
 };
 
 
