@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <vector>
+#include <iostream>
 
 // socket error implementation
 socket_error::socket_error(const char* message) : msg(message){}
@@ -79,7 +80,11 @@ ssize_t Socket::send(const std::string& data) const
 std::string Socket::recv(size_t length) const
 {
 	std::vector<char> buffer(length);
-	::recv(m_sockfd, buffer.data(), buffer.size(), 0);
+
+	int res = ::recv(m_sockfd, buffer.data(), buffer.size(), 0);
+
+	if (res < 0)
+		throw socket_error("recv error!");
 
 	return std::string(buffer.begin(), buffer.end());
 }
