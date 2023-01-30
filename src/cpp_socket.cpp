@@ -18,9 +18,9 @@ Socket::Socket()
 
 Socket::Socket(int fd) : m_sockfd(fd) {}
 
-Socket::~Socket()
+void Socket::close() const
 {
-	close(m_sockfd);
+	::close(m_sockfd);
 }
 
 void Socket::bind(uint16_t port) const

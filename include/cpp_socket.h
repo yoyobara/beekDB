@@ -28,10 +28,10 @@ class Socket
 	public:
 		/* create new socket */
 		Socket();
-		
-		/* destructs a socket */
-		virtual ~Socket();
 
+		/* closes a socket */
+		void close() const;
+		
 		/**
 		 * binds the server to run on a specific port
 		 * and to accept all connections
