@@ -15,6 +15,7 @@ $(objects): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(BUILD_DIR)
 	$(CXX) -I $(HEADERS_DIR) -MMD -MP -c $< -o $@
 
+.PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR) $(EXECUTABLE)
 
