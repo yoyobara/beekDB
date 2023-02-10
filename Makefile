@@ -9,7 +9,7 @@ objects := $(sources:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 deps := $(objects:.o=.d)
 
 $(EXECUTABLE): $(objects)
-	$(CXX) $(objects) -o $@
+	$(CXX) $(objects) -o $@ -lsqlparser
 
 $(objects): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(BUILD_DIR)
