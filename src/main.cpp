@@ -9,7 +9,8 @@
  */
 void handle_client(Socket client)
 {
-	// TODO
+	auto s {client.recv(10)};
+	std::cout << s << std::endl;
 	client.close();
 }
 
