@@ -1,25 +1,29 @@
-
 #include "storage.h"
+#include <ios>
+#include <string>
 
-
-bool write_at_pos(std::fstream& f, size_t position, const char* data, size_t size)
+bool TableFile::write_at_pos(size_t position, const char* data, size_t size)
 {
-	if (!f.is_open())
+	if (!file.is_open())
 		return false;
 
-	if (f.seekp(position, std::ios::beg).fail())
+	if (file.seekp(position, std::ios::beg).fail())
 		return false;
 
-	return !f.write(data, size).fail();
+	return !file.write(data, size).fail();
 }
 
-bool read_at_pos(std::fstream& f, size_t position, char* data, size_t size)
+bool TableFile::read_at_pos(size_t position, char* data, size_t size)
 {
-	if (!f.is_open())
+	if (!file.is_open())
 		return false;
 
-	if (f.seekg(position, std::ios::beg).fail())
+	if (file.seekg(position, std::ios::beg).fail())
 		return false;
 
-	return !f.read(data, size).fail();
+	return !file.read(data, size).fail();
 }
+
+
+TableFile::TableFile(const std::string& filename) : file(filename, std::ios::out | std::ios::in)
+{}
