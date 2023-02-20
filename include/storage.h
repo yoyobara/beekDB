@@ -4,20 +4,21 @@
 #include <fstream>
 #include <string>
 
-class TableFile
+/*
+ * a class which represents a file to be read and written at a specific position.
+ */
+class PositionalFile
 {
 	private:
 		std::fstream file;
 
 	public:
-		TableFile(const std::string& filename);
+		PositionalFile(const std::string& filename);
 
 		/**
 		 * read a file at a specific position.
 		 *
 		 * after the call the cursor is in undefined position.
-		 *
-		 * file has to be opened with out | in
 		 */
 		bool read_at_pos(size_t position, char* data, size_t size);
 
@@ -26,8 +27,13 @@ class TableFile
 		 * override the file content at that position.
 		 *
 		 * after the call the cursor is in undefined position.
-		 *
-		 * file has to be opened with out | in
 		 */
 		bool write_at_pos(size_t position, const char* data, size_t size);
+};
+
+/*
+ * a class representing a table file
+ */
+class TableFile : public PositionalFile
+{
 };

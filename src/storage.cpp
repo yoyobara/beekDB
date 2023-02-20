@@ -1,8 +1,12 @@
-#include "storage.h"
 #include <ios>
+#include <iostream>
 #include <string>
 
-bool TableFile::write_at_pos(size_t position, const char* data, size_t size)
+#include "storage.h"
+
+using std::ios;
+
+bool PositionalFile::write_at_pos(size_t position, const char* data, size_t size)
 {
 	if (!file.is_open())
 		return false;
@@ -13,7 +17,7 @@ bool TableFile::write_at_pos(size_t position, const char* data, size_t size)
 	return !file.write(data, size).fail();
 }
 
-bool TableFile::read_at_pos(size_t position, char* data, size_t size)
+bool PositionalFile::read_at_pos(size_t position, char* data, size_t size)
 {
 	if (!file.is_open())
 		return false;
@@ -25,5 +29,5 @@ bool TableFile::read_at_pos(size_t position, char* data, size_t size)
 }
 
 
-TableFile::TableFile(const std::string& filename) : file(filename, std::ios::out | std::ios::in)
+PositionalFile::PositionalFile(const std::string& filename) : file(filename, ios::out | ios::in)
 {}
