@@ -1,3 +1,4 @@
+#include <fstream>
 #include <ios>
 #include <iostream>
 #include <string>
@@ -6,28 +7,34 @@
 
 using std::ios;
 
-bool PositionalFile::write_at_pos(size_t position, const char* data, size_t size)
+void PositionalFileHandler::write(size_t position, const char* data, size_t size) 
 {
-	if (!file.is_open())
-		return false;
-
-	if (file.seekp(position, std::ios::beg).fail())
-		return false;
-
-	return !file.write(data, size).fail();
+	file.seekp(position, std::ios::beg);
+	file.write(data, size);
 }
 
-bool PositionalFile::read_at_pos(size_t position, char* data, size_t size)
+void PositionalFileHandler::read(size_t position, char* data, size_t size)
 {
-	if (!file.is_open())
-		return false;
-
-	if (file.seekg(position, std::ios::beg).fail())
-		return false;
-
-	return !file.read(data, size).fail();
+	file.seekg(position, std::ios::beg);
+	file.read(data, size);
 }
 
+PositionalFileHandler::PositionalFileHandler(const std::string& filename)
+{
+	file.exceptions(std::fstream::failbit); // set that an exception shall be thrown on io error
 
-PositionalFile::PositionalFile(const std::string& filename) : file(filename, ios::out | ios::in)
-{}
+	file.open(filename, ios::out | ios::in | ios::binary);
+}
+
+PositionalFileHandler PositionalFileHandler::open(const std::string &filename)
+{
+	return PositionalFileHandler(filename);
+}
+
+PositionalFileHandler PositionalFileHandler::create(const std::string &filename)
+{
+	// just create the file
+	std::ofstream f(filename);
+
+	return open(filename);
+}
