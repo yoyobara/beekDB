@@ -8,7 +8,7 @@
  * a class which represents a handler of a 
  * file that can be accessed in a specific position.
  */
-class PositionalFileHandler
+class RandomAccessFileHandler
 {
 	private:
 		std::fstream m_file;
@@ -16,15 +16,15 @@ class PositionalFileHandler
 		/*
 		 * filename must be a file that already exists
 		 */
-		PositionalFileHandler(const std::string_view filename);
+		RandomAccessFileHandler(const std::string_view filename);
 
 	public:
 
 		/* open an existing file */
-		static PositionalFileHandler open(const std::string_view filename);
+		static RandomAccessFileHandler open(const std::string_view filename);
 
 		/* create a new file */
-		static PositionalFileHandler create(const std::string_view filename);
+		static RandomAccessFileHandler create(const std::string_view filename);
 
 		/**
 		 * read a file at a specific position.
