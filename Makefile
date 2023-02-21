@@ -9,11 +9,11 @@ objects := $(sources:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 deps := $(objects:.o=.d)
 
 $(EXECUTABLE): $(objects)
-	$(CXX) $(objects) -o $@ -lsqlparser
+	$(CXX) -std=c++17 $(objects) -o $@ -lsqlparser
 
 $(objects): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(BUILD_DIR)
-	$(CXX) -I $(HEADERS_DIR) -MMD -MP -c $< -o $@
+	$(CXX) -std=c++17 -I $(HEADERS_DIR) -MMD -MP -c $< -o $@
 
 .PHONY: clean
 clean:

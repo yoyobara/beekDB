@@ -2,7 +2,7 @@
 
 #include <cassert>
 #include <fstream>
-#include <string>
+#include <string_view>
 
 /*
  * a class which represents a handler of a 
@@ -11,20 +11,20 @@
 class PositionalFileHandler
 {
 	private:
-		std::fstream file;
+		std::fstream m_file;
 
 		/*
 		 * filename must be a file that already exists
 		 */
-		PositionalFileHandler(const std::string& filename);
+		PositionalFileHandler(const std::string_view filename);
 
 	public:
 
 		/* open an existing file */
-		static PositionalFileHandler open(const std::string& filename);
+		static PositionalFileHandler open(const std::string_view filename);
 
 		/* create a new file */
-		static PositionalFileHandler create(const std::string& filename);
+		static PositionalFileHandler create(const std::string_view filename);
 
 		/**
 		 * read a file at a specific position.
