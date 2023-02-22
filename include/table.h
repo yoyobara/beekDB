@@ -19,19 +19,28 @@ class Column
 			VARCHAR
 		};
 
-		Column(std::string_view name);
+		/*
+		 * create a new column.
+		 * 
+		 * @param name - the column name
+		 * @param type - the column type
+		 * @param parameter - the column type parameter (for example length for varchar)
+		 */
+		Column(std::string_view name, ColumnType type, int parameter);
 
 	private:
-		const bool m_primary_key;
 		const std::string_view m_name;
 		const ColumnType m_type;
+		const int parameter;
 };
+
+const std::string TABLE_FILE_START_PHRASE {"TABDEF"};
 
 /*
  * a class representing a table.
  * subclasses PositionalFileHandler so the table can handle its file.
  */
-class Table : public PositionalFileHandler
+class Table : public RandomAccessFileHandler
 {
 	public:
 
@@ -39,11 +48,11 @@ class Table : public PositionalFileHandler
 		 * creates a new table file.
 		 * name - the name of the table
 		 */
-		static Table create_table(const std::string_view name);
+		static Table create_table(const std::string_view name, std::vector<Column> columns);
 
 		/* open existing table */
 		static Table open_table(const std::string_view name);
-	
+
 	private:
 
 		/*
@@ -52,8 +61,6 @@ class Table : public PositionalFileHandler
 		 */
 		Table(const std::string_view name);
 		
-		/* table name */
 		const std::string_view name;
-
 		std::vector<Column> columns;
 };
