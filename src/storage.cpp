@@ -19,22 +19,12 @@ void RandomAccessFileHandler::read(size_t position, char* data, size_t size)
 	m_file.read(data, size);
 }
 
-RandomAccessFileHandler::RandomAccessFileHandler(const std::string_view filename)
+RandomAccessFileHandler::RandomAccessFileHandler(const std::string_view filename, bool create)
 {
+	if (create)
+		// just create the file
+		std::ofstream f(filename.data());
+	
 	m_file.exceptions(std::fstream::failbit); // set that an exception shall be thrown on io error
-
 	m_file.open(filename.data(), ios::out | ios::in | ios::binary);
-}
-
-RandomAccessFileHandler RandomAccessFileHandler::open(const std::string_view filename)
-{
-	return RandomAccessFileHandler(filename);
-}
-
-RandomAccessFileHandler RandomAccessFileHandler::create(const std::string_view filename)
-{
-	// just create the file
-	std::ofstream f(filename.data());
-
-	return open(filename);
 }

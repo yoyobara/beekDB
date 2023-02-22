@@ -1,4 +1,6 @@
+#include "storage.h"
 #include <table.h>
+#include <vector>
 
 /* column */
 
@@ -11,3 +13,13 @@ int Column::get_parameter() const { return m_parameter; }
 
 
 /* table */
+
+Table::Table(const std::string_view name) : RandomAccessFileHandler(name, false)
+{
+
+}
+
+Table::Table(const std::string_view name, const std::vector<Column>& columns) : RandomAccessFileHandler(name, true)
+{
+
+}

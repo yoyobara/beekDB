@@ -13,18 +13,14 @@ class RandomAccessFileHandler
 	private:
 		std::fstream m_file;
 
-		/*
-		 * filename must be a file that already exists
-		 */
-		RandomAccessFileHandler(const std::string_view filename);
-
 	public:
-
-		/* open an existing file */
-		static RandomAccessFileHandler open(const std::string_view filename);
-
-		/* create a new file */
-		static RandomAccessFileHandler create(const std::string_view filename);
+		/*
+		 * constructs a new RandomAccessFileHandler.
+		 *
+		 * @param filename - the name of the file.
+		 * @param create - create a new file or not.
+		 */
+		RandomAccessFileHandler(const std::string_view filename, bool create);
 
 		/**
 		 * read a file at a specific position.
