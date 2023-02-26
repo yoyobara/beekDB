@@ -7,22 +7,18 @@
 #include "table_storage_constants.h"
 
 /*
- * a class which represents a handler of a 
- * file that can be accessed in a specific position.
+ * a class which represents a file that can be accessed at a specific position.
  */
-class RandomAccessFileHandler
+class RandomAccessFile : private std::fstream
 {
-	private:
-		std::fstream m_file;
-
 	public:
 		/*
-		 * constructs a new RandomAccessFileHandler.
+		 * constructs a new RandomAccessFile.
 		 *
 		 * @param filename - the name of the file.
 		 * @param create - create a new file or not.
 		 */
-		RandomAccessFileHandler(const std::string_view filename, bool create);
+		RandomAccessFile(const std::string_view filename, bool create);
 
 		/**
 		 * read a file at a specific position.

@@ -56,7 +56,7 @@ const std::string TABLE_FILE_START_PHRASE {"TABDEF"};
  * a class representing a table.
  * subclasses PositionalFileHandler so the table can handle its file.
  */
-class Table : public RandomAccessFileHandler
+class Table
 {
 	public:
 
@@ -75,7 +75,9 @@ class Table : public RandomAccessFileHandler
 
 	private:
 		
+		RandomAccessFile table_file;
 		const std::string_view name;
+
 		std::vector<Column> columns;
 		long rows_count;
 		int columns_count;

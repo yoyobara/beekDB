@@ -17,27 +17,21 @@ ColumnType Column::get_type() const { return m_type; }
 
 /* table */
 
-Table::Table(const std::string_view name) : RandomAccessFileHandler(name, false)
+Table::Table(const std::string_view name) :
+	table_file(name, false)
 {
 	// assert signature presence TODO
+	assert(table_file.verify_content(table_storage::SIGNATURE_OFFSET, table_storage::SIGNATURE));
 
 	// read columns count from metadata
-	read(table_storage::COLUMN_COUNT_OFFSET, &columns_count, table_storage::COLUMN_COUNT_SIZE);
+	table_file.read(table_storage::COLUMN_COUNT_OFFSET, &columns_count, table_storage::COLUMN_COUNT_SIZE);
 
 	// read rows count from metadata.
-	read(table_storage::ROW_COUNT_OFFSET, &rows_count, table_storage::ROW_COUNT_SIZE);
-
-	const void* columns_start;
-
-	for (int i = 0 ; i < columns_count ; i++)
-	{
-
-		
-	}
+	table_file.read(table_storage::ROW_COUNT_OFFSET, &rows_count, table_storage::ROW_COUNT_SIZE);
 }
 
-Table::Table(const std::string_view name, const std::vector<Column>& columns) : 
-	RandomAccessFileHandler(name, true), 
+Table::Table(const std::string_view name, const std::vector<Column>& columns) :
+	table_file(name, true),
 	columns(columns),
 	name(name)
 {
