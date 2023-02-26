@@ -5,7 +5,7 @@ this is a protocol for storing tables in a file.
 as for now, a table might have one of 3 types:
 - `INTEGER` - a signed whole number. of 4 bytes.
 - `REAL` - a real number of 8 bytes
-- `VARCHAR` - a string of pre-defined length.
+- `STRING` - a string of pre-defined length.
 
 an unknown length string is right now not implemented.
 
@@ -20,7 +20,7 @@ a table file should start with `TABDEF` so we can be sure it aint corrupted or s
 ### `metadata`
 the metadata is as follows:
 
-`<8-bytes rows count><columns>`
+`<4-bytes columns count><8-bytes rows count><columns>`
 
 ##### `columns`
 columns appear contagiously. each column is as follows:

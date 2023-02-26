@@ -46,4 +46,10 @@ class RandomAccessFileHandler
 		 * @param size - how much to write.
 		 */
 		void write(size_t position, const void* data, size_t size);
+
+		/*
+		 * verify that the content of the file starting at position,
+		 * is equal to the given string.
+		 */
+		bool verify_content(size_t position, std::string s);
 };

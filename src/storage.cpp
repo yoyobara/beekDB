@@ -1,3 +1,4 @@
+#include <array>
 #include <fstream>
 #include <ios>
 #include <iostream>
@@ -27,4 +28,12 @@ RandomAccessFileHandler::RandomAccessFileHandler(const std::string_view filename
 	
 	m_file.exceptions(std::fstream::failbit); // set that an exception shall be thrown on io error
 	m_file.open(filename.data(), ios::out | ios::in | ios::binary);
+}
+
+bool RandomAccessFileHandler::verify_content(size_t position, std::string s)
+{
+	std::string buff(s.size(), 0);
+	read(position, s.data(), s.size());
+
+	return buff == s;
 }

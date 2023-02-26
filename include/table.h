@@ -1,15 +1,29 @@
 #pragma once
 
-#include "storage.h"
 #include <vector>
 #include <string_view>
+#include <map>
+
+#include "storage.h"
 
 /* the three possible column types */
 enum ColumnType
 {
 	INTEGER,
 	REAL,
-	VARCHAR
+	STRING
+};
+
+const std::map<char, ColumnType> BYTE_TO_TYPE {
+	{'i', INTEGER},
+	{'r', REAL},
+	{'s', STRING}
+};
+
+const std::map<ColumnType, char> TYPE_TO_BYTE {
+	{INTEGER, 'i'},
+	{REAL, 'r'},
+	{STRING, 's'}
 };
 
 /*
@@ -24,19 +38,16 @@ class Column
 		 * 
 		 * @param name - the column name
 		 * @param type - the column type
-		 * @param parameter - the column type parameter (for example length for varchar)
 		 */
-		Column(const std::string_view name, ColumnType type, int parameter);
+		Column(const std::string_view name, ColumnType type);
 
 		/* simple getters */
 		std::string_view get_name() const;
 		ColumnType get_type() const;
-		int get_parameter() const;
 
 	private:
 		const std::string_view m_name;
 		const ColumnType m_type;
-		const int m_parameter;
 };
 
 const std::string TABLE_FILE_START_PHRASE {"TABDEF"};
@@ -67,4 +78,5 @@ class Table : public RandomAccessFileHandler
 		const std::string_view name;
 		std::vector<Column> columns;
 		long rows_count;
+		int columns_count;
 };
