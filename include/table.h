@@ -74,6 +74,8 @@ class Table
 		Table(const std::string_view name);
 
 	private:
+		void init_metadata();
+		void init_columns();
 		
 		RandomAccessFile table_file;
 		const std::string_view name;

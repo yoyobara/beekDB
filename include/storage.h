@@ -9,7 +9,7 @@
 /*
  * a class which represents a file that can be accessed at a specific position.
  */
-class RandomAccessFile : private std::fstream
+class RandomAccessFile : public std::fstream
 {
 	public:
 		/*

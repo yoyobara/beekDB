@@ -14,4 +14,6 @@ namespace table_storage
 
 	const int ROW_COUNT_OFFSET{10};
 	const int ROW_COUNT_SIZE{8};
+
+	const int DESC_SIZE{1};
 }

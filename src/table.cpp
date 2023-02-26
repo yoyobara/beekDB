@@ -17,10 +17,36 @@ ColumnType Column::get_type() const { return m_type; }
 
 /* table */
 
-Table::Table(const std::string_view name) :
-	table_file(name, false)
+void Table::init_columns()
 {
-	// assert signature presence TODO
+	// now cursor at start of columns.
+
+	char buffer;
+
+	for (int i = 0 ; i < columns_count ; i++)
+	{
+		// read descriptor
+		table_file.read(&buffer, table_storage::DESC_SIZE);
+
+		ColumnType type {BYTE_TO_TYPE.at(buffer)};
+
+		// read name
+		std::string name;
+		do {
+			table_file.read(&buffer, 1);
+			name += buffer;
+		}
+		while (buffer != '\0');
+		name.pop_back(); // \0
+
+		// add column
+		columns.push_back(Column(name, type));
+	}
+}
+
+void Table::init_metadata()
+{
+	// assert signature presence
 	assert(table_file.verify_content(table_storage::SIGNATURE_OFFSET, table_storage::SIGNATURE));
 
 	// read columns count from metadata
@@ -28,6 +54,13 @@ Table::Table(const std::string_view name) :
 
 	// read rows count from metadata.
 	table_file.read_at(table_storage::ROW_COUNT_OFFSET, &rows_count, table_storage::ROW_COUNT_SIZE);
+
+	init_columns();
+}
+
+Table::Table(const std::string_view name) :
+	table_file(name, false)
+{
 }
 
 Table::Table(const std::string_view name, const std::vector<Column>& columns) :
