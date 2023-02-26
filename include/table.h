@@ -51,7 +51,8 @@ class Table : public RandomAccessFileHandler
 
 		/*
 		 * creates a new table file.
-		 * name - the name of the table
+		 * @param name - the name of the table
+		 * @param columns - vecotr of table columns
 		 */
 		Table(const std::string_view name, const std::vector<Column>& columns);
 
@@ -65,4 +66,5 @@ class Table : public RandomAccessFileHandler
 		
 		const std::string_view name;
 		std::vector<Column> columns;
+		long rows_count;
 };

@@ -7,16 +7,16 @@
 
 using std::ios;
 
-void RandomAccessFileHandler::write(size_t position, const char* data, size_t size) 
+void RandomAccessFileHandler::write(size_t position, const void* data, size_t size) 
 {
 	m_file.seekp(position, std::ios::beg);
-	m_file.write(data, size);
+	m_file.write(static_cast<const char*>(data), size);
 }
 
-void RandomAccessFileHandler::read(size_t position, char* data, size_t size)
+void RandomAccessFileHandler::read(size_t position, void* data, size_t size)
 {
 	m_file.seekg(position, std::ios::beg);
-	m_file.read(data, size);
+	m_file.read(static_cast<char*>(data), size);
 }
 
 RandomAccessFileHandler::RandomAccessFileHandler(const std::string_view filename, bool create)

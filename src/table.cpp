@@ -1,6 +1,9 @@
-#include "storage.h"
 #include <table.h>
 #include <vector>
+#include <iostream>
+
+#include "storage.h"
+#include "table_storage_constants.h"
 
 /* column */
 
@@ -16,10 +19,15 @@ int Column::get_parameter() const { return m_parameter; }
 
 Table::Table(const std::string_view name) : RandomAccessFileHandler(name, false)
 {
-
+	// read rows count from metadata. kinda dirty, but reading bytes into the long type.
+	read(table_storage::ROW_COUNT_OFFSET, &rows_count, table_storage::ROW_COUNT_SIZE);
+	std::cout << rows_count << std::endl; //NOTE
 }
 
-Table::Table(const std::string_view name, const std::vector<Column>& columns) : RandomAccessFileHandler(name, true)
+Table::Table(const std::string_view name, const std::vector<Column>& columns) : 
+	RandomAccessFileHandler(name, true), 
+	columns(columns),
+	name(name)
 {
-
+	
 }

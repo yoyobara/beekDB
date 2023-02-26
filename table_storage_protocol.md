@@ -20,7 +20,7 @@ a table file should start with `TABDEF` so we can be sure it aint corrupted or s
 ### `metadata`
 the metadata is as follows:
 
-`<4-bytes columns count><8-bytes rows count><columns>`
+`<8-bytes rows count><columns>`
 
 ##### `columns`
 columns appear contagiously. each column is as follows:
