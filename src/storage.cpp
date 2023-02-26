@@ -8,17 +8,17 @@
 
 using std::ios;
 
-void RandomAccessFile::write(size_t position, const void* data, size_t size) 
+void RandomAccessFile::write_at(size_t position, const void* data, size_t size) 
 {
 	
 	seekp(position, std::ios::beg);
 	std::fstream::write(static_cast<const char*>(data), size);
 }
 
-void RandomAccessFile::read(size_t position, void* data, size_t size)
+void RandomAccessFile::read_at(size_t position, void* data, size_t size)
 {
 	seekg(position, std::ios::beg);
-	std::fstream::read(static_cast<char*>(data), size);
+	read(static_cast<char*>(data), size);
 }
 
 RandomAccessFile::RandomAccessFile(const std::string_view filename, bool create)
@@ -34,7 +34,7 @@ RandomAccessFile::RandomAccessFile(const std::string_view filename, bool create)
 bool RandomAccessFile::verify_content(size_t position, std::string s)
 {
 	std::string buff(s.size(), 0);
-	read(position, s.data(), s.size());
+	read_at(position, s.data(), s.size());
 
 	return buff == s;
 }

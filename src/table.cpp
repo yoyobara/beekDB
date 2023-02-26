@@ -24,10 +24,10 @@ Table::Table(const std::string_view name) :
 	assert(table_file.verify_content(table_storage::SIGNATURE_OFFSET, table_storage::SIGNATURE));
 
 	// read columns count from metadata
-	table_file.read(table_storage::COLUMN_COUNT_OFFSET, &columns_count, table_storage::COLUMN_COUNT_SIZE);
+	table_file.read_at(table_storage::COLUMN_COUNT_OFFSET, &columns_count, table_storage::COLUMN_COUNT_SIZE);
 
 	// read rows count from metadata.
-	table_file.read(table_storage::ROW_COUNT_OFFSET, &rows_count, table_storage::ROW_COUNT_SIZE);
+	table_file.read_at(table_storage::ROW_COUNT_OFFSET, &rows_count, table_storage::ROW_COUNT_SIZE);
 }
 
 Table::Table(const std::string_view name, const std::vector<Column>& columns) :

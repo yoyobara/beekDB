@@ -29,7 +29,7 @@ class RandomAccessFile : private std::fstream
 		 * @param data - the buffer to read into
 		 * @param size - how much to read.
 		 */
-		void read(size_t position, void* data, size_t size);
+		void read_at(size_t position, void* data, size_t size);
 
 		/**
 		 * write a file at a specific position.
@@ -41,7 +41,7 @@ class RandomAccessFile : private std::fstream
 		 * @param data - the buffer to write into
 		 * @param size - how much to write.
 		 */
-		void write(size_t position, const void* data, size_t size);
+		void write_at(size_t position, const void* data, size_t size);
 
 		/*
 		 * verify that the content of the file starting at position,
