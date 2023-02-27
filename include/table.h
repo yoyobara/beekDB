@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <vector>
 #include <string_view>
 #include <map>
@@ -39,14 +40,14 @@ class Column
 		 * @param name - the column name
 		 * @param type - the column type
 		 */
-		Column(const std::string_view name, ColumnType type);
+		Column(const std::string& name, ColumnType type);
 
 		/* simple getters */
 		std::string_view get_name() const;
 		ColumnType get_type() const;
 
 	private:
-		const std::string_view m_name;
+		const std::string m_name;
 		const ColumnType m_type;
 };
 
@@ -65,20 +66,20 @@ class Table
 		 * @param name - the name of the table
 		 * @param columns - vecotr of table columns
 		 */
-		Table(const std::string_view name, const std::vector<Column>& columns);
+		Table(const std::string& name, const std::vector<Column>& columns);
 
 		/*
 		 * opens an existing table file.
 		 * name - the name of the table.
 		 */
-		Table(const std::string_view name);
+		Table(const std::string& name);
 
 	private:
 		void init_metadata();
 		void init_columns();
 		
 		RandomAccessFile table_file;
-		const std::string_view name;
+		const std::string name;
 
 		std::vector<Column> columns;
 		long rows_count;

@@ -8,7 +8,7 @@
 
 /* column */
 
-Column::Column(const std::string_view name, ColumnType type) : 
+Column::Column(const std::string& name, ColumnType type) : 
 	m_name(name), m_type(type) {}
 
 std::string_view Column::get_name() const { return m_name; }
@@ -58,12 +58,12 @@ void Table::init_metadata()
 	init_columns();
 }
 
-Table::Table(const std::string_view name) :
+Table::Table(const std::string& name) :
 	table_file(name, false)
 {
 }
 
-Table::Table(const std::string_view name, const std::vector<Column>& columns) :
+Table::Table(const std::string& name, const std::vector<Column>& columns) :
 	table_file(name, true),
 	columns(columns),
 	name(name)
