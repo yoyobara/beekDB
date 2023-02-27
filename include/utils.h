@@ -3,4 +3,4 @@
 #include <string>
 
 template<typename T>
-std::string encode(const T& val);
+std::string encode(T&& val);
