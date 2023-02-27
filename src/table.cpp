@@ -1,10 +1,12 @@
 #include <cassert>
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 #include "table.h"
 #include "storage.h"
 #include "table_storage_constants.h"
+#include <utils.h>
 
 /* column */
 
@@ -17,6 +19,7 @@ ColumnType Column::get_type() const { return m_type; }
 
 /* table */
 
+/* open */
 void Table::init_columns()
 {
 	// now cursor at start of columns.
@@ -31,16 +34,16 @@ void Table::init_columns()
 		ColumnType type {BYTE_TO_TYPE.at(buffer)};
 
 		// read name
-		std::string name;
+		std::string col_name;
 		do {
 			table_file.read(&buffer, 1);
-			name += buffer;
+			col_name += buffer;
 		}
 		while (buffer != '\0');
-		name.pop_back(); // \0
+		col_name.pop_back(); // \0
 
 		// add column
-		columns.push_back(Column(name, type));
+		columns.push_back(Column(col_name, type));
 	}
 }
 
@@ -50,17 +53,43 @@ void Table::init_metadata()
 	assert(table_file.verify_content(table_storage::SIGNATURE_OFFSET, table_storage::SIGNATURE));
 
 	// read columns count from metadata
-	table_file.read_at(table_storage::COLUMN_COUNT_OFFSET, &columns_count, table_storage::COLUMN_COUNT_SIZE);
+	table_file.read_at(table_storage::COLUMN_COUNT_OFFSET, &columns_count, sizeof columns_count);
 
 	// read rows count from metadata.
-	table_file.read_at(table_storage::ROW_COUNT_OFFSET, &rows_count, table_storage::ROW_COUNT_SIZE);
+	table_file.read_at(table_storage::ROW_COUNT_OFFSET, &rows_count, sizeof rows_count);
 
 	init_columns();
 }
 
 Table::Table(const std::string& name) :
-	table_file(name, false)
+	table_file(name, false),
+	name(name)
 {
+	init_metadata();
+}
+
+/* create */
+
+void Table::create_metadata(const std::vector<Column>& columns)
+{
+	// the file is currently open for writing at position 0
+	std::stringstream ss;
+	ss << table_storage::SIGNATURE;
+
+	// columns count and rows count
+	columns_count_t col_count = columns.size();
+	ss << encode(col_count);
+	ss << encode(static_cast<rows_count_t>(0));
+
+	// columns themselves
+	for (const Column& c : columns)
+	{
+		// descriptor
+		ss << TYPE_TO_BYTE.at(c.get_type());
+
+		// name and \0
+		ss << c.get_name() << '\0';
+	}
 }
 
 Table::Table(const std::string& name, const std::vector<Column>& columns) :
@@ -68,5 +97,5 @@ Table::Table(const std::string& name, const std::vector<Column>& columns) :
 	columns(columns),
 	name(name)
 {
-	
+	create_metadata(columns);
 }

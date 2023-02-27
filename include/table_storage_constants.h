@@ -2,6 +2,9 @@
 
 #include <string>
 
+using columns_count_t = int;
+using rows_count_t = long;
+
 namespace table_storage 
 {
 	const int STRING_SIZE {50};
@@ -10,10 +13,8 @@ namespace table_storage
 	const int SIGNATURE_OFFSET{0};
 
 	const int COLUMN_COUNT_OFFSET{6};
-	const int COLUMN_COUNT_SIZE{4};
 
 	const int ROW_COUNT_OFFSET{10};
-	const int ROW_COUNT_SIZE{8};
 
 	const int DESC_SIZE{1};
 }

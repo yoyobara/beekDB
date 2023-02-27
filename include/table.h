@@ -6,6 +6,7 @@
 #include <map>
 
 #include "storage.h"
+#include "table_storage_constants.h"
 
 /* the three possible column types */
 enum ColumnType
@@ -75,13 +76,17 @@ class Table
 		Table(const std::string& name);
 
 	private:
+		/* open */
 		void init_metadata();
 		void init_columns();
+
+		/* create */
+		void create_metadata(const std::vector<Column>& columns);
 		
 		RandomAccessFile table_file;
 		const std::string name;
 
 		std::vector<Column> columns;
-		long rows_count;
-		int columns_count;
+		rows_count_t rows_count;
+		columns_count_t columns_count;
 };
