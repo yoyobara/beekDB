@@ -36,5 +36,5 @@
 
 int main()
 {
-	Table t("./tables/sample_table");
+	Table t("./tables/yoyo_table", {Column("name", STRING), Column("age", REAL)});
 }

@@ -90,6 +90,9 @@ void Table::create_metadata(const std::vector<Column>& columns)
 		// name and \0
 		ss << c.get_name() << '\0';
 	}
+
+	// finally write to file
+	table_file << ss.rdbuf();
 }
 
 Table::Table(const std::string& name, const std::vector<Column>& columns) :
