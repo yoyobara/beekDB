@@ -34,7 +34,7 @@ RandomAccessFile::RandomAccessFile(const std::string_view filename, bool create)
 bool RandomAccessFile::verify_content(size_t position, std::string s)
 {
 	std::string buff(s.size(), 0);
-	read_at(position, s.data(), s.size());
+	read_at(position, buff.data(), s.size());
 
 	return buff == s;
 }
