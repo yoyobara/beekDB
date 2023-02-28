@@ -36,5 +36,6 @@
 
 int main()
 {
-	Table t("./tables/yoyo_table", {Column("name", STRING), Column("age", REAL)});
+	Table t("./tables/yoyo_table");
+	std::cout << t;
 }

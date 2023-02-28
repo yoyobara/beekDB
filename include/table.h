@@ -81,7 +81,7 @@ class Table
 		/*
 		 * textual representation
 		 */
-		friend std::ofstream& operator<<(std::ofstream& out, const Table& table);
+		friend std::ostream& operator<<(std::ostream& out, const Table& table);
 
 	private:
 		/* open */

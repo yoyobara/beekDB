@@ -111,7 +111,7 @@ Table::Table(const std::string& name, const std::vector<Column>& columns) :
 }
 
 /* repr */
-std::ofstream& operator<<(std::ofstream& out, const Table& table)
+std::ostream& operator<<(std::ostream& out, const Table& table)
 {
 	for (const Column& c : table.columns)
 	{
