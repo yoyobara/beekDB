@@ -1,5 +1,7 @@
 #pragma once
 
+#include <fstream>
+#include <ostream>
 #include <string>
 #include <vector>
 #include <string_view>
@@ -51,6 +53,7 @@ class Column
 		const std::string m_name;
 		const ColumnType m_type;
 };
+std::ostream& operator<<(std::ostream& out, const Column& c);
 
 const std::string TABLE_FILE_START_PHRASE {"TABDEF"};
 
@@ -74,6 +77,11 @@ class Table
 		 * name - the name of the table.
 		 */
 		Table(const std::string& name);
+
+		/*
+		 * textual representation
+		 */
+		friend std::ofstream& operator<<(std::ofstream& out, const Table& table);
 
 	private:
 		/* open */

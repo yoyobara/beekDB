@@ -1,6 +1,7 @@
 #include <cassert>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 #include <sstream>
 
 #include "table.h"
@@ -15,6 +16,12 @@ Column::Column(const std::string& name, ColumnType type) :
 
 std::string_view Column::get_name() const { return m_name; }
 ColumnType Column::get_type() const { return m_type; }
+
+std::ostream& operator<<(std::ostream& out, const Column& c)
+{
+	out << c.get_name() << ':' << c.get_type();
+	return out;
+}
 
 
 /* table */
@@ -101,4 +108,14 @@ Table::Table(const std::string& name, const std::vector<Column>& columns) :
 	name(name)
 {
 	create_metadata(columns);
+}
+
+/* repr */
+std::ofstream& operator<<(std::ofstream& out, const Table& table)
+{
+	for (const Column& c : table.columns)
+	{
+		out << '[' << c << "] ";
+	};
+	return out;
 }
