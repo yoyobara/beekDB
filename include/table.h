@@ -10,26 +10,6 @@
 #include "storage.h"
 #include "table_storage_constants.h"
 
-/* the three possible column types */
-enum ColumnType
-{
-	INTEGER,
-	REAL,
-	STRING
-};
-
-const std::map<char, ColumnType> BYTE_TO_TYPE {
-	{'i', INTEGER},
-	{'r', REAL},
-	{'s', STRING}
-};
-
-const std::map<ColumnType, char> TYPE_TO_BYTE {
-	{INTEGER, 'i'},
-	{REAL, 'r'},
-	{STRING, 's'}
-};
-
 /*
  * represents a column name, type, properties
  */
@@ -48,10 +28,12 @@ class Column
 		/* simple getters */
 		std::string_view get_name() const;
 		ColumnType get_type() const;
+		int get_size() const;
 
 	private:
 		const std::string m_name;
 		const ColumnType m_type;
+		const int m_size;
 };
 std::ostream& operator<<(std::ostream& out, const Column& c);
 

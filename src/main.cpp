@@ -4,6 +4,7 @@
 #include <chrono>
 #include "cpp_socket.h"
 #include "table.h"
+#include "table_storage_constants.h"
 
 /*/1** */
 /* * a thread running function which is in charge of handling a simple client */
@@ -36,6 +37,8 @@
 
 int main()
 {
-	Table t("./tables/yoyo_table");
-	std::cout << t;
+	Column c("yay", STRING);
+	std::cout << c.get_size() << '\n';
+
+	return 0;
 }

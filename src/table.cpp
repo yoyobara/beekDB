@@ -1,4 +1,5 @@
 #include <cassert>
+#include <map>
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -12,10 +13,11 @@
 /* column */
 
 Column::Column(const std::string& name, ColumnType type) : 
-	m_name(name), m_type(type) {}
+	m_name(name), m_type(type), m_size(table_storage::TYPE_SIZE.at(type)) {}
 
 std::string_view Column::get_name() const { return m_name; }
 ColumnType Column::get_type() const { return m_type; }
+int Column::get_size() const { return m_size; }
 
 std::ostream& operator<<(std::ostream& out, const Column& c)
 {
@@ -38,7 +40,7 @@ void Table::init_columns()
 		// read descriptor
 		table_file.read(&buffer, table_storage::DESC_SIZE);
 
-		ColumnType type {BYTE_TO_TYPE.at(buffer)};
+		ColumnType type {table_storage::BYTE_TO_TYPE.at(buffer)};
 
 		// read name
 		std::string col_name;
@@ -92,7 +94,7 @@ void Table::create_metadata(const std::vector<Column>& columns)
 	for (const Column& c : columns)
 	{
 		// descriptor
-		ss << TYPE_TO_BYTE.at(c.get_type());
+		ss << table_storage::TYPE_TO_BYTE.at(c.get_type());
 
 		// name and \0
 		ss << c.get_name() << '\0';
