@@ -69,10 +69,6 @@ void Table::init_metadata()
 	table_file.read_at(table_storage::ROW_COUNT_OFFSET, &rows_count, sizeof rows_count);
 
 	init_columns();
-
-	// row size
-	row_size = std::accumulate(columns.begin(), columns.end(), 0, [](int current, const Column& next){ return current + next.get_size();});
-	std::cout << row_size << std::endl;
 }
 
 Table::Table(const std::string& name) :
@@ -81,6 +77,12 @@ Table::Table(const std::string& name) :
 
 {
 	init_metadata();
+	init_row_size();
+}
+
+void Table::init_row_size()
+{
+	row_size = std::accumulate(columns.begin(), columns.end(), 0, [](int current, const Column& next){ return current + next.get_size();});
 }
 
 /* create */
@@ -113,10 +115,10 @@ void Table::create_metadata(const std::vector<Column>& columns)
 Table::Table(const std::string& name, const std::vector<Column>& columns) :
 	table_file(name, true),
 	columns(columns),
-	name(name),
-	row_size(std::accumulate(columns.begin(), columns.end(), 0, [](int current, const Column& next){ return current + next.get_size();}))
+	name(name)
 {
 	create_metadata(columns);
+	init_row_size();
 }
 
 /* repr */

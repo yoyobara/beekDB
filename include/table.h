@@ -73,7 +73,9 @@ class Table
 
 		/* create */
 		void create_metadata(const std::vector<Column>& columns);
-		
+
+		void init_row_size();
+
 		RandomAccessFile table_file;
 		const std::string name;
 
