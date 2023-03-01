@@ -4,6 +4,7 @@
 #include <iostream>
 #include <algorithm>
 #include <sstream>
+#include <numeric>
 
 #include "table.h"
 #include "storage.h"
@@ -21,7 +22,7 @@ int Column::get_size() const { return m_size; }
 
 std::ostream& operator<<(std::ostream& out, const Column& c)
 {
-	out << c.get_name() << ':' << c.get_type();
+	out << c.get_name() << ": " << c.get_type();
 	return out;
 }
 
@@ -68,11 +69,16 @@ void Table::init_metadata()
 	table_file.read_at(table_storage::ROW_COUNT_OFFSET, &rows_count, sizeof rows_count);
 
 	init_columns();
+
+	// row size
+	row_size = std::accumulate(columns.begin(), columns.end(), 0, [](int current, const Column& next){ return current + next.get_size();});
+	std::cout << row_size << std::endl;
 }
 
 Table::Table(const std::string& name) :
 	table_file(name, false),
 	name(name)
+
 {
 	init_metadata();
 }
@@ -107,7 +113,8 @@ void Table::create_metadata(const std::vector<Column>& columns)
 Table::Table(const std::string& name, const std::vector<Column>& columns) :
 	table_file(name, true),
 	columns(columns),
-	name(name)
+	name(name),
+	row_size(std::accumulate(columns.begin(), columns.end(), 0, [](int current, const Column& next){ return current + next.get_size();}))
 {
 	create_metadata(columns);
 }

@@ -66,6 +66,7 @@ class Table
 		friend std::ostream& operator<<(std::ostream& out, const Table& table);
 
 	private:
+
 		/* open */
 		void init_metadata();
 		void init_columns();
@@ -79,4 +80,5 @@ class Table
 		std::vector<Column> columns;
 		rows_count_t rows_count;
 		columns_count_t columns_count;
+		int row_size;
 };

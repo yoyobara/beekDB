@@ -37,8 +37,7 @@
 
 int main()
 {
-	Column c("yay", STRING);
-	std::cout << c.get_size() << '\n';
+	Table t("./tables/yoyo_table");
 
 	return 0;
 }
