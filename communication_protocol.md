@@ -47,9 +47,11 @@ a response message to a query from the client (`Query`)
 
 its content is as follows:
 
-`<1-char result><result set if success / operation error message>`
+`<1-char result><result set if success / operation error message / empty>`
 
 possible result chars:
 - `s` - success. the rest will contains the result set.
 - `o` - operation error. will be specified in the rest of the content.
 - `e` - sql syntax error. empty content.
+
+the result set is a table, whose serialization is identical to the *storage protocol*.

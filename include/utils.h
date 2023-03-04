@@ -10,3 +10,4 @@ inline std::string encode(T val)
 
 	return s;
 }
+
