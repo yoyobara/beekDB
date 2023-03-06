@@ -1,8 +1,13 @@
 #include "client_handler.h"
 #include "communication_protocol.h"
+#include <atomic>
 #include <chrono>
 #include <iostream>
 #include <thread>
+#include <vector>
+
+std::vector<ClientThread> ClientThread::running_client_threads;
+std::atomic<bool> ClientThread::program_running = true;
 
 /* on constructor call, start thread */
 ClientThread::ClientThread(Socket client_socket) : 
