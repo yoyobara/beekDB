@@ -55,3 +55,6 @@ possible result chars:
 - `e` - sql syntax error. empty content.
 
 the result set is a table, whose serialization is identical to the *storage protocol*.
+
+#### Server_Termination ('T')
+this is sent to the client when the serer is manually terminated.
