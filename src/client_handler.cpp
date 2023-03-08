@@ -1,4 +1,5 @@
 #include <sys/poll.h>
+#include <iostream>
 #include "communication_protocol.h"
 #include "client_handler.h"
 
@@ -33,7 +34,7 @@ bool ClientThread::is_message_waiting()
 /*
  * handle a message
  */
-void process_message(Socket& s, comms::message_t msg)
+void process_message(Socket& s, comms::message_t&& msg)
 {
 }
 

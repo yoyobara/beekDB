@@ -2,13 +2,14 @@
 import socket
 import time
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(('127.0.0.1', 1337))
 x = 5
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(('localhost', 1337))
 
 time.sleep(3)
 
-s.send(b"hello")
+s.send('c'.encode('ascii') + x.to_bytes(8, 'little') + 'hello'.encode('ascii'))
 
 time.sleep(3)
 

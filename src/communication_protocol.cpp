@@ -1,4 +1,5 @@
 #include "communication_protocol.h"
+#include <iostream>
 #include "utils.h"
 #include <cstring>
 
@@ -18,7 +19,7 @@ comms::message_t comms::recv_message(const Socket &s)
 {
 	comms::message_t msg{};
 	msg.command = s.recv(comms_constants::CMD_LENGTH)[0];
-	
+
 	// get length
 	std::string length_str {s.recv(comms_constants::LENGTH_LENGTH)};
 	unsigned long length;
