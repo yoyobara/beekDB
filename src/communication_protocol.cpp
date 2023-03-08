@@ -2,6 +2,13 @@
 #include "utils.h"
 #include <cstring>
 
+comms::message_t::message_t(){}
+comms::message_t::message_t(comms::message_t&& msg)
+{
+	command = msg.command;
+	content = std::move(msg.content);
+}
+
 void comms::send_message(const Socket &s, const message_t& message)
 {
 	s.send(message.command + encode(message.content.size()) + message.content);
@@ -9,7 +16,7 @@ void comms::send_message(const Socket &s, const message_t& message)
 
 comms::message_t comms::recv_message(const Socket &s)
 {
-	comms::message_t msg;
+	comms::message_t msg{};
 	msg.command = s.recv(comms_constants::CMD_LENGTH)[0];
 	
 	// get length

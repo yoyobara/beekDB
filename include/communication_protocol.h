@@ -19,6 +19,9 @@ namespace comms
 	{
 		cmd_t command;
 		std::string content;
+
+		message_t(message_t&& msg);
+		message_t();
 	};
 
 	/*

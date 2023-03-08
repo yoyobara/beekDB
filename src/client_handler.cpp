@@ -1,8 +1,6 @@
-#include <iostream>
 #include <sys/poll.h>
 #include "communication_protocol.h"
 #include "client_handler.h"
-#include "cpp_socket.h"
 
 std::vector<ClientThread> ClientThread::running_client_threads;
 std::atomic<bool> ClientThread::program_running = true;
@@ -37,8 +35,6 @@ bool ClientThread::is_message_waiting()
  */
 void process_message(Socket& s, comms::message_t msg)
 {
-	std::cout << '|' << s.recv(200) << '|' << std::endl;
-	std::cout << msg.command << std::endl;
 }
 
 /*
@@ -49,10 +45,8 @@ void ClientThread::run()
 	while (ClientThread::program_running) {
 
 		// is_message_waiting shall block for some time
-		bool f = is_message_waiting();
-		std::cout << std::boolalpha << f << std::endl;
-		if (f)
-			process_message(m_client, comms::message_t{'h', "OKOK"});
+		if (is_message_waiting())
+			process_message(m_client, comms::recv_message(m_client));
 	}
 
 	m_client.close();
