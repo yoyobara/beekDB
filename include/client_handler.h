@@ -9,6 +9,8 @@ class ClientThread
 	private:
 		Socket m_client;
 		std::thread m_thread;
+
+		bool is_message_waiting();
 		
 		/* thread execution entry point */
 		void run();
@@ -20,10 +22,7 @@ class ClientThread
 		/* vector of currently running client threads */
 		static std::vector<ClientThread> running_client_threads;
 
-		void join()
-		{
-			m_thread.join();
-		}
+		void join();
 
 		ClientThread(Socket client_socket);
 };

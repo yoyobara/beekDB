@@ -80,6 +80,11 @@ class Socket
 		 */
 		std::string recv(size_t length) const;
 
+		/*
+		 * file descriptor getter
+		 */
+		int get_fd() const {return m_sockfd;}
+
 	protected:
 		/* socket file descriptor */
 		int m_sockfd;

@@ -11,7 +11,8 @@
 #include "client_handler.h"
 
 /**
- * handle ctrl+c (sigint) to close and cleanup the threads
+ * handle ctrl+c (sigint) to close and cleanup the threads.
+ * callback function.
  */
 void handle_sigint(int dummy)
 {

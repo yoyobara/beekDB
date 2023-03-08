@@ -1,10 +1,11 @@
 #include "cpp_socket.h"
-#include <sys/socket.h>
+#include <asm-generic/errno-base.h>
+#include <asm-generic/errno.h>
+#include <cerrno>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <cstring>
 #include <vector>
-#include <iostream>
 
 // socket error implementation
 socket_error::socket_error(const char* message) : msg(message){}
