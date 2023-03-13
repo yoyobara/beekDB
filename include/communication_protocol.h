@@ -9,6 +9,16 @@ namespace comms_constants
 	const int CMD_LENGTH {1};
 	const int LENGTH_LENGTH { sizeof (unsigned long) };
 	const int BATCH_SIZE {2048};
+
+	// commands from client
+	const char CMD_JOIN {'j'};
+	const char CMD_LEAVE {'l'};
+	const char CMD_QUERY {'q'};
+
+	// commands from server
+	const char CMD_JOIN_SUCCESS {'J'};
+	const char CMD_QUERY_RESULT {'Q'};
+	const char CMD_TERMINATION {'T'};
 }
 
 namespace comms

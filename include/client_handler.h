@@ -2,6 +2,7 @@
 #include <atomic>
 #include <thread>
 #include <vector>
+#include "communication_protocol.h"
 #include "cpp_socket.h"
 
 class ClientThread
@@ -9,9 +10,14 @@ class ClientThread
 	private:
 		Socket m_client;
 		std::thread m_thread;
+		bool m_is_joined;
 
 		bool is_message_waiting();
 		
+		bool process_message(comms::message_t&& msg);
+
+		void handle_query(const std::string& query);
+
 		/* thread execution entry point */
 		void run();
 

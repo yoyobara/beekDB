@@ -9,7 +9,8 @@ std::atomic<bool> ClientThread::program_running = true;
 /* on constructor call, start thread */
 ClientThread::ClientThread(Socket client_socket) : 
 	m_client(client_socket), 
-	m_thread(&ClientThread::run, this)
+	m_thread(&ClientThread::run, this),
+	m_is_joined(false)
 {
 }
 
@@ -32,10 +33,31 @@ bool ClientThread::is_message_waiting()
 }
 
 /*
- * handle a message
+ * handle a raw query from the client.
  */
-void process_message(Socket& s, comms::message_t&& msg)
+void ClientThread::handle_query(const std::string& query)
 {
+	// TODO
+}
+
+/*
+ * handle a message.
+ * returns whether the client left the server.
+ */
+bool ClientThread::process_message(comms::message_t&& msg)
+{
+	using namespace comms_constants;
+
+	switch (msg.command) {
+		case CMD_JOIN:
+			this->m_is_joined = true;
+			break;
+
+		case CMD_LEAVE:
+			return true;
+			 
+		case CMD_QUERY:
+	}
 }
 
 /*
@@ -47,7 +69,7 @@ void ClientThread::run()
 
 		// is_message_waiting shall block for some time
 		if (is_message_waiting())
-			process_message(m_client, comms::recv_message(m_client));
+			process_message(comms::recv_message(m_client));
 	}
 
 	m_client.close();
