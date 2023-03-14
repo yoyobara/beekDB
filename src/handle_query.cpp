@@ -11,7 +11,7 @@ namespace fs = std::filesystem;
 
 void handle_select_statement(const SelectStatement* statement)
 {
-	// TODO
+	std::cout << statement->selectList->size() << std::endl;
 }
 
 /* handle a query from the client */
