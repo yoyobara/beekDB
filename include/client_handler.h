@@ -16,7 +16,7 @@ class ClientThread
 		
 		bool process_message(comms::message_t&& msg);
 
-		void handle_query(const std::string& query);
+		bool handle_query(const std::string& query);
 
 		/* thread execution entry point */
 		void run();

@@ -33,14 +33,6 @@ bool ClientThread::is_message_waiting()
 }
 
 /*
- * handle a raw query from the client.
- */
-void ClientThread::handle_query(const std::string& query)
-{
-	// TODO
-}
-
-/*
  * handle a message.
  * returns whether the client left the server.
  */
@@ -57,7 +49,10 @@ bool ClientThread::process_message(comms::message_t&& msg)
 			return true;
 			 
 		case CMD_QUERY:
+			handle_query(msg.content);
 	}
+
+	return false;
 }
 
 /*
