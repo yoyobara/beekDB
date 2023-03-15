@@ -14,7 +14,7 @@ all: $(EXECUTABLE)
 
 .PHONY: test
 test: $(EXECUTABLE) $(tests)
-	@$(CXX) -std=c++17 -I $(HEADERS_DIR) $(tests) $(filter-out ./build/main.o, $(objects)) -o $@ -lsqlparser
+	@$(CXX) -std=c++17 -I $(HEADERS_DIR) $(tests) $(filter-out ./build/main.o, $(objects)) -o $@ -lsqlparser -lgtest -lgtest_main
 	@./test
 
 $(EXECUTABLE): $(objects)
