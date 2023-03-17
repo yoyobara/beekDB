@@ -71,10 +71,10 @@ void Table::init_metadata()
 	init_columns();
 }
 
+/* open */
 Table::Table(const std::string& name) :
 	table_file(name, false),
 	name(name)
-
 {
 	init_metadata();
 	init_row_size();
@@ -112,6 +112,7 @@ void Table::create_metadata(const std::vector<Column>& columns)
 	table_file << ss.rdbuf();
 }
 
+/* create */
 Table::Table(const std::string& name, const std::vector<Column>& columns) :
 	table_file(name, true),
 	columns(columns),

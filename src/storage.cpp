@@ -31,7 +31,7 @@ RandomAccessFile::RandomAccessFile(const std::string_view filename, bool create)
 	open(filename.data(), ios::out | ios::in | ios::binary);
 }
 
-bool RandomAccessFile::verify_content(size_t position, std::string s)
+bool RandomAccessFile::verify_content(size_t position, const std::string& s)
 {
 	std::string buff(s.size(), 0);
 	read_at(position, buff.data(), s.size());

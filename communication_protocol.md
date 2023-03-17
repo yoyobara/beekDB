@@ -51,8 +51,7 @@ its content is as follows:
 
 possible result chars:
 - `s` - success. the rest will contains the result set.
-- `o` - operation error. will be specified in the rest of the content.
-- `e` - sql syntax error. empty content.
+- `e` - sql error. content contains error message
 
 the result set is a table, whose serialization is identical to the *storage protocol*.
 

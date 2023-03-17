@@ -5,14 +5,12 @@
 #include <iostream>
 #include <filesystem>
 #include "client_handler.h"
+#include "table.h"
 
 using namespace hsql;
 namespace fs = std::filesystem;
 
-void handle_select_statement(const SelectStatement* statement)
-{
-	std::cout << statement->selectList->size() << std::endl;
-}
+void handle_select_statement(const SelectStatement* statement) { }
 
 /* handle a query from the client */
 bool ClientThread::handle_query(const std::string& query)

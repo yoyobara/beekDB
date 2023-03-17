@@ -80,7 +80,10 @@ class Table
 		const std::string name;
 
 		std::vector<Column> columns;
+
 		rows_count_t rows_count;
 		columns_count_t columns_count;
+
+		/* total size in bytes of a row */
 		int row_size;
 };

@@ -47,5 +47,5 @@ class RandomAccessFile : public std::fstream
 		 * verify that the content of the file starting at position,
 		 * is equal to the given string.
 		 */
-		bool verify_content(size_t position, std::string s);
+		bool verify_content(size_t position, const std::string& s);
 };
