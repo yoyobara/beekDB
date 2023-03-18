@@ -1,11 +1,7 @@
 #pragma once
 
-#include <fstream>
-#include <ostream>
-#include <string>
 #include <vector>
-#include <string_view>
-#include <map>
+#include <mutex>
 
 #include "storage.h"
 #include "table_storage_constants.h"
@@ -86,4 +82,7 @@ class Table
 
 		/* total size in bytes of a row */
 		int row_size;
+
+		// a mutex allowing only one to access the table at a time
+		std::mutex mtx;
 };

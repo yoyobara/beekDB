@@ -1,15 +1,8 @@
-#include <cassert>
-#include <map>
-#include <vector>
-#include <iostream>
-#include <algorithm>
-#include <sstream>
 #include <numeric>
+#include <sstream>
 
 #include "table.h"
-#include "storage.h"
-#include "table_storage_constants.h"
-#include <utils.h>
+#include "utils.h"
 
 /* column */
 

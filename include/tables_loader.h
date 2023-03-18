@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include "table.h"
 
 /*
@@ -10,6 +11,7 @@ class TablesLoader
 	private:
 
 		TablesLoader();
+		std::vector<Table> tables;
 
 	public:
 
