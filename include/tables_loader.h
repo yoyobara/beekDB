@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include "table.h"
 
@@ -11,7 +12,9 @@ class TablesLoader
 	private:
 
 		TablesLoader();
-		std::vector<Table> tables;
+
+		// the tables loaded.
+		std::vector<std::unique_ptr<Table>> tables;
 
 	public:
 

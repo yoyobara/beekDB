@@ -1,5 +1,4 @@
 #pragma once
-
 #include <vector>
 #include <mutex>
 
@@ -33,8 +32,6 @@ class Column
 };
 std::ostream& operator<<(std::ostream& out, const Column& c);
 
-const std::string TABLE_FILE_START_PHRASE {"TABDEF"};
-
 /*
  * a class representing a table.
  * subclasses PositionalFileHandler so the table can handle its file.
@@ -61,6 +58,11 @@ class Table
 		 */
 		friend std::ostream& operator<<(std::ostream& out, const Table& table);
 
+		/*
+		 * access a cell in the table
+		 */
+		// TODO
+
 	private:
 
 		/* open */
@@ -70,11 +72,15 @@ class Table
 		/* create */
 		void create_metadata(const std::vector<Column>& columns);
 
+		// initializes the size of a whole row
 		void init_row_size();
 
 		RandomAccessFile table_file;
+
+		// table's name
 		const std::string name;
 
+		// columns of the table
 		std::vector<Column> columns;
 
 		rows_count_t rows_count;

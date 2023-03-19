@@ -1,5 +1,10 @@
-#include "communication_protocol.h"
 #include <gtest/gtest.h>
+#include <memory>
+#include "table.h"
+#include "tables_loader.h"
 
-TEST(hello, word) {
+int main()
+{
+	TablesLoader::get_instance();
+	return 0;
 }

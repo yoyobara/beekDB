@@ -1,5 +1,6 @@
 #include <numeric>
 #include <sstream>
+#include <iostream>
 
 #include "table.h"
 #include "utils.h"
