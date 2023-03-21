@@ -28,6 +28,9 @@ class Column
 		ColumnType get_type() const;
 		int get_size() const;
 
+		/* column comparison */
+		bool operator==(const Column& other) const;
+
 	private:
 		const std::string m_name;
 		const ColumnType m_type;
@@ -59,7 +62,7 @@ class Table
 		/*
 		 * get unique ptr to heap allocated cell value
 		 */
-		std::unique_ptr<TableValue> get_cell(rows_count_t row_index, Column& column);
+		std::unique_ptr<TableValue> get_cell(rows_count_t row_index, const Column& column);
 
 		/*
 		 * textual representation

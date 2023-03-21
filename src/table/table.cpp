@@ -1,9 +1,12 @@
+#include <array>
+#include <ios>
 #include <memory>
 #include <numeric>
 #include <sstream>
 #include <iostream>
 
 #include "table/table.h"
+#include "table/table_storage_constants.h"
 #include "table/types.h"
 #include "utils.h"
 
@@ -15,6 +18,8 @@ Column::Column(const std::string& name, ColumnType type) :
 std::string_view Column::get_name() const { return m_name; }
 ColumnType Column::get_type() const { return m_type; }
 int Column::get_size() const { return m_size; }
+
+bool Column::operator==(Column& other) { return m_name == other.m_name;}
 
 std::ostream& operator<<(std::ostream& out, const Column& c)
 {
@@ -125,8 +130,38 @@ Table::Table(const std::string& name, const std::vector<Column>& columns) :
 }
 
 /* get cell */
-std::unique_ptr<TableValue> Table::get_cell(rows_count_t row_index, Column &column)
+std::unique_ptr<TableValue> Table::get_cell(rows_count_t row_index, const Column &column)
 {
+	std::streampos offset = table_start + row_index * row_size; // row offset
+
+	// cell offset
+	for (const Column& c : columns)
+	{
+		if (c == column)
+			break;
+
+		offset += c.get_size();
+	}
+
+	switch (column.get_type()) {
+		case INTEGER:
+			int i;
+			table_file.read_at(offset, &i, table_storage::TYPE_SIZE.at(INTEGER));
+
+			return std::make_unique<IntegerValue>(i);
+
+		case REAL:
+			double d;
+			table_file.read_at(offset, &d, table_storage::TYPE_SIZE.at(REAL));
+
+			return std::make_unique<RealValue>(d);
+
+		case STRING:
+			std::array<char, table_storage::STRING_SIZE> buff;
+			table_file.read_at(offset, buff.data(), table_storage::STRING_SIZE);
+
+			return std::make_unique<StringValue>(buff.data());
+	}
 }
 
 /* repr */

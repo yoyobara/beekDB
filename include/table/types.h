@@ -48,4 +48,6 @@ struct StringValue : TableValue
 	{
 		std::copy(s, s + 50, str_val.begin());
 	}
+
+	ColumnType get_type() const override {return STRING;}
 };

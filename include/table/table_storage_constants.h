@@ -23,10 +23,12 @@ namespace table_storage
 		{STRING, 's'}
 	};
 
+	const int STRING_SIZE {50};
+
 	const std::map<ColumnType, int> TYPE_SIZE {
 		{INTEGER, 4},
 		{REAL, 8},
-		{STRING, 50}
+		{STRING, STRING_SIZE}
 	};
 
 	const std::string SIGNATURE{"TABDEF"};
