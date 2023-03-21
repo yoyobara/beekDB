@@ -1,4 +1,7 @@
 #pragma once
+#include <algorithm>
+#include <array>
+#include <string>
 
 /* the three possible column types */
 enum ColumnType
@@ -27,8 +30,22 @@ struct IntegerValue : TableValue
 };
 
 /* real type */
-// TODO
-//
+struct RealValue : TableValue
+{
+	double real_val;
+
+	RealValue(double d) : real_val(d){}
+
+	ColumnType get_type() const override {return REAL;}
+};
 
 /* string type */
-// TODO
+struct StringValue : TableValue
+{
+	std::array<char, 50> str_val;
+
+	StringValue(const char* s) : str_val()
+	{
+		std::copy(s, s + 50, str_val.begin());
+	}
+};

@@ -1,8 +1,11 @@
 #pragma once
+#include <ios>
+#include <memory>
 #include <vector>
 #include <mutex>
 
 #include "storage.h"
+#include "table/types.h"
 #include "table_storage_constants.h"
 
 /*
@@ -54,8 +57,9 @@ class Table
 		Table(const std::string& name);
 
 		/*
-		 * get cell in the table
+		 * get unique ptr to heap allocated cell value
 		 */
+		std::unique_ptr<TableValue> get_cell(rows_count_t row_index, Column& column);
 
 		/*
 		 * textual representation
@@ -87,6 +91,9 @@ class Table
 
 		/* total size in bytes of a row */
 		int row_size;
+
+		/* start position of the table after the metadata */
+		std::streampos table_start;
 
 		// a mutex allowing only one to access the table at a time
 		std::mutex mtx;

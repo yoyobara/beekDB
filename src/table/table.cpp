@@ -1,8 +1,10 @@
+#include <memory>
 #include <numeric>
 #include <sstream>
 #include <iostream>
 
 #include "table/table.h"
+#include "table/types.h"
 #include "utils.h"
 
 /* column */
@@ -63,6 +65,9 @@ void Table::init_metadata()
 	table_file.read_at(table_storage::ROW_COUNT_OFFSET, &rows_count, sizeof rows_count);
 
 	init_columns();
+
+	// now metadata is over, at start of table itself
+	table_start = table_file.tellg();
 }
 
 /* open */
@@ -102,6 +107,9 @@ void Table::create_metadata(const std::vector<Column>& columns)
 		ss << c.get_name() << '\0';
 	}
 
+	// table start position
+	table_start = ss.tellp();
+
 	// finally write to file
 	table_file << ss.rdbuf();
 }
@@ -114,6 +122,11 @@ Table::Table(const std::string& name, const std::vector<Column>& columns) :
 {
 	create_metadata(columns);
 	init_row_size();
+}
+
+/* get cell */
+std::unique_ptr<TableValue> Table::get_cell(rows_count_t row_index, Column &column)
+{
 }
 
 /* repr */
