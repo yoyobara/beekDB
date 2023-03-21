@@ -3,10 +3,18 @@
 #include <map>
 #include <string>
 
-#include "table/types.h"
-
 using columns_count_t = int;
 using rows_count_t = long;
+
+/* general string value */
+
+/* the three possible column types */
+enum ColumnType
+{
+	INTEGER,
+	REAL,
+	STRING
+};
 
 namespace table_storage 
 {
