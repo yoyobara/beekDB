@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <vector>
-#include "table.h"
+#include "table/table.h"
 
 /*
  * the singleton in charge of loading the tables handlers.

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <filesystem>
 #include "client_handler.h"
-#include "table.h"
+#include "table/table.h"
 
 using namespace hsql;
 namespace fs = std::filesystem;

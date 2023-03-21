@@ -7,7 +7,6 @@
 
 #include "cpp_socket.h"
 #include "communication_protocol.h"
-#include "table.h"
 #include "client_handler.h"
 
 /**

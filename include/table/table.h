@@ -54,14 +54,13 @@ class Table
 		Table(const std::string& name);
 
 		/*
+		 * get cell in the table
+		 */
+
+		/*
 		 * textual representation
 		 */
 		friend std::ostream& operator<<(std::ostream& out, const Table& table);
-
-		/*
-		 * access a cell in the table
-		 */
-		// TODO
 
 	private:
 

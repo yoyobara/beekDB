@@ -2,7 +2,7 @@
 #include <sstream>
 #include <iostream>
 
-#include "table.h"
+#include "table/table.h"
 #include "utils.h"
 
 /* column */

@@ -21,7 +21,7 @@ $(EXECUTABLE): $(objects)
 	$(CXX) -I $(HEADERS_DIR) -std=c++17 $(objects) -o $@ -lsqlparser
 
 $(objects): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
-	@mkdir -p $(BUILD_DIR)
+	@mkdir -p $(dir $@)
 	$(CXX) -std=c++17 -I $(HEADERS_DIR) -MMD -MP -c $< -o $@
 
 .PHONY: clean

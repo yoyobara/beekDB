@@ -1,7 +1,6 @@
 #include <filesystem>
 #include <iostream>
 #include <memory>
-#include "table.h"
 #include "tables_loader.h"
 
 namespace fs = std::filesystem;

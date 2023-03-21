@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string_view>
 
-#include "table_storage_constants.h"
+#include "table/table_storage_constants.h"
 
 /*
  * a class which represents a file that can be accessed at a specific position.
