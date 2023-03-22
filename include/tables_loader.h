@@ -1,8 +1,15 @@
 #pragma once
 
 #include <memory>
+#include <stdexcept>
+#include <string>
 #include <vector>
 #include "table/table.h"
+
+struct no_such_table : std::runtime_error
+{
+	no_such_table(const std::string& msg) : std::runtime_error(msg){}
+};
 
 /*
  * the singleton in charge of loading the tables handlers.
@@ -15,6 +22,9 @@ class TablesLoader
 
 		// the tables loaded.
 		std::vector<std::unique_ptr<Table>> tables;
+
+		// get a table by name
+		const Table& get_table(const std::string& name) const;
 
 	public:
 

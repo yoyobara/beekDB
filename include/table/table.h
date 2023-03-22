@@ -69,6 +69,10 @@ class Table
 		 */
 		friend std::ostream& operator<<(std::ostream& out, const Table& table);
 
+		/* getters */
+		inline rows_count_t get_rows_count() const { return rows_count; }
+		inline const std::string& get_name() const { return name; }
+
 	private:
 
 		/* open */

@@ -10,7 +10,9 @@
 using namespace hsql;
 namespace fs = std::filesystem;
 
-void handle_select_statement(const SelectStatement* statement) { }
+void handle_select_statement(const SelectStatement* statement) { 
+	
+}
 
 /* handle a query from the client */
 bool ClientThread::handle_query(const std::string& query)
