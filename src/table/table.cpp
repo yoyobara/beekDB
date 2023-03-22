@@ -19,7 +19,7 @@ std::string_view Column::get_name() const { return m_name; }
 ColumnType Column::get_type() const { return m_type; }
 int Column::get_size() const { return m_size; }
 
-bool Column::operator==(Column& other) { return m_name == other.m_name;}
+bool Column::operator==(const Column& other) const { return m_name == other.m_name;}
 
 std::ostream& operator<<(std::ostream& out, const Column& c)
 {
