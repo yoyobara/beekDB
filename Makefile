@@ -1,4 +1,5 @@
-EXECUTABLE = ./beekDB
+EXECUTABLE = beekDB
+TEST_EXECUTABLE = test
 
 SRC_DIR = ./src
 BUILD_DIR = ./build
@@ -14,8 +15,8 @@ all: $(EXECUTABLE)
 
 .PHONY: test
 test: $(EXECUTABLE) $(tests)
-	@$(CXX) -std=c++17 -I $(HEADERS_DIR) $(tests) $(filter-out ./build/main.o, $(objects)) -o $@ -lsqlparser -lgtest -lgtest_main
-	@./test
+	@$(CXX) -std=c++17 -I $(HEADERS_DIR) $(tests) $(filter-out ./build/main.o, $(objects)) -o $(TEST_EXECUTABLE) -lsqlparser -lgtest -lgtest_main
+	@./$(TEST_EXECUTABLE)
 
 $(EXECUTABLE): $(objects)
 	$(CXX) -I $(HEADERS_DIR) -std=c++17 $(objects) -o $@ -lsqlparser
@@ -26,6 +27,6 @@ $(objects): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 .PHONY: clean
 clean:
-	rm -rf $(BUILD_DIR) $(EXECUTABLE) test
+	rm -rf $(BUILD_DIR) $(EXECUTABLE) $(TEST_EXECUTABLE) tmp/*
 
 -include $(deps)

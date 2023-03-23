@@ -1,5 +1,6 @@
 .cache/
 build/
+tmp/*
 beekDB
 test
 compile_commands.json

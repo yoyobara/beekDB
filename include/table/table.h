@@ -68,7 +68,7 @@ class Table
 		/*
 		 * get unique ptr to heap allocated cell value
 		 */
-		std::unique_ptr<TableValue> get_cell(rows_count_t row_index, const Column& column);
+		std::unique_ptr<TableValue> get_cell(rows_count_t row_index, const Column& column) const;
 
 		/* set cell value */
 		void set_cell(rows_count_t row_index, const Column& column, TableValue *v);
@@ -97,7 +97,7 @@ class Table
 		// initializes the size of a whole row
 		void init_row_size();
 
-		RandomAccessFile table_file;
+		mutable RandomAccessFile table_file;
 
 		// table's name
 		const std::string name;
@@ -112,7 +112,7 @@ class Table
 		int row_size;
 
 		/* start position of the table after the metadata */
-		std::streampos table_start;
+		uint64_t table_start;
 
 		// a mutex allowing only one to access the table at a time
 		std::mutex mtx;

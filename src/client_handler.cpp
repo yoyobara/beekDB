@@ -63,8 +63,8 @@ void ClientThread::run()
 	while (ClientThread::program_running) {
 
 		// is_message_waiting shall block for some time
-		if (is_message_waiting())
-			process_message(comms::recv_message(m_client));
+		if (is_message_waiting()){
+			process_message(comms::recv_message(m_client));}
 	}
 
 	m_client.close();

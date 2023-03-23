@@ -7,7 +7,7 @@
 namespace comms_constants
 {
 	const int CMD_LENGTH {1};
-	const int LENGTH_LENGTH { sizeof (unsigned long) };
+	const int LENGTH_LENGTH { sizeof(uint64_t) };
 	const int BATCH_SIZE {2048};
 
 	// commands from client

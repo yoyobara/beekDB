@@ -1,12 +1,13 @@
 #pragma once
 
+#include <cstdint>
 #include <map>
 #include <string>
 
 #include "table/types.h"
 
-using columns_count_t = int;
-using rows_count_t = long;
+using columns_count_t = uint32_t;
+using rows_count_t = uint64_t;
 
 namespace table_storage 
 {
@@ -39,4 +40,7 @@ namespace table_storage
 	const int ROW_COUNT_OFFSET{10};
 
 	const int DESC_SIZE{1};
+
+	const std::string TABLES_DIR {"tables"};
+	const std::string TEMP_DIR {"tmp"};
 }

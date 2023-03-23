@@ -1,5 +1,7 @@
 #include "communication_protocol.h"
+#include <cstdint>
 #include <iostream>
+#include "table/table_storage_constants.h"
 #include "utils.h"
 #include <cstring>
 
@@ -18,12 +20,18 @@ void comms::send_message(const Socket &s, const message_t& message)
 comms::message_t comms::recv_message(const Socket &s)
 {
 	comms::message_t msg{};
+	
+	// get signature
+	s.recv(table_storage::SIGNATURE.length());
+
 	msg.command = s.recv(comms_constants::CMD_LENGTH)[0];
 
 	// get length
 	std::string length_str {s.recv(comms_constants::LENGTH_LENGTH)};
-	unsigned long length;
+	uint64_t length;
 	std::memcpy(&length, length_str.data(), comms_constants::LENGTH_LENGTH);
+
+	std::cout << length << std::endl;
 
 	// get content
 	for (int i = 0 ; i < length / comms_constants::BATCH_SIZE ; i++)

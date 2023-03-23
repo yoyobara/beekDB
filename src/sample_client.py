@@ -1,16 +1,14 @@
 #!/bin/python3
 import socket
 import time
-
-x = 5
+import struct
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(('localhost', 1337))
 
-time.sleep(3)
+content = b'select name from mama_table'
+l = len(content)
 
-s.send('c'.encode('ascii') + x.to_bytes(8, 'little') + 'hello'.encode('ascii'))
-
-time.sleep(3)
-
+s.send(struct.pack(f"<6scQ{l}s", b'TABDEF', b'q', l, content))
+input()
 s.close()

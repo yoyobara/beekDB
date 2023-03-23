@@ -79,8 +79,9 @@ void Table::init_metadata()
 }
 
 /* open */
+// TODO remove hardcoded paths (switch to fs something)
 Table::Table(const std::string& name) :
-	table_file(name, false),
+	table_file(table_storage::TABLES_DIR + "/" + name, false),
 	name(name)
 {
 	init_metadata();
@@ -133,10 +134,10 @@ Table::Table(const std::string& name, const std::vector<Column>& columns) :
 }
 
 /* get cell */
-std::unique_ptr<TableValue> Table::get_cell(rows_count_t row_index, const Column &column)
+std::unique_ptr<TableValue> Table::get_cell(rows_count_t row_index, const Column &column) const
 {
 	// cell offset
-	std::streampos offset = table_start + row_index * row_size;
+	uint64_t offset = table_start + row_index * row_size;
 	for (const Column& c : columns)
 	{
 		if (c == column)
@@ -207,7 +208,7 @@ std::ostream& operator<<(std::ostream& out, const Table& table)
 {
 	for (const Column& c : table.columns)
 	{
-		out << '[' << c << "] ";
+		out << table.get_name() << " [" << c << "] ";
 	};
 	return out;
 }

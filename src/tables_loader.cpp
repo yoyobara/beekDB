@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstdio>
 #include <filesystem>
 #include <iostream>
 #include <memory>
@@ -11,7 +12,7 @@ TablesLoader::TablesLoader()
 	for (const auto& table_file : fs::directory_iterator("tables"))
 	{
 		// add unique ptr to table
-		tables.emplace_back(std::make_unique<Table>(table_file.path()));
+		tables.emplace_back(std::make_unique<Table>(table_file.path().filename()));
 	}
 
 	for (const std::unique_ptr<Table>& table : tables)

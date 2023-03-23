@@ -37,9 +37,10 @@ void handle_select_statement(const SelectStatement* statement)
 	{
 		for (const Column& c : result_columns)
 		{
-			// TODO
+			res_table.set_cell(i, c, source_table.get_cell(i, c).get());
 		}
 	}
+	std::cout << "wrote to table" << std::endl;
 }
 
 /* handle a query from the client */
@@ -54,6 +55,7 @@ bool ClientThread::handle_query(const std::string& query)
 		switch (statement->type()) {
 			case hsql::kStmtSelect:
 				handle_select_statement(static_cast<const SelectStatement*>(statement));
+				break;
 			default:
 				std::cerr << "feature not implemented yet!" << std::endl;
 		}
