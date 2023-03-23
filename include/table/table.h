@@ -1,6 +1,7 @@
 #pragma once
 #include <ios>
 #include <memory>
+#include <stdexcept>
 #include <vector>
 #include <mutex>
 
@@ -38,6 +39,11 @@ class Column
 };
 std::ostream& operator<<(std::ostream& out, const Column& c);
 
+struct no_such_column : std::runtime_error
+{
+	no_such_column(const std::string& msg) : std::runtime_error(msg){}
+};
+
 /*
  * a class representing a table.
  * subclasses PositionalFileHandler so the table can handle its file.
@@ -64,6 +70,9 @@ class Table
 		 */
 		std::unique_ptr<TableValue> get_cell(rows_count_t row_index, const Column& column);
 
+		/* set cell value */
+		void set_cell(rows_count_t row_index, const Column& column, TableValue *v);
+
 		/*
 		 * textual representation
 		 */
@@ -72,6 +81,9 @@ class Table
 		/* getters */
 		inline rows_count_t get_rows_count() const { return rows_count; }
 		inline const std::string& get_name() const { return name; }
+
+		/* get column by name */
+		const Column& get_column(const std::string& name) const;
 
 	private:
 

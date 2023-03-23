@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <ios>
 #include <memory>
@@ -10,10 +11,12 @@
 #include "table/types.h"
 #include "utils.h"
 
+using namespace table_storage;
+
 /* column */
 
 Column::Column(const std::string& name, ColumnType type) : 
-	m_name(name), m_type(type), m_size(table_storage::TYPE_SIZE.at(type)) {}
+	m_name(name), m_type(type), m_size(TYPE_SIZE.at(type)) {}
 
 std::string_view Column::get_name() const { return m_name; }
 ColumnType Column::get_type() const { return m_type; }
@@ -40,9 +43,9 @@ void Table::init_columns()
 	for (int i = 0 ; i < columns_count ; i++)
 	{
 		// read descriptor
-		table_file.read(&buffer, table_storage::DESC_SIZE);
+		table_file.read(&buffer, DESC_SIZE);
 
-		ColumnType type {table_storage::BYTE_TO_TYPE.at(buffer)};
+		ColumnType type {BYTE_TO_TYPE.at(buffer)};
 
 		// read name
 		std::string col_name;
@@ -61,13 +64,13 @@ void Table::init_columns()
 void Table::init_metadata()
 {
 	// assert signature presence
-	assert(table_file.verify_content(table_storage::SIGNATURE_OFFSET, table_storage::SIGNATURE));
+	assert(table_file.verify_content(SIGNATURE_OFFSET, table_storage::SIGNATURE));
 
 	// read columns count from metadata
-	table_file.read_at(table_storage::COLUMN_COUNT_OFFSET, &columns_count, sizeof columns_count);
+	table_file.read_at(COLUMN_COUNT_OFFSET, &columns_count, sizeof columns_count);
 
 	// read rows count from metadata.
-	table_file.read_at(table_storage::ROW_COUNT_OFFSET, &rows_count, sizeof rows_count);
+	table_file.read_at(ROW_COUNT_OFFSET, &rows_count, sizeof rows_count);
 
 	init_columns();
 
@@ -95,7 +98,7 @@ void Table::create_metadata(const std::vector<Column>& columns)
 {
 	// the file is currently open for writing at position 0
 	std::stringstream ss;
-	ss << table_storage::SIGNATURE;
+	ss << SIGNATURE;
 
 	// columns count and rows count
 	columns_count_t col_count = columns.size();
@@ -106,7 +109,7 @@ void Table::create_metadata(const std::vector<Column>& columns)
 	for (const Column& c : columns)
 	{
 		// descriptor
-		ss << table_storage::TYPE_TO_BYTE.at(c.get_type());
+		ss << TYPE_TO_BYTE.at(c.get_type());
 
 		// name and \0
 		ss << c.get_name() << '\0';
@@ -132,37 +135,72 @@ Table::Table(const std::string& name, const std::vector<Column>& columns) :
 /* get cell */
 std::unique_ptr<TableValue> Table::get_cell(rows_count_t row_index, const Column &column)
 {
-	std::streampos offset = table_start + row_index * row_size; // row offset
-
 	// cell offset
+	std::streampos offset = table_start + row_index * row_size;
 	for (const Column& c : columns)
 	{
 		if (c == column)
 			break;
-
 		offset += c.get_size();
 	}
 
 	switch (column.get_type()) {
 		case INTEGER:
 			int i;
-			table_file.read_at(offset, &i, table_storage::TYPE_SIZE.at(INTEGER));
+			table_file.read_at(offset, &i, TYPE_SIZE.at(INTEGER));
 
 			return std::make_unique<IntegerValue>(i);
 
 		case REAL:
 			double d;
-			table_file.read_at(offset, &d, table_storage::TYPE_SIZE.at(REAL));
+			table_file.read_at(offset, &d, TYPE_SIZE.at(REAL));
 
 			return std::make_unique<RealValue>(d);
 
 		case STRING:
-			std::array<char, table_storage::STRING_SIZE> buff;
-			table_file.read_at(offset, buff.data(), table_storage::STRING_SIZE);
+			std::array<char, STRING_SIZE> buff;
+			table_file.read_at(offset, buff.data(), TYPE_SIZE.at(STRING));
 
 			return std::make_unique<StringValue>(buff.data());
+
+		default:
+			return nullptr; // SHOULD NOT REACH THIS
 	}
 }
+
+
+void Table::set_cell(rows_count_t row_index, const Column& column, TableValue* v)
+{
+	// cell offset 
+	std::streampos offset = table_start + row_index * row_size;
+	for (const Column& c : columns)
+	{
+		if (c == column)
+			break;
+		offset += c.get_size();
+	}
+
+	switch (column.get_type()) {
+		case INTEGER: {
+			int i = static_cast<IntegerValue*>(v)->int_val;
+			table_file.write_at(offset, &i, TYPE_SIZE.at(INTEGER));
+			break;
+		}
+
+		case REAL: {
+			double d = static_cast<RealValue*>(v)->real_val;
+			table_file.write_at(offset, &d, TYPE_SIZE.at(REAL));
+			break;
+		}
+
+		case STRING: {
+			std::array<char, STRING_SIZE> arr;
+			table_file.write_at(offset, arr.data(), TYPE_SIZE.at(STRING));
+			break;
+		}
+	};
+}
+			
 
 /* repr */
 std::ostream& operator<<(std::ostream& out, const Table& table)
@@ -172,4 +210,14 @@ std::ostream& operator<<(std::ostream& out, const Table& table)
 		out << '[' << c << "] ";
 	};
 	return out;
+}
+
+/* get column */
+const Column& Table::get_column(const std::string& name) const
+{
+	auto findres {std::find_if(columns.begin(), columns.end(), [name](const Column& c){ return c.get_name() == name;})};
+	if (findres == columns.end())
+		throw no_such_column("no such column as '" + name + "'");
+
+	return *findres;
 }

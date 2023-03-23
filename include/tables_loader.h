@@ -23,10 +23,10 @@ class TablesLoader
 		// the tables loaded.
 		std::vector<std::unique_ptr<Table>> tables;
 
+	public:
+
 		// get a table by name
 		const Table& get_table(const std::string& name) const;
-
-	public:
 
 		// singleton essentials
 		inline static TablesLoader& get_instance()

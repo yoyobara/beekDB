@@ -8,10 +8,13 @@
 int main()
 {
 	Table t("tables/mama_table");
-	std::cout << t.rows_count << std::endl;
-	std::cout << t.row_size << std::endl;
 
-	std::cout << static_cast<IntegerValue*>(t.get_cell(0, t.columns.at(1)).get())->int_val << std::endl;
+	std::cout << static_cast<IntegerValue*>(t.get_cell(0, t.get_column("age")).get())->int_val << std::endl;
+
+	IntegerValue v(55);
+	t.set_cell(0, t.get_column("age"), &v);
+
+	std::cout << static_cast<IntegerValue*>(t.get_cell(0, t.get_column("age")).get())->int_val << std::endl;
 
 	return 0;
 }

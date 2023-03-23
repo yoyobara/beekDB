@@ -1,17 +1,45 @@
+#include <algorithm>
 #include <hsql/SQLParser.h>
-#include <hsql/SQLParserResult.h>
-#include <hsql/sql/SQLStatement.h>
-#include <hsql/sql/SelectStatement.h>
-#include <iostream>
 #include <filesystem>
-#include "client_handler.h"
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <thread>
+#include <vector>
 #include "table/table.h"
+#include "tables_loader.h"
+#include "client_handler.h"
 
 using namespace hsql;
 namespace fs = std::filesystem;
 
-void handle_select_statement(const SelectStatement* statement) { 
-	
+void handle_select_statement(const SelectStatement* statement)
+{ 
+	const Table& source_table = TablesLoader::get_instance().get_table(statement->fromTable->getName());
+
+	// queried columns
+	std::vector<Column> result_columns;
+	for (const auto& col_ptr : *statement->selectList)
+	{
+		try {
+			result_columns.push_back(source_table.get_column(col_ptr->getName()));
+		} catch (no_such_column &e) { 
+			std::cerr << e.what() << std::endl;
+		}
+	}
+
+	// now we have required columns listed. create new result table.
+	std::stringstream res_table_name;
+	res_table_name << "tmp/tmp_" << std::this_thread::get_id();
+	Table res_table {res_table_name.str(), result_columns};
+
+	for (rows_count_t i = 0 ; i < source_table.get_rows_count() ; i++)
+	{
+		for (const Column& c : result_columns)
+		{
+			// TODO
+		}
+	}
 }
 
 /* handle a query from the client */
