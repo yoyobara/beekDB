@@ -4,7 +4,7 @@
 
 generally, messages between the server and the client will consist of several parts:
 
-`<1-char command> <4 bytes integer of content length> <content>`
+`<1-char command> <8 bytes integer of content length> <content>`
 
 the content clause depends on the message's goal, which is determined by the command.
 messages can be sent as multiple packets; the command and content length needs to be on the first

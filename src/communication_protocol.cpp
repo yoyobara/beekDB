@@ -20,9 +20,6 @@ void comms::send_message(const Socket &s, const message_t& message)
 comms::message_t comms::recv_message(const Socket &s)
 {
 	comms::message_t msg{};
-	
-	// get signature
-	s.recv(table_storage::SIGNATURE.length());
 
 	msg.command = s.recv(comms_constants::CMD_LENGTH)[0];
 
