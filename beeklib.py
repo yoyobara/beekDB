@@ -5,6 +5,9 @@ the python API for a beekDB server
 import socket
 import struct
 
+class BeekConnectionError(Exception):
+    pass
+
 class BeekDbConnection:
 
     COMMANDS = {
@@ -25,11 +28,22 @@ class BeekDbConnection:
         connecting and joining to the beekDB server.
         """
         self.__addr = (ip_address, port)
-        self.__client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
+        # connect to server
+        self.__sock.connect(self.__addr)
 
-        self.__client_socket.connect(self.__addr)
+        # send join message
+        self.__send_message(BeekDbConnection.COMMANDS["client_join"], b'')
 
-    def query(sql_query: str) -> tuple[bool, (str | list | None)]:
+        # wait for join confirmation
+        cmd, _ = self.__recv_message()
+        if cmd != BeekDbConnection.COMMANDS["server_join_success"]:
+            raise BeekConnectionError("something went wrong")
+
+        # ok
+
+    def query(self, sql_query: str) -> tuple[bool, str | list | None]:
         """
         queries the database with an sql query.
 
@@ -47,13 +61,33 @@ class BeekDbConnection:
         content_length = len(content)
         msg = struct.pack(f"<cQ{content_length}s", cmd, content_length, content)
 
-        self.__client_socket.send(msg)
+        self.__sock.send(msg)
 
     def __recv_message(self) -> tuple[bytes, bytes]:
         """
         recieves a message from the server. returns a tuple with the command and the content.
         """
-        cmd, content_length = struct.unpack("<cQ", self.__client_socket.recv(9))
-        content = self.__client_socket.recv(content_length)
+        cmd, content_length = struct.unpack("<cQ", self.__sock.recv(9))
+        content = self.__sock.recv(content_length)
 
         return cmd, content
+
+    def close(self):
+        """
+        closes the connection with the server
+        """
+
+        self.__send_message(BeekDbConnection.COMMANDS['client_leave'], b'')
+        self.__sock.close()
+
+    def __enter__(self):
+        """
+        with statement support
+        """
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        with statement support
+        """
+        self.close()
