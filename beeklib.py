@@ -72,7 +72,7 @@ class BeekDbConnection:
 
         return cmd, content
 
-    def close(self):
+    def close(self) -> None:
         """
         closes the connection with the server
         """

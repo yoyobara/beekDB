@@ -5,6 +5,7 @@
 #include <vector>
 #include "communication_protocol.h"
 #include "cpp_socket.h"
+#include "hsql/sql/SelectStatement.h"
 
 class ClientThread
 {
@@ -18,6 +19,8 @@ class ClientThread
 		bool process_message(comms::message_t&& msg);
 
 		bool handle_query(const std::string& query);
+
+		void handle_select_statement(const hsql::SelectStatement* statement);
 
 		/* thread execution entry point */
 		void run();

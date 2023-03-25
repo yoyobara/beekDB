@@ -2,6 +2,7 @@
 #include <ios>
 #include <memory>
 #include <stdexcept>
+#include <sys/types.h>
 #include <vector>
 #include <mutex>
 
@@ -84,6 +85,12 @@ class Table
 
 		/* get column by name */
 		const Column& get_column(const std::string& name) const;
+
+		/* get the whole table's size */
+		inline ssize_t evaluate_size()
+		{
+			return table_start + row_size * rows_count;
+		}
 
 	private:
 

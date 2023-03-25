@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <sys/types.h>
 
 template<typename T>
 inline std::string encode(T val)
