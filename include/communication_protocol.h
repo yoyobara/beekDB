@@ -4,6 +4,8 @@
 #include <string>
 #include <utility>
 
+using cmd_t = char;
+
 namespace comms_constants
 {
 	const int CMD_LENGTH {1};
@@ -11,19 +13,22 @@ namespace comms_constants
 	const int BATCH_SIZE {2048};
 
 	// commands from client
-	const char CMD_JOIN {'j'};
-	const char CMD_LEAVE {'l'};
-	const char CMD_QUERY {'q'};
+	const cmd_t CMD_JOIN {'j'};
+	const cmd_t CMD_LEAVE {'l'};
+	const cmd_t CMD_QUERY {'q'};
 
 	// commands from server
-	const char CMD_JOIN_SUCCESS {'J'};
-	const char CMD_QUERY_RESULT {'Q'};
-	const char CMD_TERMINATION {'T'};
+	const cmd_t CMD_JOIN_SUCCESS {'J'};
+	const cmd_t CMD_QUERY_RESULT {'Q'};
+	const cmd_t CMD_TERMINATION {'T'};
+
+	// QUERY RESULTS
+	const cmd_t QUERY_RES_SUCCESS {'s'};
+	const cmd_t QUERY_RES_ERROR {'e'};
 }
 
 namespace comms
 {
-	using cmd_t = char;
 
 	struct message_t
 	{

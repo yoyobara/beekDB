@@ -54,10 +54,20 @@ void ClientThread::handle_select_statement(const SelectStatement* statement)
 }
 
 /* handle a query from the client */
-bool ClientThread::handle_query(const std::string& query)
+void ClientThread::handle_query(const std::string& query)
 {
 	SQLParserResult parsing_result;
-	if (!SQLParser::parse(query, &parsing_result)) return false;
+
+	// if query is illegal send error..
+	if (!SQLParser::parse(query, &parsing_result)) 
+	{
+		comms::message_t msg;
+		msg.command = comms_constants::CMD_QUERY_RESULT;
+		msg.content = comms_constants::QUERY_RES_ERROR + parsing_result.errorMsg();
+
+		comms::send_message(m_client, msg);
+		return;	
+	};
 
 	for (const SQLStatement* statement : parsing_result.getStatements())
 	{
@@ -70,6 +80,4 @@ bool ClientThread::handle_query(const std::string& query)
 				std::cerr << "feature not implemented yet!" << std::endl;
 		}
 	}
-
-	return true;
 }

@@ -18,7 +18,7 @@ class ClientThread
 		
 		bool process_message(comms::message_t&& msg);
 
-		bool handle_query(const std::string& query);
+		void handle_query(const std::string& query);
 
 		void handle_select_statement(const hsql::SelectStatement* statement);
 
