@@ -5,6 +5,7 @@
 #include <numeric>
 #include <sstream>
 #include <iostream>
+#include <string>
 
 #include "table/table.h"
 #include "table/table_storage_constants.h"
@@ -221,4 +222,10 @@ const Column& Table::get_column(const std::string& name) const
 		throw no_such_column("no such column as '" + name + "'");
 
 	return *findres;
+}
+
+std::string Table::get_file_data()
+{
+	table_file.seekg(0);
+	return (std::stringstream() << table_file.rdbuf()).str();
 }

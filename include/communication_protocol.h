@@ -2,6 +2,7 @@
 
 #include "cpp_socket.h"
 #include <string>
+#include <sys/types.h>
 #include <utility>
 
 using cmd_t = char;
@@ -40,9 +41,9 @@ namespace comms
 	};
 
 	/*
-	 * sends a message according to protocol
+	 * sends a message according to protocol. can override content length if needed, elsewhere it shall be according to the message's content size
 	 */
-	void send_message(const Socket& s, const message_t& message);
+	void send_message(const Socket& s, const message_t& message, uint8_t length = -1);
 
 	/*
 	 * recives a message according to protocol

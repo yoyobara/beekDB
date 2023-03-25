@@ -1,11 +1,14 @@
 #pragma once
+
 #include <ios>
 #include <memory>
+#include <sstream>
 #include <stdexcept>
 #include <sys/types.h>
 #include <vector>
 #include <mutex>
 
+#include "cpp_socket.h"
 #include "storage.h"
 #include "table/types.h"
 #include "table_storage_constants.h"
@@ -86,11 +89,8 @@ class Table
 		/* get column by name */
 		const Column& get_column(const std::string& name) const;
 
-		/* get the whole table's size */
-		inline ssize_t evaluate_size()
-		{
-			return table_start + row_size * rows_count;
-		}
+		/* get file data */
+		std::string get_file_data();
 
 	private:
 

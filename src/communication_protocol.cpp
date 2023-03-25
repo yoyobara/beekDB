@@ -4,6 +4,7 @@
 #include "table/table_storage_constants.h"
 #include "utils.h"
 #include <cstring>
+#include <sys/types.h>
 
 comms::message_t::message_t(){}
 comms::message_t::message_t(comms::message_t&& msg)
@@ -12,9 +13,10 @@ comms::message_t::message_t(comms::message_t&& msg)
 	content = std::move(msg.content);
 }
 
-void comms::send_message(const Socket &s, const message_t& message)
+void comms::send_message(const Socket &s, const message_t& message, uint64_t length) // length is -1 by default
 {
-	s.send(message.command + encode(message.content.size()) + message.content);
+	uint64_t msg_length = length == -1 ? message.content.size() : length;
+	s.send(message.command + encode(msg_length) + message.content);
 }
 
 comms::message_t comms::recv_message(const Socket &s)

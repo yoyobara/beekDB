@@ -14,6 +14,7 @@
 #include "table/table_storage_constants.h"
 #include "tables_loader.h"
 #include "client_handler.h"
+#include <sys/sendfile.h>
 #include "utils.h"
 
 using namespace hsql;
@@ -48,9 +49,12 @@ void ClientThread::handle_select_statement(const SelectStatement* statement)
 		}
 	}
 
-	// now send response. manual send since we need to send a file's content.
-	uint64_t table_size = res_table.evaluate_size();
-	send(m_client.get_fd(), (comms_constants::CMD_QUERY_RESULT + encode(table_size)).c_str(), comms_constants::LENGTH_LENGTH + comms_constants::CMD_LENGTH, 0);
+	// send message with only the result char as content, the rest will be sent with send_file
+	comms::message_t msg;
+	msg.command = comms_constants::CMD_QUERY_RESULT;
+	msg.content = comms_constants::QUERY_RES_SUCCESS + res_table.get_file_data();
+
+	comms::send_message(m_client, msg);
 }
 
 /* handle a query from the client */
