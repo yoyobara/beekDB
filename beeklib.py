@@ -4,6 +4,7 @@ the python API for a beekDB server
 
 import socket
 import struct
+import io
 
 class BeekConnectionError(Exception):
     pass
@@ -18,6 +19,9 @@ class BeekDbConnection:
         "server_query_result": b'Q',
         "server_termination": b'T'
     }
+
+    QUERY_ERROR = 'e'
+    QUERY_SUCCESS = 's'
 
     SIGNATURE = b'TABDEF'
 
@@ -43,7 +47,7 @@ class BeekDbConnection:
 
         # ok
 
-    def query(self, sql_query: str) -> tuple[bool, str | list | None]:
+    def query(self, sql_query: str) -> tuple[bool, str | dict | None]:
         """
         queries the database with an sql query.
 
@@ -52,7 +56,27 @@ class BeekDbConnection:
             2. query is ok, with output clause (True, <table list>)
             3. query is NOT ok. (False, <error message>)
         """
+        self.__send_message(BeekDbConnection.COMMANDS['client_query'], sql_query)
+        
+        # wait for response
+        cmd, content = self.__recv_message()
 
+        assert cmd == BeekDbConnection.COMMANDS['server_query_result']
+
+        if content[0] == BeekDbConnection.QUERY_ERROR:
+            return (False, content[1:])
+        
+        if content[0] == BeekDbConnection.QUERY_SUCCESS and len(content) == 1:
+            return (True, None)
+
+        # parse stuff...
+        table_stream = io.BytesIO(content[1:])
+        signature, columns_count, rows_count = struct.unpack("<6sIQ", table_stream.read(18))
+        
+        assert signature == BeekDbConnection.SIGNATURE
+        
+        # TODO continue
+        
     def __send_message(self, cmd: bytes, content: bytes) -> None:
         """
         sends a message to the server using the protocol
