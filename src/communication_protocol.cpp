@@ -29,7 +29,6 @@ comms::message_t comms::recv_message(const Socket &s)
 	uint64_t length;
 	std::memcpy(&length, length_str.data(), comms_constants::LENGTH_LENGTH);
 
-	std::cout << length << std::endl;
 
 	// get content
 	for (int i = 0 ; i < length / comms_constants::BATCH_SIZE ; i++)

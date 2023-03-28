@@ -17,7 +17,6 @@ TablesLoader::TablesLoader()
 
 	for (const std::unique_ptr<Table>& table : tables)
 	{
-		std::cout << *table << std::endl;
 	}
 }
 
