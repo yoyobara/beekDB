@@ -1,6 +1,7 @@
 .cache/
 build/
 tmp/*
+__pycache__/
 beekDB
 test
 compile_commands.json
