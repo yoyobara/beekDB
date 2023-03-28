@@ -13,10 +13,9 @@ comms::message_t::message_t(comms::message_t&& msg)
 	content = std::move(msg.content);
 }
 
-void comms::send_message(const Socket &s, const message_t& message, uint64_t length) // length is -1 by default
+void comms::send_message(const Socket &s, const message_t& message) // length is -1 by default
 {
-	uint64_t msg_length = length == -1 ? message.content.size() : length;
-	s.send(message.command + encode(msg_length) + message.content);
+	s.send(message.command + encode(message.content.size()) + message.content);
 }
 
 comms::message_t comms::recv_message(const Socket &s)

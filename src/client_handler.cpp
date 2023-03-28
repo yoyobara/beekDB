@@ -40,9 +40,15 @@ bool ClientThread::process_message(comms::message_t&& msg)
 {
 	using namespace comms_constants;
 
+	// TODO write better code please
+
+	comms::message_t join_msg;
+	join_msg.command = CMD_JOIN_SUCCESS;
+
 	switch (msg.command) {
 		case CMD_JOIN:
 			this->m_is_joined = true;
+			comms::send_message(m_client, join_msg);
 			break;
 
 		case CMD_LEAVE:

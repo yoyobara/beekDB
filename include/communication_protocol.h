@@ -43,7 +43,7 @@ namespace comms
 	/*
 	 * sends a message according to protocol. can override content length if needed, elsewhere it shall be according to the message's content size
 	 */
-	void send_message(const Socket& s, const message_t& message, uint8_t length = -1);
+	void send_message(const Socket& s, const message_t& message);
 
 	/*
 	 * recives a message according to protocol
