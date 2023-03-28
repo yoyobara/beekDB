@@ -20,6 +20,18 @@ class BeekDbConnection:
         "server_termination": b'T'
     }
 
+    TYPE_UNPACK = {
+        b'r': struct.Struct("<d"),
+        b'i': struct.Struct("<i"),
+        b's': struct.Struct("<50s")
+    }
+
+    TYPE_SIZE = {
+            b'r': 8,
+            b'i': 4,
+            b's': 50
+    }
+
     QUERY_ERROR = 'e'
     QUERY_SUCCESS = 's'
 
@@ -69,14 +81,42 @@ class BeekDbConnection:
         if content[0] == BeekDbConnection.QUERY_SUCCESS and len(content) == 1:
             return (True, None)
 
-        # parse stuff...
+        # parse content
         table_stream = io.BytesIO(content[1:])
         signature, columns_count, rows_count = struct.unpack("<6sIQ", table_stream.read(18))
         
+        # assert signature equality
         assert signature == BeekDbConnection.SIGNATURE
-        
-        # TODO continue
-        
+            
+        # create table-like dictionary of keys
+        table_dict = dict()
+        columns = []
+
+        # add columns to list and create key
+        for i in range(columns_count):
+            col_type = table_stream.read(1)
+            col_name = ""
+
+            while True:
+                c = table_stream.read(1)
+                if c == b'\0':
+                    break
+                else:
+                    col_name += c
+
+            columns.append((col_name, col_type))
+            table_dict[col_name] = []
+
+
+        for i in range(rows_count):
+            for name, col_type in columns:
+                unpacker = BeekDbConnection.TYPE_UNPACK[col_type]
+                data = table_stream.read(BeekDbConnection.TYPE_SIZE[col_type])
+
+                table_dict[name].append(unpacker.unpack(data))
+
+        return (True, table_dict)
+
     def __send_message(self, cmd: bytes, content: bytes) -> None:
         """
         sends a message to the server using the protocol
