@@ -5,6 +5,8 @@
 #include <csignal>
 #include <atomic>
 
+#include "spdlog/spdlog.h"
+
 #include "cpp_socket.h"
 #include "communication_protocol.h"
 #include "client_handler.h"
@@ -28,6 +30,7 @@ void handle_sigint(int dummy)
 
 int main()
 {
+	spdlog::critical("oops");
 	Socket server;
 	server.bind(1337);
 	server.listen(2);

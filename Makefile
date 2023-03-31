@@ -11,19 +11,22 @@ objects := $(sources:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 deps := $(objects:.o=.d)
 tests := $(shell find $(TESTS_DIR) -name "*.cpp")
 
+libs := -lsqlparser $(shell pkg-config --libs spdlog)
+libs_cflags := $(shell pkg-config --cflags spdlog)
+
 all: $(EXECUTABLE)
+
+$(EXECUTABLE): $(objects)
+	$(CXX) -I $(HEADERS_DIR) -std=c++17 $(libs_cflags) $(objects) -o $@ $(libs)
 
 .PHONY: test
 test: $(EXECUTABLE) $(tests)
-	@$(CXX) -std=c++17 -I $(HEADERS_DIR) $(tests) $(filter-out ./build/main.o, $(objects)) -o $(TEST_EXECUTABLE) -lsqlparser -lgtest -lgtest_main
+	@$(CXX) -std=c++17 -I $(HEADERS_DIR) $(tests) $(libs_cflags) $(filter-out ./build/main.o, $(objects)) -o $(TEST_EXECUTABLE) -lgtest -lgtest_main $(libs)
 	@./$(TEST_EXECUTABLE)
-
-$(EXECUTABLE): $(objects)
-	$(CXX) -I $(HEADERS_DIR) -std=c++17 $(objects) -o $@ -lsqlparser
 
 $(objects): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) -std=c++17 -I $(HEADERS_DIR) -MMD -MP -c $< -o $@
+	$(CXX) $(libs_cflags) -std=c++17 -I $(HEADERS_DIR) -MMD -MP -c $< -o $@ $(libs)
 
 .PHONY: clean
 clean:
