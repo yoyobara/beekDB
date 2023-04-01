@@ -19,6 +19,7 @@
 #include "utils.h"
 
 using namespace hsql;
+using namespace comms_constants;
 
 void ClientThread::handle_select_statement(const SelectStatement* statement)
 { 
@@ -51,11 +52,7 @@ void ClientThread::handle_select_statement(const SelectStatement* statement)
 	}
 
 	// send message with only the result char as content, the rest will be sent with send_file
-	comms::message_t msg;
-	msg.command = comms_constants::CMD_QUERY_RESULT;
-	msg.content = comms_constants::QUERY_RES_SUCCESS + res_table.get_file_data();
-
-	comms::send_message(m_client, msg);
+	comms::send_message(m_client, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_SUCCESS + res_table.get_file_data()));
 }
 
 /* handle a query from the client */
@@ -67,9 +64,7 @@ void ClientThread::handle_query(const std::string& query)
 	// if query is illegal send error..
 	if (!SQLParser::parse(query, &parsing_result)) 
 	{
-		comms::message_t msg;
-		msg.command = comms_constants::CMD_QUERY_RESULT;
-		msg.content = comms_constants::QUERY_RES_ERROR + parsing_result.errorMsg();
+		comms::message_t msg(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_ERROR + parsing_result.errorMsg());
 
 		comms::send_message(m_client, msg);
 		return;	

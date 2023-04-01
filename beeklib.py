@@ -17,7 +17,7 @@ class BeekDbConnection:
     COMMANDS = {
         "client_join": b'j',
         "client_leave": b'l',
-        "client_query": 'q',
+        "client_query": b'q',
         "server_join_success": b'J',
         "server_query_result": b'Q',
         "server_termination": b'T'
@@ -77,7 +77,7 @@ class BeekDbConnection:
             2. query is ok, with output clause (True, <table list>)
             3. query is NOT ok. (False, <error message>)
         """
-        self.__send_message(BeekDbConnection.COMMANDS['client_query'], sql_query)
+        self.__send_message(BeekDbConnection.COMMANDS['client_query'], sql_query.encode())
         
         # wait for response
         cmd, content = self.__recv_message()
@@ -111,7 +111,7 @@ class BeekDbConnection:
                 if c == b'\0':
                     break
                 else:
-                    col_name += c
+                    col_name += c.decode()
 
             columns.append((col_name, col_type))
             table_dict[col_name] = []

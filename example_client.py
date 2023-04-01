@@ -2,7 +2,5 @@
 
 import beeklib
 
-conn = beeklib.BeekDbConnection('127.0.0.1')
-
-print("succ")
-conn.close()
+with beeklib.BeekDbConnection('127.0.0.1') as conn:
+    print(conn.query("select age from mama_table;"))

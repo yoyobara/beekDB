@@ -7,6 +7,30 @@
 
 using cmd_t = char;
 
+namespace comms
+{
+
+	struct message_t
+	{
+		cmd_t command;
+		std::string content;
+
+		message_t(cmd_t command, std::string content) : command(command), content(content) {}
+		message_t() : command(0), content(""){}
+	};
+
+	/*
+	 * sends a message according to protocol. can override content length if needed, elsewhere it shall be according to the message's content size
+	 */
+	void send_message(const Socket& s, const message_t& message);
+
+	/*
+	 * recives a message according to protocol
+	 */
+	message_t recv_message(const Socket& s);
+	
+};
+
 namespace comms_constants
 {
 	const int CMD_LENGTH {1};
@@ -26,28 +50,7 @@ namespace comms_constants
 	// QUERY RESULTS
 	const cmd_t QUERY_RES_SUCCESS {'s'};
 	const cmd_t QUERY_RES_ERROR {'e'};
+
+	const comms::message_t JOIN_SUCCESS_MESSAGE(CMD_JOIN_SUCCESS, "");
+
 }
-
-namespace comms
-{
-
-	struct message_t
-	{
-		cmd_t command;
-		std::string content;
-
-		message_t(message_t&& msg);
-		message_t();
-	};
-
-	/*
-	 * sends a message according to protocol. can override content length if needed, elsewhere it shall be according to the message's content size
-	 */
-	void send_message(const Socket& s, const message_t& message);
-
-	/*
-	 * recives a message according to protocol
-	 */
-	message_t recv_message(const Socket& s);
-	
-};

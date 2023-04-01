@@ -41,16 +41,10 @@ bool ClientThread::process_message(comms::message_t&& msg)
 {
 	using namespace comms_constants;
 
-	// TODO write better code please
-
-	comms::message_t join_msg;
-	join_msg.command = CMD_JOIN_SUCCESS;
-	join_msg.content = "";
-
 	switch (msg.command) {
 		case CMD_JOIN:
 			this->m_is_joined = true;
-			comms::send_message(m_client, join_msg);
+			comms::send_message(m_client, JOIN_SUCCESS_MESSAGE);
 			spdlog::info("client joined. confirmed.");
 			break;
 
@@ -73,8 +67,8 @@ void ClientThread::run()
 	while (ClientThread::program_running) {
 
 		// is_message_waiting shall block for some time
-		if (is_message_waiting()){
-			process_message(comms::recv_message(m_client));}
+		if (is_message_waiting() && process_message(comms::recv_message(m_client)))
+			break;
 	}
 
 	m_client.close();

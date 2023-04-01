@@ -44,6 +44,8 @@ int main()
 
 	signal(SIGINT, handle_sigint);
 
+	spdlog::info("listening to connections..");
+
 	// repeatedly accept clients, handle them in seperate threads.
 	while (true)
 	{
