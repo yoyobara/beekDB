@@ -2,6 +2,7 @@
 #include <asm-generic/errno-base.h>
 #include <asm-generic/errno.h>
 #include <cerrno>
+#include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <cstring>

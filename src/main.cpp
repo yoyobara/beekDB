@@ -1,11 +1,12 @@
 #include <cstdlib>
 #include <iostream>
+#include <spdlog/common.h>
 #include <vector>
 #include <thread>
 #include <csignal>
 #include <atomic>
 
-#include "spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 
 #include "cpp_socket.h"
 #include "communication_protocol.h"
@@ -28,9 +29,15 @@ void handle_sigint(int dummy)
 	exit(EXIT_SUCCESS);
 }
 
+void setup_logger()
+{
+	spdlog::set_level(spdlog::level::debug);
+}
+
 int main()
 {
-	spdlog::critical("oops");
+	setup_logger();
+
 	Socket server;
 	server.bind(1337);
 	server.listen(2);
@@ -41,7 +48,7 @@ int main()
 	while (true)
 	{
 		Socket client = server.accept();
-		
+
 		// add new ClientThread to the running threads (with the socket)
 		ClientThread::running_client_threads.emplace_back(client);
 	}

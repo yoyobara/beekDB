@@ -30,6 +30,6 @@ $(objects): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 .PHONY: clean
 clean:
-	rm -rf $(BUILD_DIR) $(EXECUTABLE) $(TEST_EXECUTABLE) tmp/*
+	rm -rf $(BUILD_DIR) $(EXECUTABLE) $(TEST_EXECUTABLE) tmp/* __pycache__/
 
 -include $(deps)

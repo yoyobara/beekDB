@@ -3,6 +3,7 @@
 #include <hsql/SQLParser.h>
 #include <filesystem>
 #include <iostream>
+#include <spdlog/spdlog.h>
 #include <sstream>
 #include <string>
 #include <sys/socket.h>
@@ -60,6 +61,7 @@ void ClientThread::handle_select_statement(const SelectStatement* statement)
 /* handle a query from the client */
 void ClientThread::handle_query(const std::string& query)
 {
+	spdlog::info("handling query: '{}'", query);
 	SQLParserResult parsing_result;
 
 	// if query is illegal send error..

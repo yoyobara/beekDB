@@ -1,3 +1,4 @@
+#include <spdlog/spdlog.h>
 #include <sys/poll.h>
 #include <iostream>
 #include "communication_protocol.h"
@@ -44,14 +45,17 @@ bool ClientThread::process_message(comms::message_t&& msg)
 
 	comms::message_t join_msg;
 	join_msg.command = CMD_JOIN_SUCCESS;
+	join_msg.content = "";
 
 	switch (msg.command) {
 		case CMD_JOIN:
 			this->m_is_joined = true;
 			comms::send_message(m_client, join_msg);
+			spdlog::info("client joined. confirmed.");
 			break;
 
 		case CMD_LEAVE:
+			spdlog::info("client left");
 			return true;
 			 
 		case CMD_QUERY:
