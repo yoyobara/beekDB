@@ -116,13 +116,13 @@ class BeekDbConnection:
             columns.append((col_name, col_type))
             table_dict[col_name] = []
 
-
+        # now get the table data
         for i in range(rows_count):
             for name, col_type in columns:
                 unpacker = BeekDbConnection.TYPE_UNPACK[col_type]
                 data = table_stream.read(BeekDbConnection.TYPE_SIZE[col_type])
 
-                table_dict[name].append(unpacker.unpack(data))
+                table_dict[name].append(unpacker.unpack(data)[0])
 
         return (True, table_dict)
 

@@ -12,6 +12,7 @@
 #include "storage.h"
 #include "table/types.h"
 #include "table_storage_constants.h"
+#include "utils.h"
 
 /*
  * represents a column name, type, properties
@@ -76,6 +77,12 @@ class Table
 
 		/* set cell value */
 		void set_cell(rows_count_t row_index, const Column& column, TableValue *v);
+
+		inline void set_rows_count(rows_count_t n)
+		{
+			rows_count = n;
+			table_file.write_at(table_storage::ROW_COUNT_OFFSET, encode(n).data(), sizeof n);
+		}
 
 		/*
 		 * textual representation

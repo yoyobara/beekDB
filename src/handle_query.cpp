@@ -23,7 +23,6 @@ using namespace comms_constants;
 
 void ClientThread::handle_select_statement(const SelectStatement* statement)
 { 
-	using std::string_literals::operator""s;
 
 	const Table& source_table = TablesLoader::get_instance().get_table(statement->fromTable->getName());
 
@@ -38,10 +37,13 @@ void ClientThread::handle_select_statement(const SelectStatement* statement)
 		}
 	}
 
+	spdlog::info("{}", result_columns.size());
+
 	// now we have required columns listed. create new result temporary table.
 	std::string temp_table_name {(std::stringstream() << "tmp/tmp_" << std::this_thread::get_id()).str()};
 
 	Table res_table {temp_table_name, result_columns};
+	res_table.set_rows_count(source_table.get_rows_count());
 
 	for (rows_count_t i = 0 ; i < source_table.get_rows_count() ; i++)
 	{
@@ -78,7 +80,7 @@ void ClientThread::handle_query(const std::string& query)
 				handle_select_statement(static_cast<const SelectStatement*>(statement));
 				break;
 			default:
-				std::cerr << "feature not implemented yet!" << std::endl;
+				spdlog::error("feature not implemented yet..");
 		}
 	}
 }
