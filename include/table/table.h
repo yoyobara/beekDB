@@ -30,18 +30,20 @@ class Column
 		Column(const std::string& name, ColumnType type);
 
 		/* simple getters */
-		std::string_view get_name() const;
-		ColumnType get_type() const;
-		int get_size() const;
+		inline const std::string& get_name() const { return m_name; }
+
+		inline ColumnType get_type() const { return m_type; }
+
+		inline int get_size() const { return table_storage::TYPE_SIZE.at(get_type()); }
 
 		/* column comparison */
-		bool operator==(const Column& other) const;
+		inline bool operator==(const Column& other) const { return other.m_name == m_name; };
 
 	private:
 		const std::string m_name;
 		const ColumnType m_type;
-		const int m_size;
 };
+
 std::ostream& operator<<(std::ostream& out, const Column& c);
 
 struct no_such_column : std::runtime_error
@@ -51,18 +53,10 @@ struct no_such_column : std::runtime_error
 
 /*
  * a class representing a table.
- * subclasses PositionalFileHandler so the table can handle its file.
  */
 class Table
 {
 	public:
-
-		/*
-		 * creates a new table file.
-		 * @param name - the name of the table
-		 * @param columns - vecotr of table columns
-		 */
-		Table(const std::string& name, const std::vector<Column>& columns);
 
 		/*
 		 * opens an existing table file.
@@ -75,29 +69,20 @@ class Table
 		 */
 		std::unique_ptr<TableValue> get_cell(rows_count_t row_index, const Column& column) const;
 
+		/* get file data */
+		std::string get_file_data();
+
+		inline const std::string& get_name() const { return m_name; }
+
 		/* set cell value */
 		void set_cell(rows_count_t row_index, const Column& column, TableValue *v);
-
-		inline void set_rows_count(rows_count_t n)
-		{
-			rows_count = n;
-			table_file.write_at(table_storage::ROW_COUNT_OFFSET, encode(n).data(), sizeof n);
-		}
 
 		/*
 		 * textual representation
 		 */
 		friend std::ostream& operator<<(std::ostream& out, const Table& table);
 
-		/* getters */
-		inline rows_count_t get_rows_count() const { return rows_count; }
-		inline const std::string& get_name() const { return name; }
-
-		/* get column by name */
-		const Column& get_column(const std::string& name) const;
-
-		/* get file data */
-		std::string get_file_data();
+		friend Table create_table();
 
 	private:
 
@@ -105,29 +90,25 @@ class Table
 		void init_metadata();
 		void init_columns();
 
-		/* create */
-		void create_metadata(const std::vector<Column>& columns);
-
 		// initializes the size of a whole row
 		void init_row_size();
 
 		mutable RandomAccessFile table_file;
 
 		// table's name
-		const std::string name;
+		const std::string m_name;
 
 		// columns of the table
-		std::vector<Column> columns;
+		std::vector<Column> m_columns;
 
-		rows_count_t rows_count;
-		columns_count_t columns_count;
+		rows_count_t m_rows_count;
+		columns_count_t m_columns_count;
 
 		/* total size in bytes of a row */
-		int row_size;
+		int m_row_size;
 
 		/* start position of the table after the metadata */
-		uint64_t table_start;
-
-		// a mutex allowing only one to access the table at a time
-		std::mutex mtx;
+		uint64_t m_table_start;
 };
+
+Table create_table();

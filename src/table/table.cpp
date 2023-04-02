@@ -16,15 +16,6 @@ using namespace table_storage;
 
 /* column */
 
-Column::Column(const std::string& name, ColumnType type) : 
-	m_name(name), m_type(type), m_size(TYPE_SIZE.at(type)) {}
-
-std::string_view Column::get_name() const { return m_name; }
-ColumnType Column::get_type() const { return m_type; }
-int Column::get_size() const { return m_size; }
-
-bool Column::operator==(const Column& other) const { return m_name == other.m_name;}
-
 std::ostream& operator<<(std::ostream& out, const Column& c)
 {
 	out << c.get_name() << ": " << c.get_type();
@@ -41,7 +32,7 @@ void Table::init_columns()
 
 	char buffer;
 
-	for (int i = 0 ; i < columns_count ; i++)
+	for (int i = 0 ; i < m_columns_count ; i++)
 	{
 		// read descriptor
 		table_file.read(&buffer, DESC_SIZE);
@@ -58,7 +49,7 @@ void Table::init_columns()
 		col_name.pop_back(); // \0
 
 		// add column
-		columns.push_back(Column(col_name, type));
+		m_columns.push_back(Column(col_name, type));
 	}
 }
 
@@ -68,22 +59,22 @@ void Table::init_metadata()
 	assert(table_file.verify_content(SIGNATURE_OFFSET, table_storage::SIGNATURE));
 
 	// read columns count from metadata
-	table_file.read_at(COLUMN_COUNT_OFFSET, &columns_count, sizeof columns_count);
+	table_file.read_at(COLUMN_COUNT_OFFSET, &m_columns_count, sizeof m_columns_count);
 
 	// read rows count from metadata.
-	table_file.read_at(ROW_COUNT_OFFSET, &rows_count, sizeof rows_count);
+	table_file.read_at(ROW_COUNT_OFFSET, &m_rows_count, sizeof m_rows_count);
 
 	init_columns();
 
 	// now metadata is over, at start of table itself
-	table_start = table_file.tellg();
+	m_table_start = table_file.tellg();
 }
 
 /* open */
 // TODO remove hardcoded paths (switch to fs something)
 Table::Table(const std::string& name) :
 	table_file(table_storage::TABLES_DIR + "/" + name, false),
-	name(name)
+	m_name(name)
 {
 	init_metadata();
 	init_row_size();
@@ -91,55 +82,15 @@ Table::Table(const std::string& name) :
 
 void Table::init_row_size()
 {
-	row_size = std::accumulate(columns.begin(), columns.end(), 0, [](int current, const Column& next){ return current + next.get_size();});
-}
-
-/* create */
-
-void Table::create_metadata(const std::vector<Column>& columns)
-{
-	// the file is currently open for writing at position 0
-	std::stringstream ss;
-	ss << SIGNATURE;
-
-	// columns count and rows count
-	columns_count_t col_count = columns.size();
-	ss << encode(col_count);
-	ss << encode(static_cast<rows_count_t>(0));
-
-	// columns themselves
-	for (const Column& c : columns)
-	{
-		// descriptor
-		ss << TYPE_TO_BYTE.at(c.get_type());
-
-		// name and \0
-		ss << c.get_name() << '\0';
-	}
-
-	// table start position
-	table_start = ss.tellp();
-
-	// finally write to file
-	table_file << ss.rdbuf();
-}
-
-/* create */
-Table::Table(const std::string& name, const std::vector<Column>& columns) :
-	table_file(name, true),
-	columns(columns),
-	name(name)
-{
-	create_metadata(columns);
-	init_row_size();
+	m_row_size = std::accumulate(m_columns.begin(), m_columns.end(), 0, [](int current, const Column& next){ return current + next.get_size();});
 }
 
 /* get cell */
 std::unique_ptr<TableValue> Table::get_cell(rows_count_t row_index, const Column &column) const
 {
 	// cell offset
-	uint64_t offset = table_start + row_index * row_size;
-	for (const Column& c : columns)
+	uint64_t offset = m_table_start + row_index * m_row_size;
+	for (const Column& c : m_columns)
 	{
 		if (c == column)
 			break;
@@ -174,8 +125,8 @@ std::unique_ptr<TableValue> Table::get_cell(rows_count_t row_index, const Column
 void Table::set_cell(rows_count_t row_index, const Column& column, TableValue* v)
 {
 	// cell offset 
-	std::streampos offset = table_start + row_index * row_size;
-	for (const Column& c : columns)
+	std::streampos offset = m_table_start + row_index * m_row_size;
+	for (const Column& c : m_columns)
 	{
 		if (c == column)
 			break;
@@ -207,7 +158,7 @@ void Table::set_cell(rows_count_t row_index, const Column& column, TableValue* v
 /* repr */
 std::ostream& operator<<(std::ostream& out, const Table& table)
 {
-	for (const Column& c : table.columns)
+	for (const Column& c : table.m_columns)
 	{
 		out << table.get_name() << " [" << c << "] ";
 	};
