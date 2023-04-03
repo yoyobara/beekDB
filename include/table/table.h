@@ -117,4 +117,4 @@ class Table
 		uint64_t m_table_start;
 };
 
-void create_table(const std::vector<Column> columns, const std::string& name);
+void create_table(const std::vector<Column> columns, const fs::path& name);

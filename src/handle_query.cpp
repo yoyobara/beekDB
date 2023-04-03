@@ -37,11 +37,11 @@ void ClientThread::handle_select_statement(const SelectStatement* statement)
 	}
 
 	// now we have required columns listed. create new result temporary table.
-	std::string temp_table_name {(std::stringstream() << "tmp/tmp_" << std::this_thread::get_id()).str()};
+	std::string temp_table_path {(std::stringstream() << (table_storage::TEMP_DIR / "tmp") << std::this_thread::get_id()).str()};
 
-	create_table(result_columns, temp_table_name);
+	create_table(result_columns, temp_table_path);
 
-	Table res_table(temp_table_name);
+	Table res_table(temp_table_path);
 
 	for (long i = 0 ; i < source_table.get_rows_count() ; i++)
 	{

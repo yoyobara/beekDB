@@ -9,14 +9,10 @@ namespace fs = std::filesystem;
 
 TablesLoader::TablesLoader()
 {
-	for (const auto& table_file : fs::directory_iterator("tables"))
+	for (const auto& table_file : fs::directory_iterator(table_storage::TABLES_DIR))
 	{
 		// add unique ptr to table
-		tables.emplace_back(std::make_unique<Table>(table_file.path().filename()));
-	}
-
-	for (const std::unique_ptr<Table>& table : tables)
-	{
+		tables.emplace_back(std::make_unique<Table>(table_file.path()));
 	}
 }
 

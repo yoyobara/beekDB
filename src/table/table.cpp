@@ -81,7 +81,7 @@ void Table::init_metadata()
 
 /* open */
 Table::Table(const std::string& name) :
-	m_table_file(TABLES_DIR / name, false),
+	m_table_file(name, false),
 	m_name(name)
 {
 	init_metadata();
@@ -93,9 +93,9 @@ void Table::init_row_size()
 	m_row_size = std::accumulate(m_columns.begin(), m_columns.end(), 0, [](int current, const Column& next){ return current + next.get_size();});
 }
 
-void create_table(const std::vector<Column> columns, const std::string& name)
+void create_table(const std::vector<Column> columns, const fs::path& path)
 {
-	RandomAccessFile f(TABLES_DIR / name, true);
+	RandomAccessFile f(path, true);
 
 	// create the metadata
 
