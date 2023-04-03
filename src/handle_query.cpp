@@ -23,7 +23,6 @@ using namespace comms_constants;
 
 void ClientThread::handle_select_statement(const SelectStatement* statement)
 { 
-
 	const Table& source_table = TablesLoader::get_instance().get_table(statement->fromTable->getName());
 
 	// queried columns
@@ -37,15 +36,14 @@ void ClientThread::handle_select_statement(const SelectStatement* statement)
 		}
 	}
 
-	spdlog::info("{}", result_columns.size());
-
 	// now we have required columns listed. create new result temporary table.
 	std::string temp_table_name {(std::stringstream() << "tmp/tmp_" << std::this_thread::get_id()).str()};
 
-	Table res_table {temp_table_name, result_columns};
-	res_table.set_rows_count(source_table.get_rows_count());
+	create_table(result_columns, temp_table_name);
 
-	for (rows_count_t i = 0 ; i < source_table.get_rows_count() ; i++)
+	Table res_table(temp_table_name);
+
+	for (long i = 0 ; i < source_table.get_rows_count() ; i++)
 	{
 		for (const Column& c : result_columns)
 		{

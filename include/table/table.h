@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <ios>
 #include <memory>
 #include <sstream>
@@ -67,33 +68,39 @@ class Table
 		/*
 		 * get unique ptr to heap allocated cell value
 		 */
-		std::unique_ptr<TableValue> get_cell(rows_count_t row_index, const Column& column) const;
+		std::unique_ptr<TableValue> get_cell(long row_index, const Column& column) const;
 
 		/* get file data */
 		std::string get_file_data();
 
 		inline const std::string& get_name() const { return m_name; }
 
+		/* get rows count */
+		inline uint64_t get_rows_count() const{ return m_rows_count; }
+
 		/* set cell value */
-		void set_cell(rows_count_t row_index, const Column& column, TableValue *v);
+		void set_cell(long row_index, const Column& column, TableValue *v);
+
+		/* get column by name */
+		const Column& get_column(const std::string& name) const;
 
 		/*
 		 * textual representation
 		 */
 		friend std::ostream& operator<<(std::ostream& out, const Table& table);
 
-		friend Table create_table();
-
 	private:
 
 		/* open */
 		void init_metadata();
-		void init_columns();
+		void init_columns(int columns_count);
 
 		// initializes the size of a whole row
 		void init_row_size();
 
-		mutable RandomAccessFile table_file;
+		uint64_t calculate_offset(long row_index, const Column& column) const;
+
+		mutable RandomAccessFile m_table_file;
 
 		// table's name
 		const std::string m_name;
@@ -101,8 +108,7 @@ class Table
 		// columns of the table
 		std::vector<Column> m_columns;
 
-		rows_count_t m_rows_count;
-		columns_count_t m_columns_count;
+		long m_rows_count;
 
 		/* total size in bytes of a row */
 		int m_row_size;
@@ -111,4 +117,4 @@ class Table
 		uint64_t m_table_start;
 };
 
-Table create_table();
+void create_table(const std::vector<Column> columns, const std::string& name);

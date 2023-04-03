@@ -3,11 +3,11 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <filesystem>
 
 #include "table/types.h"
 
-using columns_count_t = uint32_t;
-using rows_count_t = uint64_t;
+namespace fs = std::filesystem;
 
 namespace table_storage 
 {
@@ -41,6 +41,6 @@ namespace table_storage
 
 	const int DESC_SIZE{1};
 
-	const std::string TABLES_DIR {"tables"};
-	const std::string TEMP_DIR {"tmp"};
+	const fs::path TABLES_DIR { fs::path("tables") };
+	const fs::path TEMP_DIR { fs::path("tmp") };
 }

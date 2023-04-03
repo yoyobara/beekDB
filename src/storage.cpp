@@ -21,14 +21,15 @@ void RandomAccessFile::read_at(size_t position, void* data, size_t size)
 	read(static_cast<char*>(data), size);
 }
 
-RandomAccessFile::RandomAccessFile(const std::string_view filename, bool create)
+RandomAccessFile::RandomAccessFile(const fs::path& filename, bool create)
 {
+	std::cout << static_cast<std::string>(filename) << std::endl;
 	if (create)
 		// just create the file
-		std::ofstream f(filename.data());
+		std::ofstream f(filename);
 	
 	exceptions(std::fstream::failbit); // set that an exception shall be thrown on io error
-	open(filename.data(), ios::out | ios::in | ios::binary);
+	open(filename, ios::out | ios::in | ios::binary);
 }
 
 bool RandomAccessFile::verify_content(size_t position, const std::string& s)

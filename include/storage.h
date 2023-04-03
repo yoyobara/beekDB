@@ -15,10 +15,10 @@ class RandomAccessFile : public std::fstream
 		/*
 		 * constructs a new RandomAccessFile.
 		 *
-		 * @param filename - the name of the file.
+		 * @param filename - the path of the file.
 		 * @param create - create a new file or not.
 		 */
-		RandomAccessFile(const std::string_view filename, bool create);
+		RandomAccessFile(const fs::path& filename, bool create);
 
 		/**
 		 * read a file at a specific position.
