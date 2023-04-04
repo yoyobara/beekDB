@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <hsql/SQLParser.h>
 #include <filesystem>
+#include <hsql/sql/CreateStatement.h>
+#include <hsql/sql/SQLStatement.h>
 #include <iostream>
 #include <spdlog/spdlog.h>
 #include <sstream>
@@ -56,6 +58,17 @@ void ClientThread::handle_select_statement(const SelectStatement* statement)
 	comms::send_message(m_client, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_SUCCESS + res_table.get_file_data()));
 }
 
+void ClientThread::handle_create_statement(const CreateStatement* statement)
+{
+	// table creation
+	std::vector<Column> columns(statement->columns->size());
+
+	std::transform(statement->columns->begin(), statement->columns->end(), columns.begin(), [](ColumnDefinition* df)
+	{
+		// TODO create column from definition.
+	});
+}
+
 /* handle a query from the client */
 void ClientThread::handle_query(const std::string& query)
 {
@@ -77,6 +90,10 @@ void ClientThread::handle_query(const std::string& query)
 		switch (statement->type()) {
 			case hsql::kStmtSelect:
 				handle_select_statement(static_cast<const SelectStatement*>(statement));
+				break;
+			
+			case hsql::kStmtCreate:
+
 				break;
 			default:
 				spdlog::error("feature not implemented yet..");

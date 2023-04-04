@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <hsql/sql/CreateStatement.h>
 #include <thread>
 #include <vector>
 #include "communication_protocol.h"
@@ -21,6 +22,7 @@ class ClientThread
 		void handle_query(const std::string& query);
 
 		void handle_select_statement(const hsql::SelectStatement* statement);
+		void handle_create_statement(const hsql::CreateStatement* statement);
 
 		/* thread execution entry point */
 		void run();
