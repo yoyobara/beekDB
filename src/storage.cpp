@@ -23,7 +23,6 @@ void RandomAccessFile::read_at(size_t position, void* data, size_t size)
 
 RandomAccessFile::RandomAccessFile(const fs::path& filename, bool create)
 {
-	std::cout << static_cast<std::string>(filename) << std::endl;
 	if (create)
 		// just create the file
 		std::ofstream f(filename);

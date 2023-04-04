@@ -23,7 +23,7 @@ using namespace comms_constants;
 
 void ClientThread::handle_select_statement(const SelectStatement* statement)
 { 
-	const Table& source_table = TablesLoader::get_instance().get_table(statement->fromTable->getName());
+	const Table& source_table = TablesLoader::get_instance().get_table(table_storage::TABLES_DIR / statement->fromTable->getName());
 
 	// queried columns
 	std::vector<Column> result_columns;
@@ -37,7 +37,8 @@ void ClientThread::handle_select_statement(const SelectStatement* statement)
 	}
 
 	// now we have required columns listed. create new result temporary table.
-	std::string temp_table_path {(std::stringstream() << (table_storage::TEMP_DIR / "tmp") << std::this_thread::get_id()).str()};
+	fs::create_directory(table_storage::TEMP_DIR);
+	std::string temp_table_path {table_storage::TEMP_DIR / ("tmp" + get_thread_id())};
 
 	create_table(result_columns, temp_table_path);
 

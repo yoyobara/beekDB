@@ -88,6 +88,12 @@ Table::Table(const std::string& name) :
 	init_row_size();
 }
 
+void Table::set_rows_count(uint64_t rows_count)
+{
+	m_rows_count = rows_count;
+	m_table_file.write_at(ROW_COUNT_OFFSET, &m_rows_count, sizeof m_rows_count);
+}
+
 void Table::init_row_size()
 {
 	m_row_size = std::accumulate(m_columns.begin(), m_columns.end(), 0, [](int current, const Column& next){ return current + next.get_size();});
@@ -164,10 +170,10 @@ std::unique_ptr<TableValue> Table::get_cell(long row_index, const Column& column
 
 void Table::set_cell(long row_index, const Column& column, TableValue* v)
 {
-	spdlog::info("setting cell (row: {}, column: {})", row_index, column.get_name());
+	spdlog::info("setting cell (row: {}, column: {}) in table {}", row_index, column.get_name(), m_name);
 	
 	// if in higher row index than currently has, needs to resize
-	if (m_rows_count <= row_index) m_rows_count = row_index + 1;
+	if (m_rows_count <= row_index) set_rows_count(row_index + 1);
 
 	// cell offset 
 	uint64_t offset { calculate_offset(row_index, column) };

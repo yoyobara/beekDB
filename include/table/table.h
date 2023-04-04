@@ -77,6 +77,7 @@ class Table
 
 		/* get rows count */
 		inline uint64_t get_rows_count() const{ return m_rows_count; }
+		void set_rows_count(uint64_t rows_count);
 
 		/* set cell value */
 		void set_cell(long row_index, const Column& column, TableValue *v);
