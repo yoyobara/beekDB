@@ -28,7 +28,7 @@ class Column
 		 * @param name - the column name
 		 * @param type - the column type
 		 */
-		Column(const std::string& name, ColumnType type);
+		Column(const std::string& name, ColumnType type) : m_name(name), m_type(type) {};
 
 		/* simple getters */
 		inline const std::string& get_name() const { return m_name; }
@@ -41,8 +41,8 @@ class Column
 		inline bool operator==(const Column& other) const { return other.m_name == m_name; };
 
 	private:
-		const std::string m_name;
-		const ColumnType m_type;
+		std::string m_name;
+		ColumnType m_type;
 };
 
 std::ostream& operator<<(std::ostream& out, const Column& c);

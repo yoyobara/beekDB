@@ -68,21 +68,22 @@ void ClientThread::handle_create_statement(const hsql::CreateStatement* statemen
 	};
 
 	// table creation
-	std::vector<Column> columns(statement->columns->size());
+	std::vector<Column> columns;
 
 	// created table columns
-	std::transform(statement->columns->begin(), statement->columns->end(), columns.begin(), [](hsql::ColumnDefinition* df)
+
+	for (hsql::ColumnDefinition* df : *statement->columns)
 	{
 		if (df->type.data_type == hsql::DataType::VARCHAR && df->type.length != table_storage::VARCHAR_50_SIZE)
 		{
 			spdlog::error("varchar length must be {} currently", table_storage::VARCHAR_50_SIZE);
 		}
 
-		return Column(df->name, SQL_TYPE_TO_COLUMN_TYPE.at(df->type.data_type));
-	});
+		columns.emplace_back(df->name, SQL_TYPE_TO_COLUMN_TYPE.at(df->type.data_type));
+	}
 
 	// actually create the table
-	create_table(columns, statement->tableName);
+	create_table(columns, table_storage::TABLES_DIR / statement->tableName);
 }
 
 /* handle a query from the client */
@@ -94,7 +95,9 @@ void ClientThread::handle_query(const std::string& query)
 	SQLParserResult parsing_result;
 
 	// if query is illegal send error..
-	if (!SQLParser::parse(query, &parsing_result)) 
+	SQLParser::parse(query, &parsing_result);
+
+	if (!parsing_result.isValid()) 
 	{
 		comms::message_t msg(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_ERROR + parsing_result.errorMsg());
 
@@ -111,8 +114,9 @@ void ClientThread::handle_query(const std::string& query)
 				break;
 			
 			case hsql::kStmtCreate:
-
+				handle_create_statement(static_cast<const CreateStatement*>(statement));
 				break;
+
 			default:
 				spdlog::error("feature not implemented yet..");
 		}

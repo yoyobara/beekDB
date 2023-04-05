@@ -8,7 +8,7 @@
 
 namespace fs = std::filesystem;
 
-TablesLoader::TablesLoader() : tables({})
+TablesLoader::TablesLoader() : tables()
 {
 	reload_tables();
 }
@@ -18,7 +18,7 @@ void TablesLoader::reload_tables()
 	for (const auto& table_file : fs::directory_iterator(table_storage::TABLES_DIR))
 	{
 		// if already there dont add it
-		if (std::find_if(tables.begin(), tables.end(), [table_file](std::unique_ptr<Table> ptr){ return ptr->get_name() == table_file.path(); }) == tables.end())
+		if (std::find_if(tables.begin(), tables.end(), [table_file](const std::unique_ptr<Table>& ptr){ return ptr->get_name() == table_file.path(); }) == tables.end())
 		{
 			// add unique ptr to table
 			tables.emplace_back(std::make_unique<Table>(table_file.path()));

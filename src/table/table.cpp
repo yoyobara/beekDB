@@ -21,8 +21,6 @@ using namespace table_storage;
 
 /* column */
 
-Column::Column(const std::string& name, ColumnType type) : m_name(name), m_type(type) {}
-
 std::ostream& operator<<(std::ostream& out, const Column& c)
 {
 	out << c.get_name() << ": " << c.get_type();
@@ -102,6 +100,7 @@ void Table::init_row_size()
 void create_table(const std::vector<Column> columns, const fs::path& path)
 {
 	RandomAccessFile f(path, true);
+	spdlog::debug("{}", path.string());
 
 	// create the metadata
 
