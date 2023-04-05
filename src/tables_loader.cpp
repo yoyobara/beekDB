@@ -26,7 +26,7 @@ void TablesLoader::reload_tables()
 	}
 }
 
-const Table& TablesLoader::get_table(const std::string& name) const
+Table& TablesLoader::get_table(const std::string& name) const
 {
 	auto find_result = std::find_if(tables.begin(), tables.end(), [name](const std::unique_ptr<Table>& ptr){ return ptr->get_name() == name; });
 

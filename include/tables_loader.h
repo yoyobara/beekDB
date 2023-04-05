@@ -26,7 +26,7 @@ class TablesLoader
 	public:
 
 		// get a table by name
-		const Table& get_table(const std::string& name) const;
+		Table& get_table(const std::string& name) const;
 
 		// load tables from directory
 		void reload_tables();

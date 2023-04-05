@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <hsql/sql/ColumnType.h>
 #include <hsql/sql/CreateStatement.h>
+#include <hsql/sql/Expr.h>
 #include <hsql/sql/InsertStatement.h>
 #include <hsql/sql/SQLStatement.h>
 #include <iostream>
@@ -87,15 +88,41 @@ void ClientThread::handle_create_statement(const hsql::CreateStatement* statemen
 	create_table(columns, table_storage::TABLES_DIR / statement->tableName);
 }
 
-void handle_insert_statement(const hsql::InsertStatement* statement)
+void ClientThread::handle_insert_statement(const hsql::InsertStatement* statement)
 {
-	const Table& dest_table = TablesLoader::get_instance().get_table(statement->tableName);
+	Table& dest_table = TablesLoader::get_instance().get_table(statement->tableName);
+
+	const uint64_t row {dest_table.get_rows_count() + 1};
 
 	for (int i = 0 ; i < statement->columns->size() ; i++)
 	{
-		const Column& c = dest_table.get_column(statement->columns->at(i));
-		// TODO
+		const Column& column = dest_table.get_column(statement->columns->at(i));
+		hsql::Expr* value = statement->values->at(i);
+
+		switch (value->type) {
+			case hsql::kExprLiteralInt: {
+				IntegerValue ival(value->ival);
+				dest_table.set_cell(row, column, &ival);
+				break;
+			}
+
+			case hsql::kExprLiteralFloat: {
+				RealValue rval(value->fval);
+				dest_table.set_cell(row, column, &rval);
+				break;
+			}
+
+			case hsql::kExprLiteralString: {
+				VarChar50Value vval(value->name);
+				dest_table.set_cell(row, column, &vval);
+		    }
+
+			default:
+				spdlog::error("feature not implemented yet..");
+		}
 	}
+
+	comms::send_message(m_client, comms::message_t(CMD_QUERY_RESULT, std::to_string(QUERY_RES_SUCCESS)));
 }
 
 /* handle a query from the client */
