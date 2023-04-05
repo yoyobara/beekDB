@@ -3,4 +3,4 @@
 import beeklib
 
 with beeklib.BeekDbConnection('127.0.0.1') as conn:
-    print(conn.query("create table tab (col1 INTEGER, col2 REAL, col3 VARCHAR(50));"))
+    print(conn.query("insert into tab (col1, col2, col3) values(55, 2.2, 'hey bitch')"))

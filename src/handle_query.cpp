@@ -28,7 +28,7 @@ using namespace comms_constants;
 
 void ClientThread::handle_select_statement(const hsql::SelectStatement* statement)
 { 
-	const Table& source_table = TablesLoader::get_instance().get_table(table_storage::TABLES_DIR / statement->fromTable->getName());
+	const Table& source_table = TablesLoader::get_instance().get_table(statement->fromTable->getName());
 
 	// queried columns
 	std::vector<Column> result_columns;
@@ -115,6 +115,7 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 			case hsql::kExprLiteralString: {
 				VarChar50Value vval(value->name);
 				dest_table.set_cell(row, column, &vval);
+				break;
 		    }
 
 			default:
