@@ -8,7 +8,7 @@ enum ColumnType
 {
 	INTEGER,
 	REAL,
-	STRING
+	VARCHAR_50
 };
 
 
@@ -40,14 +40,14 @@ struct RealValue : TableValue
 };
 
 /* string type */
-struct StringValue : TableValue
+struct VarChar50Value : TableValue
 {
 	std::array<char, 50> str_val;
 
-	StringValue(const char* s) : str_val()
+	VarChar50Value(const char* s) : str_val()
 	{
 		std::copy(s, s + 50, str_val.begin());
 	}
 
-	ColumnType get_type() const override {return STRING;}
+	ColumnType get_type() const override {return VARCHAR_50;}
 };

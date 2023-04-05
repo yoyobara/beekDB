@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <hsql/SQLParser.h>
 #include <filesystem>
+#include <hsql/sql/ColumnType.h>
 #include <hsql/sql/CreateStatement.h>
 #include <hsql/sql/SQLStatement.h>
 #include <iostream>
@@ -15,15 +16,15 @@
 #include "communication_protocol.h"
 #include "table/table.h"
 #include "table/table_storage_constants.h"
+#include "table/types.h"
 #include "tables_loader.h"
 #include "client_handler.h"
 #include <sys/sendfile.h>
 #include "utils.h"
 
-using namespace hsql;
 using namespace comms_constants;
 
-void ClientThread::handle_select_statement(const SelectStatement* statement)
+void ClientThread::handle_select_statement(const hsql::SelectStatement* statement)
 { 
 	const Table& source_table = TablesLoader::get_instance().get_table(table_storage::TABLES_DIR / statement->fromTable->getName());
 
@@ -58,20 +59,33 @@ void ClientThread::handle_select_statement(const SelectStatement* statement)
 	comms::send_message(m_client, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_SUCCESS + res_table.get_file_data()));
 }
 
-void ClientThread::handle_create_statement(const CreateStatement* statement)
+void ClientThread::handle_create_statement(const hsql::CreateStatement* statement)
 {
+	static const std::map<hsql::DataType, ColumnType> SQL_TYPE_TO_COLUMN_TYPE {
+		{hsql::DataType::INT, INTEGER},
+		{hsql::DataType::VARCHAR, VARCHAR_50},
+		{hsql::DataType::REAL, REAL}
+	};
+
 	// table creation
 	std::vector<Column> columns(statement->columns->size());
 
-	std::transform(statement->columns->begin(), statement->columns->end(), columns.begin(), [](ColumnDefinition* df)
+	std::transform(statement->columns->begin(), statement->columns->end(), columns.begin(), [](hsql::ColumnDefinition* df)
 	{
-		// TODO create column from definition.
+		if (df->type.data_type == hsql::DataType::VARCHAR && df->type.length != table_storage::VARCHAR_50_SIZE)
+		{
+			spdlog::error("varchar length must be {} currently", table_storage::VARCHAR_50_SIZE);
+		}
+
+		return Column(df->name, SQL_TYPE_TO_COLUMN_TYPE.at(df->type.data_type));
 	});
 }
 
 /* handle a query from the client */
 void ClientThread::handle_query(const std::string& query)
 {
+	using namespace hsql;
+
 	spdlog::info("handling query: '{}'", query);
 	SQLParserResult parsing_result;
 

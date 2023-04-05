@@ -15,21 +15,21 @@ namespace table_storage
 	const std::map<char, ColumnType> BYTE_TO_TYPE {
 		{'i', INTEGER},
 		{'r', REAL},
-		{'s', STRING}
+		{'s', VARCHAR_50}
 	};
 
 	const std::map<ColumnType, char> TYPE_TO_BYTE {
 		{INTEGER, 'i'},
 		{REAL, 'r'},
-		{STRING, 's'}
+		{VARCHAR_50, 's'}
 	};
 
-	const int STRING_SIZE {50};
+	const int VARCHAR_50_SIZE {50}; // need to be declared seperately since appearently we need it as a compile time constant.
 
 	const std::map<ColumnType, int> TYPE_SIZE {
 		{INTEGER, 4},
 		{REAL, 8},
-		{STRING, STRING_SIZE}
+		{VARCHAR_50, VARCHAR_50_SIZE}
 	};
 
 	const std::string SIGNATURE{"TABDEF"};

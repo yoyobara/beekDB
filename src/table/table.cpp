@@ -2,8 +2,8 @@
 #include <array>
 #include <cstdint>
 #include <filesystem>
-#include <ios>
-#include <memory>
+#include <ios> 
+#include <memory> 
 #include <numeric>
 #include <spdlog/spdlog.h>
 #include <sstream>
@@ -157,11 +157,11 @@ std::unique_ptr<TableValue> Table::get_cell(long row_index, const Column& column
 
 			return std::make_unique<RealValue>(d);
 
-		case STRING:
-			std::array<char, STRING_SIZE> buff;
-			m_table_file.read_at(offset, buff.data(), TYPE_SIZE.at(STRING));
+		case VARCHAR_50:
+			std::array<char, VARCHAR_50_SIZE> buff;
+			m_table_file.read_at(offset, buff.data(), VARCHAR_50_SIZE);
 
-			return std::make_unique<StringValue>(buff.data());
+			return std::make_unique<VarChar50Value>(buff.data());
 	}
 	spdlog::error("undefined type");
 	return nullptr;
@@ -191,9 +191,9 @@ void Table::set_cell(long row_index, const Column& column, TableValue* v)
 			break;
 		}
 
-		case STRING: {
-			std::array<char, STRING_SIZE> arr;
-			m_table_file.write_at(offset, arr.data(), TYPE_SIZE.at(STRING));
+		case VARCHAR_50: {
+			std::array<char, VARCHAR_50_SIZE> arr;
+			m_table_file.write_at(offset, arr.data(), VARCHAR_50_SIZE);
 			break;
 		}
 	};
