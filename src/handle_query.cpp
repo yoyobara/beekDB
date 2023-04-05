@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <hsql/sql/ColumnType.h>
 #include <hsql/sql/CreateStatement.h>
+#include <hsql/sql/InsertStatement.h>
 #include <hsql/sql/SQLStatement.h>
 #include <iostream>
 #include <spdlog/spdlog.h>
@@ -86,6 +87,17 @@ void ClientThread::handle_create_statement(const hsql::CreateStatement* statemen
 	create_table(columns, table_storage::TABLES_DIR / statement->tableName);
 }
 
+void handle_insert_statement(const hsql::InsertStatement* statement)
+{
+	const Table& dest_table = TablesLoader::get_instance().get_table(statement->tableName);
+
+	for (int i = 0 ; i < statement->columns->size() ; i++)
+	{
+		const Column& c = dest_table.get_column(statement->columns->at(i));
+		// TODO
+	}
+}
+
 /* handle a query from the client */
 void ClientThread::handle_query(const std::string& query)
 {
@@ -115,6 +127,10 @@ void ClientThread::handle_query(const std::string& query)
 			
 			case hsql::kStmtCreate:
 				handle_create_statement(static_cast<const CreateStatement*>(statement));
+				break;
+
+			case hsql::kStmtInsert:
+				handle_insert_statement(static_cast<const InsertStatement*>(statement)); 
 				break;
 
 			default:
