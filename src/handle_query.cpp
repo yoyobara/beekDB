@@ -70,6 +70,7 @@ void ClientThread::handle_create_statement(const hsql::CreateStatement* statemen
 	// table creation
 	std::vector<Column> columns(statement->columns->size());
 
+	// created table columns
 	std::transform(statement->columns->begin(), statement->columns->end(), columns.begin(), [](hsql::ColumnDefinition* df)
 	{
 		if (df->type.data_type == hsql::DataType::VARCHAR && df->type.length != table_storage::VARCHAR_50_SIZE)
@@ -79,6 +80,9 @@ void ClientThread::handle_create_statement(const hsql::CreateStatement* statemen
 
 		return Column(df->name, SQL_TYPE_TO_COLUMN_TYPE.at(df->type.data_type));
 	});
+
+	// actually create the table
+	create_table(columns, statement->tableName);
 }
 
 /* handle a query from the client */

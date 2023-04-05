@@ -28,6 +28,9 @@ class TablesLoader
 		// get a table by name
 		const Table& get_table(const std::string& name) const;
 
+		// load tables from directory
+		void reload_tables();
+
 		// singleton essentials
 		inline static TablesLoader& get_instance()
 		{
