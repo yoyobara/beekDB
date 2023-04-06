@@ -92,7 +92,7 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 {
 	Table& dest_table = TablesLoader::get_instance().get_table(statement->tableName);
 
-	const uint64_t row {dest_table.get_rows_count() + 1};
+	const uint64_t row {dest_table.get_rows_count()};
 
 	for (int i = 0 ; i < statement->columns->size() ; i++)
 	{

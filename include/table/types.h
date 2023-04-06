@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <array>
+#include <cstring>
 #include <string>
 
 /* the three possible column types */
@@ -44,9 +45,9 @@ struct VarChar50Value : TableValue
 {
 	std::array<char, 50> str_val;
 
-	VarChar50Value(const char* s) : str_val()
+	VarChar50Value(const char* s) : str_val{}
 	{
-		std::copy(s, s + 50, str_val.begin());
+		std::strcpy(str_val.data(), s);
 	}
 
 	ColumnType get_type() const override {return VARCHAR_50;}

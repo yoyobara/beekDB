@@ -174,24 +174,26 @@ void Table::set_cell(long row_index, const Column& column, TableValue* v)
 	// if in higher row index than currently has, needs to resize
 	if (m_rows_count <= row_index) set_rows_count(row_index + 1);
 
-	// cell offset 
 	uint64_t offset { calculate_offset(row_index, column) };
 
 	switch (column.get_type()) {
 		case INTEGER: {
 			int i = static_cast<IntegerValue*>(v)->int_val;
+			spdlog::debug("{}", i);
 			m_table_file.write_at(offset, &i, TYPE_SIZE.at(INTEGER));
 			break;
 		}
 
 		case REAL: {
 			double d = static_cast<RealValue*>(v)->real_val;
+			spdlog::debug("{}", d);
 			m_table_file.write_at(offset, &d, TYPE_SIZE.at(REAL));
 			break;
 		}
 
 		case VARCHAR_50: {
-			std::array<char, VARCHAR_50_SIZE> arr;
+			std::array<char, VARCHAR_50_SIZE> arr{ static_cast<VarChar50Value*>(v)->str_val };
+			for (int t = 0 ; t < 50 ; t++) std::cout << (int)static_cast<VarChar50Value*>(v)->str_val[t] << std::endl;
 			m_table_file.write_at(offset, arr.data(), VARCHAR_50_SIZE);
 			break;
 		}
