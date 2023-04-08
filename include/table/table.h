@@ -82,6 +82,9 @@ class Table
 		/* set cell value */
 		void set_cell(long row_index, const Column& column, TableValue *v);
 
+		/* set row to zeros */
+		void zero_row(long row_index);
+
 		/* get column by name */
 		const Column& get_column(const std::string& name) const;
 

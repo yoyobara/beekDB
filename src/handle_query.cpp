@@ -94,25 +94,42 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 
 	const uint64_t row {dest_table.get_rows_count()};
 
+	// zero fill first
+	dest_table.zero_row(row);
+
+	// fill columns
 	for (int i = 0 ; i < statement->columns->size() ; i++)
 	{
 		const Column& column = dest_table.get_column(statement->columns->at(i));
 		hsql::Expr* value = statement->values->at(i);
 
-		switch (value->type) {
-			case hsql::kExprLiteralInt: {
+		spdlog::debug("found column: {} of type {}", column.get_name(), column.get_type());
+
+		switch (column.get_type()) {
+			case INTEGER: {
+				spdlog::debug("int value: {}", value->ival);
 				IntegerValue ival(value->ival);
 				dest_table.set_cell(row, column, &ival);
 				break;
 			}
 
-			case hsql::kExprLiteralFloat: {
+			case REAL: {
+				
+				// handle case of integer literal
+				if (value->type == hsql::kExprLiteralInt)
+				{
+					value->type = hsql::kExprLiteralFloat;
+					value->fval = static_cast<double>(value->ival);
+				}
+
+				spdlog::debug("real value: {}", value->fval);
 				RealValue rval(value->fval);
 				dest_table.set_cell(row, column, &rval);
 				break;
 			}
 
-			case hsql::kExprLiteralString: {
+			case VARCHAR_50: {
+				spdlog::debug("varchar50 value: {}", value->name);
 				VarChar50Value vval(value->name);
 				dest_table.set_cell(row, column, &vval);
 				break;

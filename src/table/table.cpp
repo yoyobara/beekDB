@@ -193,11 +193,17 @@ void Table::set_cell(long row_index, const Column& column, TableValue* v)
 
 		case VARCHAR_50: {
 			std::array<char, VARCHAR_50_SIZE> arr{ static_cast<VarChar50Value*>(v)->str_val };
-			for (int t = 0 ; t < 50 ; t++) std::cout << (int)static_cast<VarChar50Value*>(v)->str_val[t] << std::endl;
 			m_table_file.write_at(offset, arr.data(), VARCHAR_50_SIZE);
 			break;
 		}
 	};
+}
+
+void Table::zero_row(long row_index)
+{
+	char* zero_buff = new char[m_row_size]{};
+	m_table_file.write_at(calculate_offset(row_index, m_columns.at(0)), zero_buff, m_row_size);
+	delete[] zero_buff;
 }
 			
 
