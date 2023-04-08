@@ -48,8 +48,8 @@ namespace comms_constants
 	const cmd_t CMD_TERMINATION {'T'};
 
 	// QUERY RESULTS
-	const cmd_t QUERY_RES_SUCCESS {'s'};
-	const cmd_t QUERY_RES_ERROR {'e'};
+	const std::string QUERY_RES_SUCCESS {"s"};
+	const std::string QUERY_RES_ERROR {"e"};
 
 	const comms::message_t JOIN_SUCCESS_MESSAGE(CMD_JOIN_SUCCESS, "");
 

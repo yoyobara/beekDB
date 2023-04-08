@@ -35,8 +35,8 @@ class BeekDbConnection:
             b's': 50
     }
 
-    QUERY_ERROR = 'e'
-    QUERY_SUCCESS = 's'
+    QUERY_ERROR = ord('e')
+    QUERY_SUCCESS = ord('s')
 
     SIGNATURE = b'TABDEF'
 

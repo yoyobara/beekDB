@@ -140,7 +140,7 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 		}
 	}
 
-	comms::send_message(m_client, comms::message_t(CMD_QUERY_RESULT, std::to_string(QUERY_RES_SUCCESS)));
+	comms::send_message(m_client, comms::message_t(CMD_QUERY_RESULT, QUERY_RES_SUCCESS));
 }
 
 /* handle a query from the client */
