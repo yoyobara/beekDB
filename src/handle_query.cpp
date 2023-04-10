@@ -134,6 +134,7 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 			case VARCHAR_50: {
 				spdlog::debug("varchar50 value: {}", value->name);
 				VarChar50Value vval(value->name);
+				spdlog::debug("vchval50 value: {}", vval.str_val.data());
 				dest_table.set_cell(row, column, &vval);
 				break;
 		    }
