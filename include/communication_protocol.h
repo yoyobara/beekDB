@@ -52,5 +52,6 @@ namespace comms_constants
 	const std::string QUERY_RES_ERROR {"e"};
 
 	const comms::message_t JOIN_SUCCESS_MESSAGE(CMD_JOIN_SUCCESS, "");
+	const comms::message_t QUERY_RESULT_SUCCESS_NO_CONTENT(CMD_QUERY_RESULT, QUERY_RES_SUCCESS);
 
 }

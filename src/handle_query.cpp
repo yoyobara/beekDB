@@ -86,6 +86,9 @@ void ClientThread::handle_create_statement(const hsql::CreateStatement* statemen
 
 	// actually create the table
 	create_table(columns, table_storage::TABLES_DIR / statement->tableName);
+
+	// response
+	comms::send_message(m_client, QUERY_RESULT_SUCCESS_NO_CONTENT);
 }
 
 void ClientThread::handle_insert_statement(const hsql::InsertStatement* statement)
@@ -140,7 +143,7 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 		}
 	}
 
-	comms::send_message(m_client, comms::message_t(CMD_QUERY_RESULT, QUERY_RES_SUCCESS));
+	comms::send_message(m_client, QUERY_RESULT_SUCCESS_NO_CONTENT);
 }
 
 /* handle a query from the client */

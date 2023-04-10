@@ -112,6 +112,8 @@ void create_table(const std::vector<Column> columns, const fs::path& path)
 	long rows_count = 0;
 	f.write_at(ROW_COUNT_OFFSET, &rows_count, sizeof(long));
 
+	spdlog::debug("till here fine");
+
 	// now at columns offset
 	for (const Column& col : columns)
 	{
@@ -119,6 +121,7 @@ void create_table(const std::vector<Column> columns, const fs::path& path)
 		f.write(col.get_name().data(), col.get_name().size()); // name
 		f.write("\0", 1); // null character
 	}
+	spdlog::debug("NO DUDE");
 }
 
 /* calculate the offset of a cell in the file */
