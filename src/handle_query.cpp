@@ -35,7 +35,13 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	for (const auto& col_ptr : *statement->selectList)
 	{
 		try {
-			result_columns.push_back(source_table.get_column(col_ptr->getName()));
+
+			// check star case 
+			if (col_ptr->isType(hsql::kExprStar))
+				result_columns.insert(result_columns.end(), source_table.cols_begin(), source_table.cols_end());
+			else
+				result_columns.push_back(source_table.get_column(col_ptr->getName()));
+
 		} catch (no_such_column &e) { 
 			std::cerr << e.what() << std::endl;
 		}

@@ -88,6 +88,18 @@ class Table
 		/* get column by name */
 		const Column& get_column(const std::string& name) const;
 
+		/* begin of columns vector */
+		inline std::vector<Column>::const_iterator cols_begin() const
+		{
+			return m_columns.begin();
+		}
+
+		/* end of columns vector */
+		inline std::vector<Column>::const_iterator cols_end() const
+		{
+			return m_columns.end();
+		}
+
 		/*
 		 * textual representation
 		 */
