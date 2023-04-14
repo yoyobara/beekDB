@@ -1,0 +1,3 @@
+handle no such table exception
+handle star wildcard for select statement
+handle no columns list for select statement
