@@ -8,6 +8,7 @@
 #include <hsql/sql/InsertStatement.h>
 #include <hsql/sql/SQLStatement.h>
 #include <iostream>
+#include <iterator>
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <string>
@@ -28,7 +29,13 @@ using namespace comms_constants;
 
 void ClientThread::handle_select_statement(const hsql::SelectStatement* statement)
 { 
-	const Table& source_table = TablesLoader::get_instance().get_table(statement->fromTable->getName());
+	const Table* source_table;
+	try {
+		source_table = &TablesLoader::get_instance().get_table(statement->fromTable->getName());
+	} catch (no_such_table& e)
+	{
+	comms::send_message(m_client, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_ERROR + e.what()));
+	}
 
 	// queried columns
 	std::vector<Column> result_columns;
@@ -38,9 +45,9 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 
 			// check star case 
 			if (col_ptr->isType(hsql::kExprStar))
-				result_columns.insert(result_columns.end(), source_table.cols_begin(), source_table.cols_end());
+				result_columns.insert(result_columns.end(), source_table->cols_begin(), source_table->cols_end());
 			else
-				result_columns.push_back(source_table.get_column(col_ptr->getName()));
+				result_columns.push_back(source_table->get_column(col_ptr->getName()));
 
 		} catch (no_such_column &e) { 
 			std::cerr << e.what() << std::endl;
@@ -55,11 +62,11 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 
 	Table res_table(temp_table_path);
 
-	for (long i = 0 ; i < source_table.get_rows_count() ; i++)
+	for (long i = 0 ; i < source_table->get_rows_count() ; i++)
 	{
 		for (const Column& c : result_columns)
 		{
-			res_table.set_cell(i, c, source_table.get_cell(i, c).get());
+			res_table.set_cell(i, c, source_table->get_cell(i, c).get());
 		}
 	}
 
