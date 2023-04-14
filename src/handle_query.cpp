@@ -34,7 +34,7 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 		source_table = &TablesLoader::get_instance().get_table(statement->fromTable->getName());
 	} catch (no_such_table& e)
 	{
-	comms::send_message(m_client, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_ERROR + e.what()));
+	comms::send_message(m_client, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_ERROR + e.msg));
 	return;
 	}
 

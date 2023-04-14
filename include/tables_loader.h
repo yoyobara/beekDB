@@ -1,14 +1,25 @@
 #pragma once
 
+#include <exception>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <iostream>
 #include "table/table.h"
 
-struct no_such_table : std::runtime_error
+
+struct no_such_table : std::exception
 {
-	no_such_table(const std::string& msg) : std::runtime_error(msg){}
+	const std::string msg;
+
+	no_such_table(std::string&& msg) : msg(msg) {}
+
+	const char * what() const noexcept override 
+	{
+		std::cout << msg << std::endl;
+		return msg.c_str();
+	}
 };
 
 /*
