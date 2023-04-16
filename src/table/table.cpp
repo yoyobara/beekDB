@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <exception>
 #include <filesystem>
 #include <ios> 
 #include <memory> 
@@ -57,3 +58,60 @@ ValueType Record::get(Column& column)
 }
 
 /* table */
+
+Table::Table(const fs::path& path) : 
+	name(path),
+	file(path, false)
+{
+	// verify signature
+	if (!file.verify_content(SIGNATURE_OFFSET, SIGNATURE))
+		spdlog::critical("table file is corrupted: {}", name);
+
+	// read columns count
+	int columns_count;
+	file.read_at(COLUMN_COUNT_OFFSET, &columns_count, sizeof columns_count);
+
+	// read records count
+	file.read_at(RECORDS_COUNT_OFFSET, &records_count, sizeof records_count);
+	
+	// read columns (file pos now at first col)
+	for (int i = 0 ; i < columns_count ; i++)
+	{
+		char descriptor;
+		file.read(&descriptor, 1);
+
+		char buff;
+		std::string column_name;
+		do
+		{
+			file.read(&buff, 1);
+			column_name += buff;
+		} while (buff != '\0');
+		column_name.pop_back(); // '\0'
+		
+		columns.push_back(Column(column_name, BYTE_TO_TYPE.at(descriptor)));
+	}
+	// now pos at start of table data
+}
+
+void create_table(const fs::path& path, std::vector<Column> columns)
+{
+	// create a random access file
+	RandomAccessFile f(path, true);
+
+	std::stringstream strm("", std::ios::app | std::ios::out);
+
+	// write metadata
+	strm << SIGNATURE;
+
+	// columns count
+	int columns_count = columns.size();
+	strm.write(reinterpret_cast<char*>(&columns_count), sizeof columns_count);
+
+	// records count
+	long records_count = 0;
+	strm.write(reinterpret_cast<char*>(&records_count), sizeof records_count);
+
+	for (Column& c : columns)
+		strm << TYPE_TO_BYTE.at(c.get_type()) << c.get_name() << '\0';
+}

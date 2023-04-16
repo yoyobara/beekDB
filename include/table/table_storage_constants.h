@@ -37,7 +37,7 @@ namespace table_storage
 
 	const int COLUMN_COUNT_OFFSET{6};
 
-	const int ROW_COUNT_OFFSET{10};
+	const int RECORDS_COUNT_OFFSET{10};
 
 	const int DESC_SIZE{1};
 

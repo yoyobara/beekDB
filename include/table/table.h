@@ -74,9 +74,17 @@ struct Record
 struct Table
 {
 	friend class Record;
+	
+	Table(const fs::path& path);
 
 	private:
 		RandomAccessFile file;
 		std::vector<Column> columns;
+
+		std::string name;
+
 		int record_size;
+		long records_count;
 };
+
+void create_table(const fs::path& path);
