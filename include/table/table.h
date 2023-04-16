@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <ios>
 #include <memory>
@@ -73,18 +74,24 @@ struct Record
 
 struct Table
 {
-	friend class Record;
-	
 	Table(const fs::path& path);
 
+	const std::string& get_name() const { return m_name; }
+	const int get_records_count() const { return m_records_count; }
+
+	const std::vector<Column>& get_columns() const { return m_columns; }
+	const Column& get_column(const std::string& name) const;
+
+	friend class Record;
+
 	private:
-		RandomAccessFile file;
-		std::vector<Column> columns;
+		RandomAccessFile m_file;
+		std::vector<Column> m_columns;
 
-		std::string name;
+		std::string m_name;
 
-		int record_size;
-		long records_count;
+		int m_record_size;
+		long m_records_count;
 };
 
-void create_table(const fs::path& path);
+void create_table(const fs::path& path, std::vector<Column> columns);

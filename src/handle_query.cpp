@@ -38,7 +38,7 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 
 			// check star case 
 			if (col_ptr->isType(hsql::kExprStar))
-				result_columns.insert(result_columns.end(), source_table.cols_begin(), source_table.cols_end());
+				result_columns.insert(result_columns.end(), source_table.get_columns().begin(), source_table.get_columns().end());
 			else
 				result_columns.push_back(source_table.get_column(col_ptr->getName()));
 
@@ -51,11 +51,11 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	fs::create_directory(table_storage::TEMP_DIR);
 	std::string temp_table_path {table_storage::TEMP_DIR / ("tmp" + get_thread_id())};
 
-	create_table(result_columns, temp_table_path);
+	create_table(temp_table_path, result_columns);
 
 	Table res_table(temp_table_path);
 
-	for (long i = 0 ; i < source_table.get_rows_count() ; i++)
+	for (long i = 0 ; i < source_table.get_records_count() ; i++)
 	{
 		for (const Column& c : result_columns)
 		{

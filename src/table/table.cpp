@@ -32,9 +32,9 @@ std::ostream& operator<<(std::ostream& out, const Column& c)
 
 Record::Record(Table& of_table, size_t file_pos) : 
 	of_table(of_table), 
-	raw_data(new char[of_table.record_size])
+	raw_data(new char[of_table.m_record_size])
 {
-	of_table.file.read_at(file_pos, raw_data.get(), of_table.record_size);
+	of_table.m_file.read_at(file_pos, raw_data.get(), of_table.m_record_size);
 }
 
 template<typename ValueType>
@@ -47,7 +47,7 @@ template<typename ValueType>
 ValueType Record::get(Column& column)
 {
 	int offset{0};
-	for (Column& c : of_table.columns)
+	for (Column& c : of_table.m_columns)
 	{
 		if (c == column)
 			break;
@@ -60,36 +60,36 @@ ValueType Record::get(Column& column)
 /* table */
 
 Table::Table(const fs::path& path) : 
-	name(path),
-	file(path, false)
+	m_name(path),
+	m_file(path, false)
 {
 	// verify signature
-	if (!file.verify_content(SIGNATURE_OFFSET, SIGNATURE))
-		spdlog::critical("table file is corrupted: {}", name);
+	if (!m_file.verify_content(SIGNATURE_OFFSET, SIGNATURE))
+		spdlog::critical("table file is corrupted: {}", m_name);
 
 	// read columns count
 	int columns_count;
-	file.read_at(COLUMN_COUNT_OFFSET, &columns_count, sizeof columns_count);
+	m_file.read_at(COLUMN_COUNT_OFFSET, &columns_count, sizeof columns_count);
 
 	// read records count
-	file.read_at(RECORDS_COUNT_OFFSET, &records_count, sizeof records_count);
+	m_file.read_at(RECORDS_COUNT_OFFSET, &m_records_count, sizeof m_records_count);
 	
 	// read columns (file pos now at first col)
 	for (int i = 0 ; i < columns_count ; i++)
 	{
 		char descriptor;
-		file.read(&descriptor, 1);
+		m_file.read(&descriptor, 1);
 
 		char buff;
 		std::string column_name;
 		do
 		{
-			file.read(&buff, 1);
+			m_file.read(&buff, 1);
 			column_name += buff;
 		} while (buff != '\0');
 		column_name.pop_back(); // '\0'
 		
-		columns.push_back(Column(column_name, BYTE_TO_TYPE.at(descriptor)));
+		m_columns.push_back(Column(column_name, BYTE_TO_TYPE.at(descriptor)));
 	}
 	// now pos at start of table data
 }
@@ -114,4 +114,19 @@ void create_table(const fs::path& path, std::vector<Column> columns)
 
 	for (Column& c : columns)
 		strm << TYPE_TO_BYTE.at(c.get_type()) << c.get_name() << '\0';
+	
+	f << strm.rdbuf();
+}
+
+const Column& Table::get_column(const std::string& name) const
+{
+	auto findres = std::find_if(m_columns.begin(), m_columns.end(), [name](const Column& c)
+	{
+		return c.get_name() == name;
+	});
+
+	if (findres == m_columns.end())
+		throw no_such_column("no such column as " + name);
+
+	return *findres;
 }
