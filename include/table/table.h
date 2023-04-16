@@ -52,85 +52,31 @@ struct no_such_column : std::runtime_error
 	no_such_column(const std::string& msg) : std::runtime_error(msg){}
 };
 
-/*
- * a class representing a table.
- */
-class Table
+struct Table;
+
+/* represents a record in the table */
+struct Record
 {
-	public:
-
-		/*
-		 * opens an existing table file.
-		 * name - the name of the table.
-		 */
-		Table(const std::string& name);
-
-		/*
-		 * get unique ptr to heap allocated cell value
-		 */
-		std::unique_ptr<TableValue> get_cell(long row_index, const Column& column) const;
-
-		/* get file data */
-		std::string get_file_data();
-
-		inline const std::string& get_name() const { return m_name; }
-
-		/* get rows count */
-		inline uint64_t get_rows_count() const{ return m_rows_count; }
-		void set_rows_count(uint64_t rows_count);
-
-		/* set cell value */
-		void set_cell(long row_index, const Column& column, TableValue *v);
-
-		/* set row to zeros */
-		void zero_row(long row_index);
-
-		/* get column by name */
-		const Column& get_column(const std::string& name) const;
-
-		/* begin of columns vector */
-		inline std::vector<Column>::const_iterator cols_begin() const
-		{
-			return m_columns.begin();
-		}
-
-		/* end of columns vector */
-		inline std::vector<Column>::const_iterator cols_end() const
-		{
-			return m_columns.end();
-		}
-
-		/*
-		 * textual representation
-		 */
-		friend std::ostream& operator<<(std::ostream& out, const Table& table);
-
 	private:
+		Table& of_table;
+		std::unique_ptr<char> raw_data;
 
-		/* open */
-		void init_metadata();
-		void init_columns(int columns_count);
+		template<typename ValueType>
+		ValueType get(int offset);
 
-		// initializes the size of a whole row
-		void init_row_size();
+	public:
+		Record(Table& of_table, size_t file_pos);
 
-		uint64_t calculate_offset(long row_index, const Column& column) const;
-
-		mutable RandomAccessFile m_table_file;
-
-		// table's name
-		const std::string m_name;
-
-		// columns of the table
-		std::vector<Column> m_columns;
-
-		long m_rows_count;
-
-		/* total size in bytes of a row */
-		int m_row_size;
-
-		/* start position of the table after the metadata */
-		uint64_t m_table_start;
+		template<typename ValueType>
+		ValueType get(Column& column);
 };
 
-void create_table(const std::vector<Column> columns, const fs::path& name);
+struct Table
+{
+	friend class Record;
+
+	private:
+		RandomAccessFile file;
+		std::vector<Column> columns;
+		int record_size;
+};
