@@ -28,6 +28,7 @@ using namespace comms_constants;
 
 void ClientThread::handle_select_statement(const hsql::SelectStatement* statement)
 { 
+	/*
 	const Table& source_table = TablesLoader::get_instance().get_table(statement->fromTable->getName());
 
 	// queried columns
@@ -65,10 +66,12 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 
 	// send message with only the result char as content, the rest will be sent with send_file
 	comms::send_message(m_client, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_SUCCESS + res_table.get_file_data()));
+	*/
 }
 
 void ClientThread::handle_create_statement(const hsql::CreateStatement* statement)
 {
+	/*
 	static const std::map<hsql::DataType, ColumnType> SQL_TYPE_TO_COLUMN_TYPE {
 		{hsql::DataType::INT, INTEGER},
 		{hsql::DataType::VARCHAR, VARCHAR_50},
@@ -95,10 +98,12 @@ void ClientThread::handle_create_statement(const hsql::CreateStatement* statemen
 
 	// response
 	comms::send_message(m_client, QUERY_RESULT_SUCCESS_NO_CONTENT);
+	*/
 }
 
 void ClientThread::handle_insert_statement(const hsql::InsertStatement* statement)
 {
+	/*
 	Table& dest_table = TablesLoader::get_instance().get_table(statement->tableName);
 
 	const uint64_t row {dest_table.get_rows_count()};
@@ -151,6 +156,7 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 	}
 
 	comms::send_message(m_client, QUERY_RESULT_SUCCESS_NO_CONTENT);
+	*/
 }
 
 /* handle a query from the client */
@@ -193,3 +199,4 @@ void ClientThread::handle_query(const std::string& query)
 		}
 	}
 }
+

@@ -30,24 +30,24 @@ std::ostream& operator<<(std::ostream& out, const Column& c)
 
 /* record */
 
-Record::Record(Table& of_table, size_t file_pos) : 
+Record::Record(const Table* of_table, size_t file_pos) : 
 	of_table(of_table), 
-	raw_data(new char[of_table.m_record_size])
+	raw_data(new char[of_table->m_record_size])
 {
-	of_table.m_file.read_at(file_pos, raw_data.get(), of_table.m_record_size);
+	of_table->m_file.read_at(file_pos, raw_data.get(), of_table->m_record_size);
 }
 
 template<typename ValueType>
-ValueType Record::get(int offset)
+ValueType Record::get(int offset) const
 {
 	return ValueType(raw_data.get()[offset]);
 }
 
 template<typename ValueType>
-ValueType Record::get(Column& column)
+ValueType Record::get(Column& column) const
 {
 	int offset{0};
-	for (Column& c : of_table.m_columns)
+	for (const Column& c : of_table->m_columns)
 	{
 		if (c == column)
 			break;
@@ -56,7 +56,6 @@ ValueType Record::get(Column& column)
 
 	return get<ValueType>(offset);
 }
-
 /* table */
 
 Table::Table(const fs::path& path) : 
@@ -130,3 +129,17 @@ const Column& Table::get_column(const std::string& name) const
 
 	return *findres;
 }
+
+
+RecordIterator Table::begin() const
+{
+	return RecordIterator(this);
+}
+RecordIterator Table::end() const
+{
+	RecordIterator r(this);
+	r.remaining_records = 0;
+
+	return r;
+}
+

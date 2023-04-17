@@ -59,18 +59,23 @@ struct Table;
 struct Record
 {
 	private:
-		Table& of_table;
+		const Table *of_table;
 		std::unique_ptr<char> raw_data;
+		long data_pos;
 
 		template<typename ValueType>
-		ValueType get(int offset);
+		ValueType get(int offset) const;
+
+		friend class RecordIterator;
 
 	public:
-		Record(Table& of_table, size_t file_pos);
+		Record(const Table* of_table, size_t file_pos);
 
 		template<typename ValueType>
-		ValueType get(Column& column);
+		ValueType get(Column& column) const;
 };
+
+struct RecordIterator;
 
 struct Table
 {
@@ -83,15 +88,56 @@ struct Table
 	const Column& get_column(const std::string& name) const;
 
 	friend class Record;
+	friend class RecordIterator;
+
+	RecordIterator begin() const;
+	RecordIterator end() const;
 
 	private:
-		RandomAccessFile m_file;
+		mutable RandomAccessFile m_file;
 		std::vector<Column> m_columns;
 
 		std::string m_name;
 
 		int m_record_size;
 		long m_records_count;
+		long m_data_offset;
+};
+
+/* class to iterate over records of a table */
+struct RecordIterator
+{
+	RecordIterator(const Table* of_table) : 
+		of_table(of_table),
+		remaining_records(of_table->m_records_count),
+		current_record(of_table, of_table->m_data_offset)
+	{}
+
+	inline const Record& operator*() { return current_record; }
+
+	inline RecordIterator& operator++()
+	{
+		remaining_records--;
+		current_record = Record(of_table, current_record.data_pos + of_table->m_record_size);
+		return *this;
+	}
+
+	inline bool operator==(RecordIterator& other)
+	{
+		return of_table == other.of_table && remaining_records == other.remaining_records;
+	}
+
+	inline bool operator!=(RecordIterator& other)
+	{
+		return !(*this == other);
+	}
+
+	friend class Table;
+
+	private:
+		const Table *of_table;
+		Record current_record;
+		long remaining_records;
 };
 
 void create_table(const fs::path& path, std::vector<Column> columns);
