@@ -49,13 +49,10 @@ int main()
 
 	spdlog::info("listening to connections..");
 
-	std::cout << "start\n";
 	for (const Record& r : TablesLoader::get_instance().get_table("tabs"))
 	{
-		Column c("n", INTEGER);
-		std::cout << r.get<IntegerValue>(c).int_val << std::endl;
+		std::cout << r.get<RealValue>("age").real_val << std::endl;
 	}
-	std::cout << "end\n";
 
 	// repeatedly accept clients, handle them in seperate threads.
 	while (true)

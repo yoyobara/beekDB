@@ -72,7 +72,7 @@ struct Record
 		Record(const Table* of_table, size_t file_pos);
 
 		template<typename ValueType>
-		ValueType get(Column& column) const;
+		ValueType get(const std::string& column_name) const;
 };
 
 struct RecordIterator;

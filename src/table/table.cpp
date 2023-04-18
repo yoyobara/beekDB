@@ -6,6 +6,7 @@
 #include <ios> 
 #include <memory> 
 #include <numeric>
+#include <spdlog/fmt/bin_to_hex.h>
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <iostream>
@@ -30,11 +31,12 @@ std::ostream& operator<<(std::ostream& out, const Column& c)
 
 /* record */
 
-Record::Record(const Table* of_table, size_t file_pos) : 
+Record::Record(const Table* of_table, size_t data_pos) : 
 	of_table(of_table), 
 	raw_data(new char[of_table->m_record_size])
 {
-	of_table->m_file.read_at(file_pos, raw_data.get(), of_table->m_record_size);
+	of_table->m_file.read_at(data_pos, raw_data.get(), of_table->m_record_size);
+	spdlog::debug("record vals: {}", spdlog::to_hex(raw_data.get(), raw_data.get() + 58));
 }
 
 template<typename ValueType>
@@ -44,22 +46,24 @@ ValueType Record::get(int offset) const
 }
 
 template<typename ValueType>
-ValueType Record::get(Column& column) const
+ValueType Record::get(const std::string& column_name) const
 {
 	int offset{0};
 	for (const Column& c : of_table->m_columns)
 	{
-		if (c == column)
+		if (c.get_name() == column_name)
 			break;
 		offset += c.get_size();
 	}
 
+	spdlog::debug("offset: {}", offset);
+
 	return get<ValueType>(offset);
 }
 
-template IntegerValue Record::get<>(Column& column) const;
-template RealValue Record::get<>(Column& column) const;
-template VarChar50Value Record::get<>(Column& column) const;
+template IntegerValue Record::get<>(const std::string& column_name) const;
+template RealValue Record::get<>(const std::string& column_name) const;
+template VarChar50Value Record::get<>(const std::string& column_name) const;
 
 /* table */
 
@@ -96,6 +100,7 @@ Table::Table(const fs::path& path) :
 		m_columns.push_back(Column(column_name, BYTE_TO_TYPE.at(descriptor)));
 	}
 	// now pos at start of table data
+	m_data_offset = m_file.tellg();
 }
 
 void create_table(const fs::path& path, std::vector<Column> columns)
