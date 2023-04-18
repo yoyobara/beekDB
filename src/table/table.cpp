@@ -40,7 +40,7 @@ Record::Record(const Table* of_table, size_t file_pos) :
 template<typename ValueType>
 ValueType Record::get(int offset) const
 {
-	return ValueType(raw_data.get()[offset]);
+	return ValueType(raw_data.get() + offset);
 }
 
 template<typename ValueType>
@@ -56,6 +56,11 @@ ValueType Record::get(Column& column) const
 
 	return get<ValueType>(offset);
 }
+
+template IntegerValue Record::get<>(Column& column) const;
+template RealValue Record::get<>(Column& column) const;
+template VarChar50Value Record::get<>(Column& column) const;
+
 /* table */
 
 Table::Table(const fs::path& path) : 
