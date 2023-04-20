@@ -58,7 +58,7 @@ struct Table;
 /* represents a record in the table */
 struct Record
 {
-	private:
+	public:
 		const Table *of_table;
 		std::unique_ptr<char> raw_data;
 		long data_pos;

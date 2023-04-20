@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <iostream>
 #include <memory>
+#include <spdlog/spdlog.h>
 #include "table/table.h"
 #include "table/table_storage_constants.h"
 #include "tables_loader.h"
@@ -33,6 +34,7 @@ Table& TablesLoader::get_table(const std::string& name) const
 
 	if (find_result == tables.end())
 		throw no_such_table("no such table as '" + name + "'...");
+
 
 	return **find_result;
 }

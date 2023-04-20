@@ -33,10 +33,13 @@ std::ostream& operator<<(std::ostream& out, const Column& c)
 
 Record::Record(const Table* of_table, size_t data_pos) : 
 	of_table(of_table), 
-	raw_data(new char[of_table->m_record_size])
+	raw_data(new char[of_table->m_record_size]),
+	data_pos(data_pos)
 {
+	
 	of_table->m_file.read_at(data_pos, raw_data.get(), of_table->m_record_size);
-	spdlog::debug("record vals: {}", spdlog::to_hex(raw_data.get(), raw_data.get() + 58));
+	
+	
 }
 
 template<typename ValueType>
@@ -56,8 +59,6 @@ ValueType Record::get(const std::string& column_name) const
 		offset += c.get_size();
 	}
 
-	spdlog::debug("offset: {}", offset);
-
 	return get<ValueType>(offset);
 }
 
@@ -69,7 +70,8 @@ template VarChar50Value Record::get<>(const std::string& column_name) const;
 
 Table::Table(const fs::path& path) : 
 	m_name(path),
-	m_file(path, false)
+	m_file(path, false),
+	m_record_size(0)
 {
 	// verify signature
 	if (!m_file.verify_content(SIGNATURE_OFFSET, SIGNATURE))
@@ -81,7 +83,7 @@ Table::Table(const fs::path& path) :
 
 	// read records count
 	m_file.read_at(RECORDS_COUNT_OFFSET, &m_records_count, sizeof m_records_count);
-	
+
 	// read columns (file pos now at first col)
 	for (int i = 0 ; i < columns_count ; i++)
 	{
@@ -97,8 +99,12 @@ Table::Table(const fs::path& path) :
 		} while (buff != '\0');
 		column_name.pop_back(); // '\0'
 		
-		m_columns.push_back(Column(column_name, BYTE_TO_TYPE.at(descriptor)));
+		Column c(column_name, BYTE_TO_TYPE.at(descriptor));
+		
+		m_columns.push_back(c);
+		m_record_size += c.get_size();
 	}
+
 	// now pos at start of table data
 	m_data_offset = m_file.tellg();
 }

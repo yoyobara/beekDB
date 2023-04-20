@@ -15,6 +15,8 @@
 #include "table/types.h"
 #include "tables_loader.h"
 
+#define private public
+
 /**
  * handle ctrl+c (sigint) to close and cleanup the threads.
  * callback function.
