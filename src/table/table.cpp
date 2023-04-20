@@ -33,13 +33,12 @@ std::ostream& operator<<(std::ostream& out, const Column& c)
 
 Record::Record(const Table* of_table, size_t data_pos) : 
 	of_table(of_table), 
-	raw_data(new char[of_table->m_record_size]),
+	raw_data(new char[of_table->m_record_size]{}),
 	data_pos(data_pos)
 {
-	
-	of_table->m_file.read_at(data_pos, raw_data.get(), of_table->m_record_size);
-	
-	
+	try {
+		of_table->m_file.read_at(data_pos, raw_data.get(), of_table->m_record_size);
+	} catch (std::ios::failure) {}
 }
 
 template<typename ValueType>
@@ -151,6 +150,7 @@ RecordIterator Table::begin() const
 {
 	return RecordIterator(this);
 }
+
 RecordIterator Table::end() const
 {
 	RecordIterator r(this);

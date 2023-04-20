@@ -51,9 +51,11 @@ int main()
 
 	spdlog::info("listening to connections..");
 
-	for (const Record& r : TablesLoader::get_instance().get_table("tabs"))
+	Table& table = TablesLoader::get_instance().get_table("tabs");
+	for (const Record& r : table)
 	{
-		std::cout << r.get<RealValue>("age").real_val << std::endl;
+		auto arr = r.get<VarChar50Value>("name").str_val;
+		std::cout << std::string(arr.begin(), arr.end()).size() << std::endl;
 	}
 
 	// repeatedly accept clients, handle them in seperate threads.

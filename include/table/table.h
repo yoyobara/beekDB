@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <ios>
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -122,14 +123,9 @@ struct RecordIterator
 		return *this;
 	}
 
-	inline bool operator==(RecordIterator& other)
+	inline bool operator!=(const RecordIterator& other)
 	{
-		return of_table == other.of_table && remaining_records == other.remaining_records;
-	}
-
-	inline bool operator!=(RecordIterator& other)
-	{
-		return !(*this == other);
+		return remaining_records != other.remaining_records;
 	}
 
 	friend class Table;
