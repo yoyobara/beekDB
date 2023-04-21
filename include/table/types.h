@@ -19,6 +19,7 @@ enum ColumnType
 struct TableValue
 {
 	virtual ColumnType get_type() const = 0;
+	virtual void* get_value_pointer() = 0;
 };
 
 /* integer type value */
@@ -31,6 +32,10 @@ struct IntegerValue : TableValue
 	IntegerValue(const char* raw) : int_val(*reinterpret_cast<const int*>(raw)) {}
 
 	ColumnType get_type() const override {return INTEGER;}
+	void * get_value_pointer() override
+	{
+		return &int_val;
+	}
 };
 
 /* real type */
@@ -42,6 +47,10 @@ struct RealValue : TableValue
 	RealValue(const char* raw) : real_val(*reinterpret_cast<const double*>(raw)) {}
 
 	ColumnType get_type() const override {return REAL;}
+	void * get_value_pointer() override
+	{
+		return &real_val;
+	}
 };
 
 /* string type */
@@ -55,4 +64,8 @@ struct VarChar50Value : TableValue
 	}
 
 	ColumnType get_type() const override {return VARCHAR_50;}
+	void * get_value_pointer() override
+	{
+		return &str_val;
+	}
 };

@@ -56,7 +56,13 @@ struct no_such_column : std::runtime_error
 
 struct Table;
 
-/* represents a record in the table */
+/* represents a record in the table 
+ *
+ * when a record is initialized, it hold the data for the whole record on the heap
+ * using a smart pointer, and provides interface to get stuff from the record, and put 
+ * new stuff (in the table file also)
+ *
+ * */
 struct Record
 {
 	public:
@@ -72,8 +78,25 @@ struct Record
 	public:
 		Record(const Table* of_table, size_t file_pos);
 
+		/*
+		 * get a value of a column in the record.
+		 */
 		template<typename ValueType>
 		ValueType get(const std::string& column_name) const;
+
+		/* 
+		 * put a new value on the record temporary buffer
+		 */
+		template<typename ValueType>
+		void put(const std::string& column_name, ValueType value);
+
+		/*
+		 * updates the table according to the record's temporary buffer
+		 */
+		void update_table() const
+		{
+			// TODO
+		}
 };
 
 struct RecordIterator;
@@ -85,24 +108,39 @@ struct Table
 	const std::string& get_name() const { return m_name; }
 	const int get_records_count() const { return m_records_count; }
 
+	// get an unmodifiable vector of columns
 	const std::vector<Column>& get_columns() const { return m_columns; }
+
+	// get a single column by name
 	const Column& get_column(const std::string& name) const;
 
 	friend class Record;
 	friend class RecordIterator;
 
+	// iterator pair
 	RecordIterator begin() const;
 	RecordIterator end() const;
 
 	private:
+		// file that the table manages
 		mutable RandomAccessFile m_file;
+		
+		// column vector
 		std::vector<Column> m_columns;
 
+		// column name
 		std::string m_name;
 
+		// size in bytes of a single record in the table
 		int m_record_size;
+
 		long m_records_count;
+
+		// the offset in bytes of where the data starts (see table storage protocol)
 		long m_data_offset;
+
+		size_t get_column_offset(const Column& c) const;
+		size_t get_column_offset(const std::string& column_name) const;
 };
 
 /* class to iterate over records of a table */

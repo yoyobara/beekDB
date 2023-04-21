@@ -50,20 +50,30 @@ ValueType Record::get(int offset) const
 template<typename ValueType>
 ValueType Record::get(const std::string& column_name) const
 {
-	int offset{0};
-	for (const Column& c : of_table->m_columns)
-	{
-		if (c.get_name() == column_name)
-			break;
-		offset += c.get_size();
-	}
-
-	return get<ValueType>(offset);
+	return get<ValueType>(of_table->get_column_offset(column_name));
 }
 
+template <typename ValueType>
+void Record::put(const std::string& column_name, ValueType value)
+{
+	const Column& selected_column{ of_table->get_column(column_name) };
+	size_t column_offset{ of_table->get_column_offset(selected_column)};
+
+	char* raw_data_offset_ptr = raw_data.get() + column_offset;
+	char* value_offset_ptr = static_cast<char*>(value.get_value_pointer());
+
+	// write on object data	
+	std::copy(value_offset_ptr, value_offset_ptr + selected_column.get_size(), raw_data_offset_ptr);
+}
+
+// template pre-declarations
 template IntegerValue Record::get<>(const std::string& column_name) const;
 template RealValue Record::get<>(const std::string& column_name) const;
 template VarChar50Value Record::get<>(const std::string& column_name) const;
+
+template void Record::put<>(const std::string& column_name, IntegerValue value);
+template void Record::put<>(const std::string& column_name, RealValue value);
+template void Record::put<>(const std::string& column_name, VarChar50Value value);
 
 /* table */
 
@@ -145,6 +155,23 @@ const Column& Table::get_column(const std::string& name) const
 	return *findres;
 }
 
+size_t Table::get_column_offset(const std::string& column_name) const
+{
+	size_t offset{0};
+	for (const Column& c : m_columns)
+	{
+		if (c.get_name() == column_name)
+			break;
+		offset += c.get_size();
+	}
+
+	return offset;
+}
+
+size_t Table::get_column_offset(const Column& column) const
+{
+	return get_column_offset(column.get_name());
+}
 
 RecordIterator Table::begin() const
 {
