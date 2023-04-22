@@ -41,6 +41,20 @@ Record::Record(const Table* of_table, size_t data_pos) :
 	} catch (std::ios::failure) {}
 }
 
+Record::Record(const Table* of_table, std::vector<TableValue*> values) : 
+	of_table(of_table),
+	raw_data(new char[of_table->m_records_count]{}),
+	data_pos(-1)
+{
+	for (int i = 0 ; i < values.size() ; i++)
+	{
+		if (values.at(i) == nullptr)
+			continue;
+
+		put(of_table->m_columns.at(i).get_name(), *values.at(i));
+	}
+}
+
 template<typename ValueType>
 ValueType Record::get(int offset) const
 {
@@ -54,7 +68,7 @@ ValueType Record::get(const std::string& column_name) const
 }
 
 template <typename ValueType>
-void Record::put(const std::string& column_name, ValueType value)
+void Record::put(const std::string& column_name, ValueType* value)
 {
 	const Column& selected_column{ of_table->get_column(column_name) };
 	size_t column_offset{ of_table->get_column_offset(selected_column)};
@@ -64,6 +78,13 @@ void Record::put(const std::string& column_name, ValueType value)
 
 	// write on object data	
 	std::copy(value_offset_ptr, value_offset_ptr + selected_column.get_size(), raw_data_offset_ptr);
+}
+
+void Record::update() const
+{
+	// lock mutex
+	of_table->m_file.write_at(data_pos, raw_data.get(), of_table->m_record_size);
+	// unlock mutex
 }
 
 // template pre-declarations
@@ -171,6 +192,17 @@ size_t Table::get_column_offset(const std::string& column_name) const
 size_t Table::get_column_offset(const Column& column) const
 {
 	return get_column_offset(column.get_name());
+}
+
+void Table::insert(const Record& rec)
+{
+	size_t new_offset { get_new_record_offset() };
+	m_file.write_at(new_offset, rec.raw_data.get(), m_record_size);
+
+	m_records_count++;
+
+	// update actual metadata
+	m_file.write_at(RECORDS_COUNT_OFFSET, &m_records_count, sizeof m_records_count);
 }
 
 RecordIterator Table::begin() const

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <ios>
 #include <iostream>
@@ -76,7 +77,8 @@ struct Record
 		friend class RecordIterator;
 
 	public:
-		Record(const Table* of_table, size_t file_pos);
+		Record(const Table* of_table, size_t file_pos); // link record with its table
+		Record(const Table* of_table, std::vector<TableValue*> values); // initialized with values meant for insertion
 
 		/*
 		 * get a value of a column in the record.
@@ -93,10 +95,7 @@ struct Record
 		/*
 		 * updates the table according to the record's temporary buffer
 		 */
-		void update_table() const
-		{
-			// TODO
-		}
+		void update() const;
 };
 
 struct RecordIterator;
@@ -107,12 +106,19 @@ struct Table
 
 	const std::string& get_name() const { return m_name; }
 	const int get_records_count() const { return m_records_count; }
+	const size_t get_new_record_offset() const {return m_data_offset + m_record_size * m_records_count; }
 
 	// get an unmodifiable vector of columns
 	const std::vector<Column>& get_columns() const { return m_columns; }
 
 	// get a single column by name
 	const Column& get_column(const std::string& name) const;
+
+	/*
+	 * insert a new record into table with values.
+	 * a values which is nullptr is leaving the cell uninitialized.
+	 */
+	void insert(const Record& rec);
 
 	friend class Record;
 	friend class RecordIterator;

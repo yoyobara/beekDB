@@ -28,7 +28,6 @@ using namespace comms_constants;
 
 void ClientThread::handle_select_statement(const hsql::SelectStatement* statement)
 { 
-	/*
 	const Table& source_table = TablesLoader::get_instance().get_table(statement->fromTable->getName());
 
 	// queried columns
@@ -56,17 +55,10 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 
 	Table res_table(temp_table_path);
 
-	for (long i = 0 ; i < source_table.get_records_count() ; i++)
-	{
-		for (const Column& c : result_columns)
-		{
-			res_table.set_cell(i, c, source_table.get_cell(i, c).get());
-		}
-	}
+	// values into temp table
 
 	// send message with only the result char as content, the rest will be sent with send_file
 	comms::send_message(m_client, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_SUCCESS + res_table.get_file_data()));
-	*/
 }
 
 void ClientThread::handle_create_statement(const hsql::CreateStatement* statement)
