@@ -90,7 +90,7 @@ struct Record
 		 * put a new value on the record temporary buffer
 		 */
 		template<typename ValueType>
-		void put(const std::string& column_name, ValueType value);
+		void put(const std::string& column_name, ValueType* value);
 
 		/*
 		 * updates the table according to the record's temporary buffer

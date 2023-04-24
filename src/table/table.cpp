@@ -51,7 +51,7 @@ Record::Record(const Table* of_table, std::vector<TableValue*> values) :
 		if (values.at(i) == nullptr)
 			continue;
 
-		put(of_table->m_columns.at(i).get_name(), *values.at(i));
+		put(of_table->m_columns.at(i).get_name(), values.at(i));
 	}
 }
 
@@ -74,7 +74,7 @@ void Record::put(const std::string& column_name, ValueType* value)
 	size_t column_offset{ of_table->get_column_offset(selected_column)};
 
 	char* raw_data_offset_ptr = raw_data.get() + column_offset;
-	char* value_offset_ptr = static_cast<char*>(value.get_value_pointer());
+	char* value_offset_ptr = static_cast<char*>(value->get_value_pointer());
 
 	// write on object data	
 	std::copy(value_offset_ptr, value_offset_ptr + selected_column.get_size(), raw_data_offset_ptr);
@@ -91,10 +91,6 @@ void Record::update() const
 template IntegerValue Record::get<>(const std::string& column_name) const;
 template RealValue Record::get<>(const std::string& column_name) const;
 template VarChar50Value Record::get<>(const std::string& column_name) const;
-
-template void Record::put<>(const std::string& column_name, IntegerValue value);
-template void Record::put<>(const std::string& column_name, RealValue value);
-template void Record::put<>(const std::string& column_name, VarChar50Value value);
 
 /* table */
 

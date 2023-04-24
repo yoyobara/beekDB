@@ -1,5 +1,7 @@
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
+#include <cstdlib>
 #include <hsql/SQLParser.h>
 #include <filesystem>
 #include <hsql/sql/ColumnType.h>
@@ -8,6 +10,7 @@
 #include <hsql/sql/InsertStatement.h>
 #include <hsql/sql/SQLStatement.h>
 #include <iostream>
+#include <memory>
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <string>
@@ -56,9 +59,10 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	Table res_table(temp_table_path);
 
 	// values into temp table
+	// TODO
 
 	// send message with only the result char as content, the rest will be sent with send_file
-	comms::send_message(m_client, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_SUCCESS + res_table.get_file_data()));
+	// comms::send_message(m_client, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_SUCCESS + res_table.get_file_data()));
 }
 
 void ClientThread::handle_create_statement(const hsql::CreateStatement* statement)
@@ -95,60 +99,42 @@ void ClientThread::handle_create_statement(const hsql::CreateStatement* statemen
 
 void ClientThread::handle_insert_statement(const hsql::InsertStatement* statement)
 {
-	/*
 	Table& dest_table = TablesLoader::get_instance().get_table(statement->tableName);
+	std::vector<Column> selected_columns;
 
-	const uint64_t row {dest_table.get_rows_count()};
+	// if no column list is provided, use all columns, elsewhere use the specified columns
+	if (statement->columns == nullptr)
+		selected_columns = dest_table.get_columns();
+	else
+		for (const char* ex : *statement->columns)
+			selected_columns.push_back(dest_table.get_column(ex));
 
-	// zero fill first
-	dest_table.zero_row(row);
-
-	// fill columns
-	for (int i = 0 ; i < statement->columns->size() ; i++)
+	std::vector<std::unique_ptr<TableValue>> values;
+	for (int i = 0 ; i < selected_columns.size() ; i++)
 	{
-		const Column& column = dest_table.get_column(statement->columns->at(i));
-		hsql::Expr* value = statement->values->at(i);
-
-		spdlog::debug("found column: {} of type {}", column.get_name(), column.get_type());
+		hsql::Expr* value {statement->values->at(i)};
+		const Column& column {selected_columns.at(i)};
 
 		switch (column.get_type()) {
-			case INTEGER: {
-				spdlog::debug("int value: {}", value->ival);
-				IntegerValue ival(value->ival);
-				dest_table.set_cell(row, column, &ival);
-				break;
-			}
+			case INTEGER:
+				assert(value->type == hsql::kExprLiteralInt);
+				values.push_back(std::make_unique<IntegerValue>(value->ival));
 
-			case REAL: {
-				
-				// handle case of integer literal
+			case REAL:
 				if (value->type == hsql::kExprLiteralInt)
-				{
-					value->type = hsql::kExprLiteralFloat;
-					value->fval = static_cast<double>(value->ival);
-				}
+					values.push_back(std::make_unique<RealValue>(static_cast<double>(value->ival)));
+				else if (value->type == hsql::kExprLiteralFloat)
+					values.push_back(std::make_unique<RealValue>(value->fval));
+				else
+					spdlog::error("incorrect literal for column {}", column.get_name());
 
-				spdlog::debug("real value: {}", value->fval);
-				RealValue rval(value->fval);
-				dest_table.set_cell(row, column, &rval);
-				break;
-			}
-
-			case VARCHAR_50: {
-				spdlog::debug("varchar50 value: {}", value->name);
-				VarChar50Value vval(value->name);
-				spdlog::debug("vchval50 value: {}", vval.str_val.data());
-				dest_table.set_cell(row, column, &vval);
-				break;
-		    }
-
-			default:
-				spdlog::error("feature not implemented yet..");
+			case VARCHAR_50:
+				// TODO continue
+				
 		}
 	}
 
 	comms::send_message(m_client, QUERY_RESULT_SUCCESS_NO_CONTENT);
-	*/
 }
 
 /* handle a query from the client */
