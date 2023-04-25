@@ -1,4 +1,5 @@
 #pragma once
+#include "table/table_storage_constants.h"
 #include <algorithm>
 #include <array>
 #include <cstring>
@@ -58,9 +59,10 @@ struct VarChar50Value : TableValue
 {
 	std::array<char, 50> str_val;
 
+	/* construct from 50 chars */
 	VarChar50Value(const char* raw) : str_val{}
 	{
-		std::strcpy(str_val.data(), raw);
+		std::strncpy(str_val.data(), raw, 50);
 	}
 
 	ColumnType get_type() const override {return VARCHAR_50;}

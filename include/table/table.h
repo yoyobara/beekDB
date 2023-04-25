@@ -78,7 +78,7 @@ struct Record
 
 	public:
 		Record(const Table* of_table, size_t file_pos); // link record with its table
-		Record(const Table* of_table, std::vector<TableValue*> values); // initialized with values meant for insertion
+		Record(const Table* of_table, const std::vector<std::unique_ptr<TableValue>>& values); // initialized with values meant for insertion
 
 		/*
 		 * get a value of a column in the record.
@@ -126,6 +126,11 @@ struct Table
 	// iterator pair
 	RecordIterator begin() const;
 	RecordIterator end() const;
+
+	std::string get_file_data()
+	{
+		return "";
+	}
 
 	private:
 		// file that the table manages

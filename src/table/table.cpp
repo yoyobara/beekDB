@@ -41,7 +41,7 @@ Record::Record(const Table* of_table, size_t data_pos) :
 	} catch (std::ios::failure) {}
 }
 
-Record::Record(const Table* of_table, std::vector<TableValue*> values) : 
+Record::Record(const Table* of_table, const std::vector<std::unique_ptr<TableValue>>& values) : 
 	of_table(of_table),
 	raw_data(new char[of_table->m_records_count]{}),
 	data_pos(-1)
@@ -51,8 +51,9 @@ Record::Record(const Table* of_table, std::vector<TableValue*> values) :
 		if (values.at(i) == nullptr)
 			continue;
 
-		put(of_table->m_columns.at(i).get_name(), values.at(i));
+		put(of_table->m_columns.at(i).get_name(), values.at(i).get());
 	}
+	update();
 }
 
 template<typename ValueType>

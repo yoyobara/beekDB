@@ -59,10 +59,29 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	Table res_table(temp_table_path);
 
 	// values into temp table
-	// TODO
+	for (const Record& r : source_table)
+	{
+		std::vector<std::unique_ptr<TableValue>> values;
+		for (const Column& col : result_columns)
+		{
+			switch (col.get_type()) {
+				case INTEGER:
+					values.push_back(std::make_unique<IntegerValue>(r.get<IntegerValue>(col.get_name())));
+					break;
+				case REAL:
+					values.push_back(std::make_unique<RealValue>(r.get<RealValue>(col.get_name())));
+					break;
+				case VARCHAR_50:
+					values.push_back(std::make_unique<VarChar50Value>(r.get<VarChar50Value>(col.get_name())));
+					break;
+			}
+		}
 
-	// send message with only the result char as content, the rest will be sent with send_file
-	// comms::send_message(m_client, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_SUCCESS + res_table.get_file_data()));
+		res_table.insert(Record(&res_table, values));
+	}
+
+	// send table response
+	comms::send_message(m_client, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_SUCCESS + res_table.get_file_data()));
 }
 
 void ClientThread::handle_create_statement(const hsql::CreateStatement* statement)
@@ -117,22 +136,30 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 
 		switch (column.get_type()) {
 			case INTEGER:
-				assert(value->type == hsql::kExprLiteralInt);
+				if (!value->isType(hsql::kExprLiteralInt)) 
+					spdlog::error("incorrect literal type for column {}", column.get_name());
 				values.push_back(std::make_unique<IntegerValue>(value->ival));
+				break;
 
 			case REAL:
-				if (value->type == hsql::kExprLiteralInt)
+				if (value->isType(hsql::kExprLiteralInt))
 					values.push_back(std::make_unique<RealValue>(static_cast<double>(value->ival)));
-				else if (value->type == hsql::kExprLiteralFloat)
+				else if (value->isType(hsql::kExprLiteralFloat))
 					values.push_back(std::make_unique<RealValue>(value->fval));
 				else
-					spdlog::error("incorrect literal for column {}", column.get_name());
+					spdlog::error("incorrect literal type for column {}", column.get_name());
+				break;
 
 			case VARCHAR_50:
-				// TODO continue
-				
+				if (!value->isType(hsql::kExprLiteralString))
+					spdlog::error("incorrect literal type for column {}", column.get_name());
+
+				values.push_back(std::make_unique<VarChar50Value>(value->getName()));
+				break;
 		}
 	}
+
+	dest_table.insert(Record(&dest_table, values));
 
 	comms::send_message(m_client, QUERY_RESULT_SUCCESS_NO_CONTENT);
 }
