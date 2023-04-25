@@ -127,10 +127,7 @@ struct Table
 	RecordIterator begin() const;
 	RecordIterator end() const;
 
-	std::string get_file_data()
-	{
-		return "";
-	}
+	std::string get_file_data();
 
 	private:
 		// file that the table manages

@@ -202,6 +202,12 @@ void Table::insert(const Record& rec)
 	m_file.write_at(RECORDS_COUNT_OFFSET, &m_records_count, sizeof m_records_count);
 }
 
+std::string Table::get_file_data()
+{
+	m_file.seekg(0);
+	return (std::stringstream() << m_file.rdbuf()).str();
+}
+
 RecordIterator Table::begin() const
 {
 	return RecordIterator(this);
