@@ -44,8 +44,7 @@ Record::Record(const Table* of_table) :
 	of_table(of_table),
 	raw_data(new char[of_table->m_record_size]{}),
 	data_pos(-1)
-{
-}
+{}
 
 template<typename ValueType>
 ValueType Record::get(int offset) const
@@ -198,4 +197,14 @@ std::string Table::get_file_data()
 {
 	m_file.seekg(0);
 	return (std::stringstream() << m_file.rdbuf()).str();
+}
+
+void Table::for_each(std::function<void(Record&&)> func) const
+{
+	size_t end_offset = get_new_record_offset();
+
+	for (size_t offset = m_data_offset ; offset < end_offset ; offset += m_record_size)
+	{
+		func(Record(this, offset));
+	}
 }

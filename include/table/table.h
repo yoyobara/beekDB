@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
 #include <cassert>
 #include <cstdint>
 #include <ios>
@@ -75,9 +76,9 @@ struct Record
 		ValueType get(int offset) const;
 
 
-	public:
-		Record(const Table* of_table, size_t file_pos); // link record with its table
-		Record(const Table* of_table); // empty record
+	public: 
+		Record(const Table* of_table, size_t file_pos); // link record with its table 
+		Record(const Table* of_table); // empty record probably for later insertion
 
 		/*
 		 * get a value of a column in the record.
@@ -120,6 +121,9 @@ struct Table
 	friend class Record;
 
 	std::string get_file_data();
+
+	/* does specific stuff on each record of this table */
+	void for_each(std::function<void(Record&&)> func) const;
 
 	private:
 		// file that the table manages

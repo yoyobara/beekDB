@@ -62,9 +62,7 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	Table res_table(temp_table_path);
 
 	// values into temp table
-	for (RecordIterator it = source_table.begin() ; it != source_table.end(); ++it)
-	{
-		/*
+	source_table.for_each([&](Record&& r) {
 		Record new_record(&res_table);
 		for (const Column& col : result_columns)
 		{
@@ -82,9 +80,7 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 		}
 
 		res_table.insert(new_record);
-		*/
-		spdlog::debug("original_rec {}", spdlog::to_hex((*it).raw_data.get(), (*it).raw_data.get() + 58));
-	}
+	});
 
 	// send table response
 	comms::send_message(m_client, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_SUCCESS + res_table.get_file_data()));
