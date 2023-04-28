@@ -36,24 +36,15 @@ Record::Record(const Table* of_table, size_t data_pos) :
 	raw_data(new char[of_table->m_record_size]{}),
 	data_pos(data_pos)
 {
-	try {
-		of_table->m_file.read_at(data_pos, raw_data.get(), of_table->m_record_size);
-	} catch (std::ios::failure) {}
+	spdlog::debug("reading file at offset {} of size {}", data_pos, of_table->m_record_size);
+	of_table->m_file.read_at(data_pos, raw_data.get(), of_table->m_record_size);
 }
 
-Record::Record(const Table* of_table, const std::vector<std::unique_ptr<TableValue>>& values) : 
+Record::Record(const Table* of_table) : 
 	of_table(of_table),
-	raw_data(new char[of_table->m_records_count]{}),
+	raw_data(new char[of_table->m_record_size]{}),
 	data_pos(-1)
 {
-	for (int i = 0 ; i < values.size() ; i++)
-	{
-		if (values.at(i) == nullptr)
-			continue;
-
-		put(of_table->m_columns.at(i).get_name(), values.at(i).get());
-	}
-	update();
 }
 
 template<typename ValueType>
@@ -65,17 +56,18 @@ ValueType Record::get(int offset) const
 template<typename ValueType>
 ValueType Record::get(const std::string& column_name) const
 {
+	spdlog::debug("offst: {}", of_table->get_column_offset(column_name));
 	return get<ValueType>(of_table->get_column_offset(column_name));
 }
 
 template <typename ValueType>
-void Record::put(const std::string& column_name, ValueType* value)
+void Record::put(const std::string& column_name, ValueType value)
 {
 	const Column& selected_column{ of_table->get_column(column_name) };
 	size_t column_offset{ of_table->get_column_offset(selected_column)};
 
 	char* raw_data_offset_ptr = raw_data.get() + column_offset;
-	char* value_offset_ptr = static_cast<char*>(value->get_value_pointer());
+	char* value_offset_ptr = static_cast<char*>(value.get_value_pointer());
 
 	// write on object data	
 	std::copy(value_offset_ptr, value_offset_ptr + selected_column.get_size(), raw_data_offset_ptr);
@@ -92,6 +84,10 @@ void Record::update() const
 template IntegerValue Record::get<>(const std::string& column_name) const;
 template RealValue Record::get<>(const std::string& column_name) const;
 template VarChar50Value Record::get<>(const std::string& column_name) const;
+
+template void Record::put(const std::string &column_name, IntegerValue value);
+template void Record::put(const std::string &column_name, RealValue value);
+template void Record::put(const std::string &column_name, VarChar50Value value);
 
 /* table */
 
@@ -141,23 +137,19 @@ void create_table(const fs::path& path, std::vector<Column> columns)
 	// create a random access file
 	RandomAccessFile f(path, true);
 
-	std::stringstream strm("", std::ios::app | std::ios::out);
-
 	// write metadata
-	strm << SIGNATURE;
+	f << SIGNATURE;
 
 	// columns count
 	int columns_count = columns.size();
-	strm.write(reinterpret_cast<char*>(&columns_count), sizeof columns_count);
+	f.write(reinterpret_cast<char*>(&columns_count), sizeof columns_count);
 
 	// records count
 	long records_count = 0;
-	strm.write(reinterpret_cast<char*>(&records_count), sizeof records_count);
+	f.write(reinterpret_cast<char*>(&records_count), sizeof records_count);
 
 	for (Column& c : columns)
-		strm << TYPE_TO_BYTE.at(c.get_type()) << c.get_name() << '\0';
-	
-	f << strm.rdbuf();
+		f << TYPE_TO_BYTE.at(c.get_type()) << c.get_name() << '\0';
 }
 
 const Column& Table::get_column(const std::string& name) const
@@ -207,17 +199,3 @@ std::string Table::get_file_data()
 	m_file.seekg(0);
 	return (std::stringstream() << m_file.rdbuf()).str();
 }
-
-RecordIterator Table::begin() const
-{
-	return RecordIterator(this);
-}
-
-RecordIterator Table::end() const
-{
-	RecordIterator r(this);
-	r.remaining_records = 0;
-
-	return r;
-}
-

@@ -74,11 +74,10 @@ struct Record
 		template<typename ValueType>
 		ValueType get(int offset) const;
 
-		friend class RecordIterator;
 
 	public:
 		Record(const Table* of_table, size_t file_pos); // link record with its table
-		Record(const Table* of_table, const std::vector<std::unique_ptr<TableValue>>& values); // initialized with values meant for insertion
+		Record(const Table* of_table); // empty record
 
 		/*
 		 * get a value of a column in the record.
@@ -90,15 +89,13 @@ struct Record
 		 * put a new value on the record temporary buffer
 		 */
 		template<typename ValueType>
-		void put(const std::string& column_name, ValueType* value);
+		void put(const std::string& column_name, ValueType value);
 
 		/*
 		 * updates the table according to the record's temporary buffer
 		 */
 		void update() const;
 };
-
-struct RecordIterator;
 
 struct Table
 {
@@ -121,11 +118,6 @@ struct Table
 	void insert(const Record& rec);
 
 	friend class Record;
-	friend class RecordIterator;
-
-	// iterator pair
-	RecordIterator begin() const;
-	RecordIterator end() const;
 
 	std::string get_file_data();
 
@@ -149,37 +141,6 @@ struct Table
 
 		size_t get_column_offset(const Column& c) const;
 		size_t get_column_offset(const std::string& column_name) const;
-};
-
-/* class to iterate over records of a table */
-struct RecordIterator
-{
-	RecordIterator(const Table* of_table) : 
-		of_table(of_table),
-		remaining_records(of_table->m_records_count),
-		current_record(of_table, of_table->m_data_offset)
-	{}
-
-	inline const Record& operator*() { return current_record; }
-
-	inline RecordIterator& operator++()
-	{
-		remaining_records--;
-		current_record = Record(of_table, current_record.data_pos + of_table->m_record_size);
-		return *this;
-	}
-
-	inline bool operator!=(const RecordIterator& other)
-	{
-		return remaining_records != other.remaining_records;
-	}
-
-	friend class Table;
-
-	private:
-		const Table *of_table;
-		Record current_record;
-		long remaining_records;
 };
 
 void create_table(const fs::path& path, std::vector<Column> columns);

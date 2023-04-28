@@ -11,6 +11,7 @@
 #include <hsql/sql/SQLStatement.h>
 #include <iostream>
 #include <memory>
+#include <spdlog/fmt/bin_to_hex.h>
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <string>
@@ -54,30 +55,35 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	fs::create_directory(table_storage::TEMP_DIR);
 	std::string temp_table_path {table_storage::TEMP_DIR / ("tmp" + get_thread_id())};
 
+	spdlog::debug("here");
 	create_table(temp_table_path, result_columns);
+	spdlog::debug("not");
 
 	Table res_table(temp_table_path);
 
 	// values into temp table
-	for (const Record& r : source_table)
+	for (RecordIterator it = source_table.begin() ; it != source_table.end(); ++it)
 	{
-		std::vector<std::unique_ptr<TableValue>> values;
+		/*
+		Record new_record(&res_table);
 		for (const Column& col : result_columns)
 		{
 			switch (col.get_type()) {
 				case INTEGER:
-					values.push_back(std::make_unique<IntegerValue>(r.get<IntegerValue>(col.get_name())));
+					new_record.put(col.get_name(), r.get<IntegerValue>(col.get_name()));
 					break;
 				case REAL:
-					values.push_back(std::make_unique<RealValue>(r.get<RealValue>(col.get_name())));
+					new_record.put(col.get_name(), r.get<RealValue>(col.get_name()));
 					break;
 				case VARCHAR_50:
-					values.push_back(std::make_unique<VarChar50Value>(r.get<VarChar50Value>(col.get_name())));
+					new_record.put(col.get_name(), r.get<VarChar50Value>(col.get_name()));
 					break;
 			}
 		}
 
-		res_table.insert(Record(&res_table, values));
+		res_table.insert(new_record);
+		*/
+		spdlog::debug("original_rec {}", spdlog::to_hex((*it).raw_data.get(), (*it).raw_data.get() + 58));
 	}
 
 	// send table response
@@ -128,7 +134,7 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 		for (const char* ex : *statement->columns)
 			selected_columns.push_back(dest_table.get_column(ex));
 
-	std::vector<std::unique_ptr<TableValue>> values;
+	Record new_record(&dest_table);
 	for (int i = 0 ; i < selected_columns.size() ; i++)
 	{
 		hsql::Expr* value {statement->values->at(i)};
@@ -138,14 +144,15 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 			case INTEGER:
 				if (!value->isType(hsql::kExprLiteralInt)) 
 					spdlog::error("incorrect literal type for column {}", column.get_name());
-				values.push_back(std::make_unique<IntegerValue>(value->ival));
+
+				new_record.put(column.get_name(), IntegerValue(value->ival));
 				break;
 
 			case REAL:
 				if (value->isType(hsql::kExprLiteralInt))
-					values.push_back(std::make_unique<RealValue>(static_cast<double>(value->ival)));
+					new_record.put(column.get_name(), RealValue(value->ival));
 				else if (value->isType(hsql::kExprLiteralFloat))
-					values.push_back(std::make_unique<RealValue>(value->fval));
+					new_record.put(column.get_name(), RealValue(value->fval));
 				else
 					spdlog::error("incorrect literal type for column {}", column.get_name());
 				break;
@@ -154,12 +161,12 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 				if (!value->isType(hsql::kExprLiteralString))
 					spdlog::error("incorrect literal type for column {}", column.get_name());
 
-				values.push_back(std::make_unique<VarChar50Value>(value->getName()));
+				new_record.put(column.get_name(), VarChar50Value(value->getName()));
 				break;
 		}
 	}
 
-	dest_table.insert(Record(&dest_table, values));
+	dest_table.insert(new_record);
 
 	comms::send_message(m_client, QUERY_RESULT_SUCCESS_NO_CONTENT);
 }
