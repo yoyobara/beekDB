@@ -5,9 +5,6 @@ the python API for a beekDB server
 import socket
 import struct
 import io
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
 
 class BeekConnectionError(Exception):
     pass
@@ -52,19 +49,13 @@ class BeekDbConnection:
         # connect to server
         self.__sock.connect(self.__addr)
 
-        logging.info("connection established")
-
         # send join message
         self.__send_message(BeekDbConnection.COMMANDS["client_join"], b'')
-
-        logging.info("sent join msg")
 
         # wait for join confirmation
         cmd, _ = self.__recv_message()
         if cmd != BeekDbConnection.COMMANDS["server_join_success"]:
             raise BeekConnectionError("something went wrong")
-
-        logging.info("join confirmed")
 
         # ok
 
