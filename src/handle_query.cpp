@@ -88,7 +88,6 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 
 void ClientThread::handle_create_statement(const hsql::CreateStatement* statement)
 {
-	/*
 	static const std::map<hsql::DataType, ColumnType> SQL_TYPE_TO_COLUMN_TYPE {
 		{hsql::DataType::INT, INTEGER},
 		{hsql::DataType::VARCHAR, VARCHAR_50},
@@ -111,11 +110,10 @@ void ClientThread::handle_create_statement(const hsql::CreateStatement* statemen
 	}
 
 	// actually create the table
-	create_table(columns, table_storage::TABLES_DIR / statement->tableName);
+	create_table(table_storage::TABLES_DIR / statement->tableName, columns);
 
 	// response
 	comms::send_message(m_client, QUERY_RESULT_SUCCESS_NO_CONTENT);
-	*/
 }
 
 void ClientThread::handle_insert_statement(const hsql::InsertStatement* statement)
