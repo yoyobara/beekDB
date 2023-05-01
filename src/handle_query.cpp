@@ -49,7 +49,7 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 
 			// check star case 
 			if (col_ptr->isType(hsql::kExprStar))
-				result_columns.insert(result_columns.end(), source_table.get_columns().begin(), source_table.get_columns().end());
+				result_columns.insert(result_columns.end(), source_table->get_columns().begin(), source_table->get_columns().end());
 			else
 				result_columns.push_back(source_table->get_column(col_ptr->getName()));
 
@@ -69,7 +69,7 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	Table res_table(temp_table_path);
 
 	// values into temp table
-	source_table.for_each([&](Record&& r) {
+	source_table->for_each([&](Record&& r) {
 		Record new_record(&res_table);
 		for (const Column& col : result_columns)
 		{
