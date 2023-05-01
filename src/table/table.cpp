@@ -1,10 +1,12 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <exception>
 #include <filesystem>
 #include <ios> 
 #include <memory> 
 #include <numeric>
+#include <spdlog/fmt/bin_to_hex.h>
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <iostream>
@@ -27,211 +29,182 @@ std::ostream& operator<<(std::ostream& out, const Column& c)
 	return out;
 }
 
+/* record */
+
+Record::Record(const Table* of_table, size_t data_pos) : 
+	of_table(of_table), 
+	raw_data(new char[of_table->m_record_size]{}),
+	data_pos(data_pos)
+{
+	spdlog::debug("reading file at offset {} of size {}", data_pos, of_table->m_record_size);
+	of_table->m_file.read_at(data_pos, raw_data.get(), of_table->m_record_size);
+}
+
+Record::Record(const Table* of_table) : 
+	of_table(of_table),
+	raw_data(new char[of_table->m_record_size]{}),
+	data_pos(-1)
+{}
+
+template<typename ValueType>
+ValueType Record::get(int offset) const
+{
+	return ValueType(raw_data.get() + offset);
+}
+
+template<typename ValueType>
+ValueType Record::get(const std::string& column_name) const
+{
+	spdlog::debug("offst: {}", of_table->get_column_offset(column_name));
+	return get<ValueType>(of_table->get_column_offset(column_name));
+}
+
+template <typename ValueType>
+void Record::put(const std::string& column_name, ValueType value)
+{
+	const Column& selected_column{ of_table->get_column(column_name) };
+	size_t column_offset{ of_table->get_column_offset(selected_column)};
+
+	char* raw_data_offset_ptr = raw_data.get() + column_offset;
+	char* value_offset_ptr = static_cast<char*>(value.get_value_pointer());
+
+	// write on object data	
+	std::copy(value_offset_ptr, value_offset_ptr + selected_column.get_size(), raw_data_offset_ptr);
+}
+
+void Record::update() const
+{
+	// lock mutex
+	of_table->m_file.write_at(data_pos, raw_data.get(), of_table->m_record_size);
+	// unlock mutex
+}
+
+// template pre-declarations
+template IntegerValue Record::get<>(const std::string& column_name) const;
+template RealValue Record::get<>(const std::string& column_name) const;
+template VarChar50Value Record::get<>(const std::string& column_name) const;
+
+template void Record::put(const std::string &column_name, IntegerValue value);
+template void Record::put(const std::string &column_name, RealValue value);
+template void Record::put(const std::string &column_name, VarChar50Value value);
 
 /* table */
 
-/* open */
-void Table::init_columns(int columns_count)
+Table::Table(const fs::path& path) : 
+	m_name(path),
+	m_file(path, false),
+	m_record_size(0)
 {
-	// now cursor at start of columns.
+	// verify signature
+	if (!m_file.verify_content(SIGNATURE_OFFSET, SIGNATURE))
+		spdlog::critical("table file is corrupted: {}", m_name);
 
-	char buffer;
+	// read columns count
+	int columns_count;
+	m_file.read_at(COLUMN_COUNT_OFFSET, &columns_count, sizeof columns_count);
 
+	// read records count
+	m_file.read_at(RECORDS_COUNT_OFFSET, &m_records_count, sizeof m_records_count);
+
+	// read columns (file pos now at first col)
 	for (int i = 0 ; i < columns_count ; i++)
 	{
-		// read descriptor
-		m_table_file.read(&buffer, DESC_SIZE);
+		char descriptor;
+		m_file.read(&descriptor, 1);
 
-		ColumnType type {BYTE_TO_TYPE.at(buffer)};
-
-		// read name
-		std::string col_name;
-		do {
-			m_table_file.read(&buffer, 1);
-			col_name += buffer;
-		}
-		while (buffer != '\0');
-		col_name.pop_back(); // \0
-
-		// add column
-		m_columns.push_back(Column(col_name, type));
+		char buff;
+		std::string column_name;
+		do
+		{
+			m_file.read(&buff, 1);
+			column_name += buff;
+		} while (buff != '\0');
+		column_name.pop_back(); // '\0'
+		
+		Column c(column_name, BYTE_TO_TYPE.at(descriptor));
+		
+		m_columns.push_back(c);
+		m_record_size += c.get_size();
 	}
+
+	// now pos at start of table data
+	m_data_offset = m_file.tellg();
 }
 
-void Table::init_metadata()
+void create_table(const fs::path& path, std::vector<Column> columns)
 {
-	// assert signature presence
-	assert(m_table_file.verify_content(SIGNATURE_OFFSET, table_storage::SIGNATURE));
-
-	int columns_count;
-
-	// read columns count from metadata
-	m_table_file.read_at(COLUMN_COUNT_OFFSET, &columns_count, sizeof columns_count);
-
-	// read rows count from metadata.
-	m_table_file.read_at(ROW_COUNT_OFFSET, &m_rows_count, sizeof m_rows_count);
-
-	init_columns(columns_count);
-
-	// now metadata is over, at start of table itself
-	m_table_start = m_table_file.tellg();
-}
-
-/* open */
-Table::Table(const std::string& name) :
-	m_table_file(name, false),
-	m_name(name)
-{
-	init_metadata();
-	init_row_size();
-}
-
-void Table::set_rows_count(uint64_t rows_count)
-{
-	m_rows_count = rows_count;
-	m_table_file.write_at(ROW_COUNT_OFFSET, &m_rows_count, sizeof m_rows_count);
-}
-
-void Table::init_row_size()
-{
-	m_row_size = std::accumulate(m_columns.begin(), m_columns.end(), 0, [](int current, const Column& next){ return current + next.get_size();});
-}
-
-void create_table(const std::vector<Column> columns, const fs::path& path)
-{
+	// create a random access file
 	RandomAccessFile f(path, true);
-	spdlog::debug("{}", path.string());
 
-	// create the metadata
+	// write metadata
+	f << SIGNATURE;
 
-	f.write_at(SIGNATURE_OFFSET, SIGNATURE.data(), SIGNATURE.size()); // signature
-
+	// columns count
 	int columns_count = columns.size();
-	f.write_at(COLUMN_COUNT_OFFSET, &columns_count, sizeof(int));
+	f.write(reinterpret_cast<char*>(&columns_count), sizeof columns_count);
 
-	long rows_count = 0;
-	f.write_at(ROW_COUNT_OFFSET, &rows_count, sizeof(long));
+	// records count
+	long records_count = 0;
+	f.write(reinterpret_cast<char*>(&records_count), sizeof records_count);
 
-	spdlog::debug("till here fine");
-
-	// now at columns offset
-	for (const Column& col : columns)
-	{
-		f.write(&TYPE_TO_BYTE.at(col.get_type()), DESC_SIZE); // desc
-		f.write(col.get_name().data(), col.get_name().size()); // name
-		f.write("\0", 1); // null character
-	}
-	spdlog::debug("NO DUDE");
+	for (Column& c : columns)
+		f << TYPE_TO_BYTE.at(c.get_type()) << c.get_name() << '\0';
 }
 
-/* calculate the offset of a cell in the file */
-uint64_t Table::calculate_offset(long row_index, const Column& column) const
+const Column& Table::get_column(const std::string& name) const
 {
-	uint64_t offset = m_table_start + row_index * m_row_size;
+	auto findres = std::find_if(m_columns.begin(), m_columns.end(), [name](const Column& c)
+	{
+		return c.get_name() == name;
+	});
 
+	if (findres == m_columns.end())
+		throw no_such_column("no such column as " + name);
+
+	return *findres;
+}
+
+size_t Table::get_column_offset(const std::string& column_name) const
+{
+	size_t offset{0};
 	for (const Column& c : m_columns)
 	{
-		if (c == column)
+		if (c.get_name() == column_name)
 			break;
-
 		offset += c.get_size();
 	}
 
 	return offset;
 }
 
-/* get cell */
-std::unique_ptr<TableValue> Table::get_cell(long row_index, const Column& column) const
+size_t Table::get_column_offset(const Column& column) const
 {
-	// cell offset
-	uint64_t offset {calculate_offset(row_index, column)};
-
-	switch (column.get_type()) {
-		case INTEGER:
-			int i;
-			m_table_file.read_at(offset, &i, TYPE_SIZE.at(INTEGER));
-
-			return std::make_unique<IntegerValue>(i);
-
-		case REAL:
-			double d;
-			m_table_file.read_at(offset, &d, TYPE_SIZE.at(REAL));
-
-			return std::make_unique<RealValue>(d);
-
-		case VARCHAR_50:
-			std::array<char, VARCHAR_50_SIZE> buff;
-			m_table_file.read_at(offset, buff.data(), VARCHAR_50_SIZE);
-
-			return std::make_unique<VarChar50Value>(buff.data());
-	}
-	spdlog::error("undefined type");
-	return nullptr;
+	return get_column_offset(column.get_name());
 }
 
-
-void Table::set_cell(long row_index, const Column& column, TableValue* v)
+void Table::insert(const Record& rec)
 {
-	spdlog::info("setting cell (row: {}, column: {}) in table {}", row_index, column.get_name(), m_name);
-	
-	// if in higher row index than currently has, needs to resize
-	if (m_rows_count <= row_index) set_rows_count(row_index + 1);
+	size_t new_offset { get_new_record_offset() };
+	m_file.write_at(new_offset, rec.raw_data.get(), m_record_size);
 
-	uint64_t offset { calculate_offset(row_index, column) };
+	m_records_count++;
 
-	switch (column.get_type()) {
-		case INTEGER: {
-			int i = static_cast<IntegerValue*>(v)->int_val;
-			spdlog::debug("{}", i);
-			m_table_file.write_at(offset, &i, TYPE_SIZE.at(INTEGER));
-			break;
-		}
-
-		case REAL: {
-			double d = static_cast<RealValue*>(v)->real_val;
-			spdlog::debug("{}", d);
-			m_table_file.write_at(offset, &d, TYPE_SIZE.at(REAL));
-			break;
-		}
-
-		case VARCHAR_50: {
-			std::array<char, VARCHAR_50_SIZE> arr{ static_cast<VarChar50Value*>(v)->str_val };
-			m_table_file.write_at(offset, arr.data(), VARCHAR_50_SIZE);
-			break;
-		}
-	};
-}
-
-void Table::zero_row(long row_index)
-{
-	char* zero_buff = new char[m_row_size]{};
-	m_table_file.write_at(calculate_offset(row_index, m_columns.at(0)), zero_buff, m_row_size);
-	delete[] zero_buff;
-}
-			
-
-/* repr */
-std::ostream& operator<<(std::ostream& out, const Table& table)
-{
-	for (const Column& c : table.m_columns)
-	{
-		out << table.get_name() << " [" << c << "] ";
-	};
-	return out;
-}
-
-/* get column */
-const Column& Table::get_column(const std::string& name) const
-{
-	auto findres {std::find_if(m_columns.begin(), m_columns.end(), [name](const Column& c){ return c.get_name() == name;})};
-	if (findres == m_columns.end())
-		throw no_such_column("no such column as '" + name + "'");
-
-	return *findres;
+	// update actual metadata
+	m_file.write_at(RECORDS_COUNT_OFFSET, &m_records_count, sizeof m_records_count);
 }
 
 std::string Table::get_file_data()
 {
-	m_table_file.seekg(0);
-	return (std::stringstream() << m_table_file.rdbuf()).str();
+	m_file.seekg(0);
+	return (std::stringstream() << m_file.rdbuf()).str();
+}
+
+void Table::for_each(std::function<void(Record&&)> func) const
+{
+	size_t end_offset = get_new_record_offset();
+
+	for (size_t offset = m_data_offset ; offset < end_offset ; offset += m_record_size)
+	{
+		func(Record(this, offset));
+	}
 }

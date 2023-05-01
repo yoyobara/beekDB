@@ -1,2 +1,1 @@
-handle no such table exception
-handle no columns list for select statement
+fix query handlers

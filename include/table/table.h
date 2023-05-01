@@ -1,7 +1,11 @@
 #pragma once
 
+#include <algorithm>
+#include <functional>
+#include <cassert>
 #include <cstdint>
 #include <ios>
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -52,85 +56,95 @@ struct no_such_column : std::runtime_error
 	no_such_column(const std::string& msg) : std::runtime_error(msg){}
 };
 
-/*
- * a class representing a table.
- */
-class Table
+struct Table;
+
+/* represents a record in the table 
+ *
+ * when a record is initialized, it hold the data for the whole record on the heap
+ * using a smart pointer, and provides interface to get stuff from the record, and put 
+ * new stuff (in the table file also)
+ *
+ * */
+struct Record
 {
 	public:
+		const Table *of_table;
+		std::unique_ptr<char> raw_data;
+		long data_pos;
+
+		template<typename ValueType>
+		ValueType get(int offset) const;
+
+
+	public: 
+		Record(const Table* of_table, size_t file_pos); // link record with its table 
+		Record(const Table* of_table); // empty record probably for later insertion
 
 		/*
-		 * opens an existing table file.
-		 * name - the name of the table.
+		 * get a value of a column in the record.
 		 */
-		Table(const std::string& name);
+		template<typename ValueType>
+		ValueType get(const std::string& column_name) const;
+
+		/* 
+		 * put a new value on the record temporary buffer
+		 */
+		template<typename ValueType>
+		void put(const std::string& column_name, ValueType value);
 
 		/*
-		 * get unique ptr to heap allocated cell value
+		 * updates the table according to the record's temporary buffer
 		 */
-		std::unique_ptr<TableValue> get_cell(long row_index, const Column& column) const;
-
-		/* get file data */
-		std::string get_file_data();
-
-		inline const std::string& get_name() const { return m_name; }
-
-		/* get rows count */
-		inline uint64_t get_rows_count() const{ return m_rows_count; }
-		void set_rows_count(uint64_t rows_count);
-
-		/* set cell value */
-		void set_cell(long row_index, const Column& column, TableValue *v);
-
-		/* set row to zeros */
-		void zero_row(long row_index);
-
-		/* get column by name */
-		const Column& get_column(const std::string& name) const;
-
-		/* begin of columns vector */
-		inline std::vector<Column>::const_iterator cols_begin() const
-		{
-			return m_columns.begin();
-		}
-
-		/* end of columns vector */
-		inline std::vector<Column>::const_iterator cols_end() const
-		{
-			return m_columns.end();
-		}
-
-		/*
-		 * textual representation
-		 */
-		friend std::ostream& operator<<(std::ostream& out, const Table& table);
-
-	private:
-
-		/* open */
-		void init_metadata();
-		void init_columns(int columns_count);
-
-		// initializes the size of a whole row
-		void init_row_size();
-
-		uint64_t calculate_offset(long row_index, const Column& column) const;
-
-		mutable RandomAccessFile m_table_file;
-
-		// table's name
-		const std::string m_name;
-
-		// columns of the table
-		std::vector<Column> m_columns;
-
-		long m_rows_count;
-
-		/* total size in bytes of a row */
-		int m_row_size;
-
-		/* start position of the table after the metadata */
-		uint64_t m_table_start;
+		void update() const;
 };
 
-void create_table(const std::vector<Column> columns, const fs::path& name);
+struct Table
+{
+	Table(const fs::path& path);
+
+	const std::string& get_name() const { return m_name; }
+	const int get_records_count() const { return m_records_count; }
+	const size_t get_new_record_offset() const {return m_data_offset + m_record_size * m_records_count; }
+
+	// get an unmodifiable vector of columns
+	const std::vector<Column>& get_columns() const { return m_columns; }
+
+	// get a single column by name
+	const Column& get_column(const std::string& name) const;
+
+	/*
+	 * insert a new record into table with values.
+	 * a values which is nullptr is leaving the cell uninitialized.
+	 */
+	void insert(const Record& rec);
+
+	friend class Record;
+
+	std::string get_file_data();
+
+	/* does specific stuff on each record of this table */
+	void for_each(std::function<void(Record&&)> func) const;
+
+	private:
+		// file that the table manages
+		mutable RandomAccessFile m_file;
+		
+		// column vector
+		std::vector<Column> m_columns;
+
+		// column name
+		std::string m_name;
+
+		// size in bytes of a single record in the table
+		int m_record_size;
+
+		long m_records_count;
+
+		// the offset in bytes of where the data starts (see table storage protocol)
+		long m_data_offset;
+
+		size_t get_column_offset(const Column& c) const;
+		size_t get_column_offset(const std::string& column_name) const;
+};
+
+void create_table(const fs::path& path, std::vector<Column> columns);

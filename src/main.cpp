@@ -11,6 +11,9 @@
 #include "cpp_socket.h"
 #include "communication_protocol.h"
 #include "client_handler.h"
+#include "table/table.h"
+#include "table/types.h"
+#include "tables_loader.h"
 
 /**
  * handle ctrl+c (sigint) to close and cleanup the threads.
