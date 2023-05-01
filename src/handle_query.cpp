@@ -111,6 +111,9 @@ void ClientThread::handle_create_statement(const hsql::CreateStatement* statemen
 
 	// actually create the table
 	create_table(table_storage::TABLES_DIR / statement->tableName, columns);
+	
+	// reload tables for loader
+	TablesLoader::get_instance().reload_tables();
 
 	// response
 	comms::send_message(m_client, QUERY_RESULT_SUCCESS_NO_CONTENT);
