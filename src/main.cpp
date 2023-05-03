@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 #include <spdlog/common.h>
 #include <vector>
 #include <thread>
@@ -25,8 +26,8 @@ void handle_sigint(int dummy)
 	ClientThread::program_running = false;
 
 	// wait for them all to join
-	for (ClientThread& ct: ClientThread::running_client_threads) {
-		ct.join();
+	for (auto&& ct: ClientThread::running_client_threads) {
+		ct->join();
 	}
 
 	exit(EXIT_SUCCESS);
@@ -35,6 +36,7 @@ void handle_sigint(int dummy)
 void setup_logger()
 {
 	spdlog::set_level(spdlog::level::debug);
+	spdlog::set_pattern("[thread %t] %v");
 }
 
 int main()
@@ -52,9 +54,9 @@ int main()
 	// repeatedly accept clients, handle them in seperate threads.
 	while (true)
 	{
-		Socket client = server.accept();
+		Socket client{server.accept()};
 
 		// add new ClientThread to the running threads (with the socket)
-		ClientThread::running_client_threads.emplace_back(client);
+		ClientThread::running_client_threads.push_back(std::make_unique<ClientThread>(client));
 	}
 }

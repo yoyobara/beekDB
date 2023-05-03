@@ -3,6 +3,7 @@
 #include <atomic>
 #include <hsql/sql/CreateStatement.h>
 #include <hsql/sql/InsertStatement.h>
+#include <memory>
 #include <thread>
 #include <vector>
 #include "communication_protocol.h"
@@ -11,7 +12,7 @@
 
 class ClientThread
 {
-	private:
+	public:
 		Socket m_client;
 		std::thread m_thread;
 		bool m_is_joined;
@@ -34,9 +35,11 @@ class ClientThread
 		static std::atomic<bool> program_running;
 
 		/* vector of currently running client threads */
-		static std::vector<ClientThread> running_client_threads;
+		static std::vector<std::unique_ptr<ClientThread>> running_client_threads;
 
 		void join();
 
 		ClientThread(Socket client_socket);
+
+		ClientThread(ClientThread&& moved);
 };

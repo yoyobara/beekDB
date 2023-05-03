@@ -3,6 +3,7 @@
 #include <asm-generic/errno.h>
 #include <cerrno>
 #include <netinet/in.h>
+#include <spdlog/spdlog.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <cstring>
@@ -82,6 +83,8 @@ ssize_t Socket::send(const std::string& data) const
 std::string Socket::recv(size_t length) const
 {
 	std::vector<char> buffer(length);
+
+	spdlog::debug("reciving with fd={}", this->get_fd());
 
 	int res = ::recv(m_sockfd, buffer.data(), buffer.size(), 0);
 

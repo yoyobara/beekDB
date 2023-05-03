@@ -1,10 +1,12 @@
+#include <memory>
 #include <spdlog/spdlog.h>
 #include <sys/poll.h>
 #include <iostream>
+#include <thread>
 #include "communication_protocol.h"
 #include "client_handler.h"
 
-std::vector<ClientThread> ClientThread::running_client_threads;
+std::vector<std::unique_ptr<ClientThread>> ClientThread::running_client_threads;
 std::atomic<bool> ClientThread::program_running = true;
 
 /* on constructor call, start thread */
@@ -13,6 +15,16 @@ ClientThread::ClientThread(Socket client_socket) :
 	m_thread(&ClientThread::run, this),
 	m_is_joined(false)
 {
+	spdlog::info("new client thread with fd={}", m_client.get_fd());
+}
+
+/* move */
+ClientThread::ClientThread(ClientThread&& moved) : 
+	m_client(moved.m_client),
+	m_thread(std::move(moved.m_thread)),
+	m_is_joined(false)
+{
+	spdlog::debug("moved client thread");
 }
 
 void ClientThread::join()
@@ -69,7 +81,10 @@ void ClientThread::run()
 		// is_message_waiting shall block for some time
 		if (is_message_waiting() && process_message(comms::recv_message(m_client)))
 			break;
+
+		spdlog::debug("my fd is {}", m_client.get_fd());
 	}
 
+	std::cout << "called close\n";
 	m_client.close();
 }
