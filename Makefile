@@ -8,7 +8,7 @@ sources := $(shell find $(SRC_DIR) -name "*.cpp")
 objects := $(sources:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 deps := $(objects:.o=.d)
 
-libs := -lsqlparser $(shell pkg-config --libs spdlog)
+libs := -lsqlparser $(shell pkg-config --libs spdlog) -lcryptopp
 libs_cflags := $(shell pkg-config --cflags spdlog)
 
 all: $(EXECUTABLE)

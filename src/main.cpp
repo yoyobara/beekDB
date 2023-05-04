@@ -27,7 +27,7 @@ void handle_sigint(int dummy)
 
 	// wait for them all to join
 	for (auto&& ct: ClientThread::running_client_threads) {
-		ct->join();
+		ct->join_thread();
 	}
 
 	exit(EXIT_SUCCESS);

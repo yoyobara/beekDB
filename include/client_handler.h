@@ -9,6 +9,8 @@
 #include "communication_protocol.h"
 #include "cpp_socket.h"
 #include "hsql/sql/SelectStatement.h"
+#include "cryptopp/dh.h"
+#include "cryptopp/osrng.h"
 
 class ClientThread
 {
@@ -16,6 +18,9 @@ class ClientThread
 		Socket m_client;
 		std::thread m_thread;
 		bool m_is_joined;
+
+		/* random generator for encrypted traffic */
+		CryptoPP::AutoSeededRandomPool rnd_gen;
 
 		bool is_message_waiting();
 		
@@ -37,7 +42,7 @@ class ClientThread
 		/* vector of currently running client threads */
 		static std::vector<std::unique_ptr<ClientThread>> running_client_threads;
 
-		void join();
+		void join_thread();
 
 		ClientThread(Socket client_socket);
 

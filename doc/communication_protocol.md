@@ -57,3 +57,12 @@ the result set is a table, whose serialization is identical to the *storage prot
 
 #### Server_Termination ('T')
 this is sent to the client when the serer is manually terminated.
+
+## Diffie-Hellman Key Exchange protocol
+
+### Process
+using the `Join` message, the client sends the sever the DH parameters, and its public key. 
+the server initializes the DH stuff using the recieved parameters, and then generates its own 
+keys and sends the public key to the client
+
+then both sizes calculate the shared key and uses it to communicate

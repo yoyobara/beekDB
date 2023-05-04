@@ -27,7 +27,7 @@ ClientThread::ClientThread(ClientThread&& moved) :
 	spdlog::debug("moved client thread");
 }
 
-void ClientThread::join()
+void ClientThread::join_thread()
 {
 	this->m_thread.join();
 }
