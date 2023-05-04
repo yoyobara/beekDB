@@ -176,7 +176,7 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 }
 
 /* handle a query from the client */
-void ClientThread::handle_query(const std::string& query)
+void ClientThread::handle_query(std::string&& query)
 {
 	using namespace hsql;
 

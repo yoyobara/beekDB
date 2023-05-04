@@ -6,6 +6,10 @@ import socket
 import struct
 import io
 
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import dh
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+
 class BeekConnectionError(Exception):
     pass
 
@@ -32,6 +36,9 @@ class BeekDbConnection:
             b's': 50
     }
 
+    DH_P = 23142
+    DH_G = 11
+
     QUERY_ERROR = ord('e')
     QUERY_SUCCESS = ord('s')
 
@@ -45,19 +52,25 @@ class BeekDbConnection:
         """
         self.__addr = (ip_address, port)
         self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.aes_key = None
 
         # connect to server
         self.__sock.connect(self.__addr)
 
         # send join message
-        self.__send_message(BeekDbConnection.COMMANDS["client_join"], b'')
+        self.__send_message(self.COMMANDS["client_join"], b'')
 
         # wait for join confirmation
         cmd, _ = self.__recv_message()
-        if cmd != BeekDbConnection.COMMANDS["server_join_success"]:
+        if cmd != self.COMMANDS["server_join_success"]:
             raise BeekConnectionError("something went wrong")
 
         # ok
+    
+    def init_cryptography(self):
+        dh_params = dh.generate_parameters(generator=2, key_size=1024)
+        my_private_key = dh_params.generate_private_key()
+
 
     def query(self, sql_query: str) -> tuple[bool, str | dict | None]:
         """
@@ -68,17 +81,17 @@ class BeekDbConnection:
             2. query is ok, with output clause (True, <table list>)
             3. query is NOT ok. (False, <error message>)
         """
-        self.__send_message(BeekDbConnection.COMMANDS['client_query'], sql_query.encode())
+        self.__send_message(self.COMMANDS['client_query'], sql_query.encode())
         
         # wait for response
         cmd, content = self.__recv_message()
 
-        assert cmd == BeekDbConnection.COMMANDS['server_query_result']
+        assert cmd == self.COMMANDS['server_query_result']
 
-        if content[0] == BeekDbConnection.QUERY_ERROR:
+        if content[0] == self.QUERY_ERROR:
             return (False, content[1:])
         
-        if content[0] == BeekDbConnection.QUERY_SUCCESS and len(content) == 1:
+        if content[0] == self.QUERY_SUCCESS and len(content) == 1:
             return (True, None)
 
         # parse content
@@ -86,7 +99,7 @@ class BeekDbConnection:
         signature, columns_count, rows_count = struct.unpack("<6sIQ", table_stream.read(18))
         
         # assert signature equality
-        assert signature == BeekDbConnection.SIGNATURE
+        assert signature == self.SIGNATURE
             
         # create table-like dictionary of keys
         table_dict = dict()
@@ -110,8 +123,8 @@ class BeekDbConnection:
         # now get the table data
         for i in range(rows_count):
             for name, col_type in columns:
-                unpacker = BeekDbConnection.TYPE_UNPACK[col_type]
-                data = table_stream.read(BeekDbConnection.TYPE_SIZE[col_type])
+                unpacker = self.TYPE_UNPACK[col_type]
+                data = table_stream.read(self.TYPE_SIZE[col_type])
 
                 table_dict[name].append(unpacker.unpack(data)[0])
 
@@ -141,7 +154,7 @@ class BeekDbConnection:
         closes the connection with the server
         """
 
-        self.__send_message(BeekDbConnection.COMMANDS['client_leave'], b'')
+        self.__send_message(self.COMMANDS['client_leave'], b'')
         self.__sock.close()
 
     def __enter__(self):

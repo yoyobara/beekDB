@@ -1,3 +1,4 @@
+#include <cryptopp/dh.h>
 #include <memory>
 #include <spdlog/spdlog.h>
 #include <sys/poll.h>
@@ -39,10 +40,21 @@ bool ClientThread::is_message_waiting()
 {
 	pollfd fds{m_client.get_fd(), POLLIN};
 	int pollres { poll(&fds, 1, 500) };
-
 	if (pollres < 0) throw socket_error("poll error");
 
 	return pollres;
+}
+
+void ClientThread::handle_client_join(std::string&& message_content)
+{
+	CryptoPP::DH dh;
+	dh.AccessGroupParameters().Initialize(23142, 11);
+	
+
+
+	this->m_is_joined = true;
+	comms::send_message(m_client, comms_constants::JOIN_SUCCESS_MESSAGE);
+	spdlog::info("client joined. confirmed.");
 }
 
 /*
@@ -55,9 +67,7 @@ bool ClientThread::process_message(comms::message_t&& msg)
 
 	switch (msg.command) {
 		case CMD_JOIN:
-			this->m_is_joined = true;
-			comms::send_message(m_client, JOIN_SUCCESS_MESSAGE);
-			spdlog::info("client joined. confirmed.");
+			handle_client_join(std::move(msg.content));
 			break;
 
 		case CMD_LEAVE:
