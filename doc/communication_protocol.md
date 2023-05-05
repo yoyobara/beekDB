@@ -18,7 +18,7 @@ packet, but the rest can be delivered by several packets since we know the total
 when connecting, the client shall send this message so the server will manage the connection.
 after sent the client should connect for server acceptance.
 
-has no `content` at all.
+also sends as its `content` the client's public key in order to exchange keys using the DH protocol.
 
 #### Leave (`l`)
 before disconnecting from the server, the client shall send this message to say that he left
@@ -41,6 +41,8 @@ the content here is the query text itself. limited to a single query.
 
 #### Join_Success (`J`)
 when accepting a new client, the server shall reply with this response after reciving the `Join` message from the client.
+
+also sends as its `content` its public key also as part of the DH protocol.
 
 #### Query_Result (`Q`)
 a response message to a query from the client (`Query`)

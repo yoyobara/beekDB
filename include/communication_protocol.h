@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cpp_socket.h"
+#include <cryptopp/integer.h>
 #include <string>
 #include <sys/types.h>
 #include <utility>
@@ -53,4 +54,9 @@ namespace comms_constants
 
 	const comms::message_t JOIN_SUCCESS_MESSAGE(CMD_JOIN_SUCCESS, "");
 	const comms::message_t QUERY_RESULT_SUCCESS_NO_CONTENT(CMD_QUERY_RESULT, QUERY_RES_SUCCESS);
+
+	// diffie - hellman parameters
+	const CryptoPP::Integer DH_MODULUS("0x82f043b2edae3f093b78aedf79c9f36235ccd721eebb4ff36caa1fc27f952457985e486d7f68177014ff605b57a635c943867556fd409672e416ef1ac4ae0f0573f48130901c580b5637eac68d4cbde4246bc5aa20b53ae7dc4c1569886d7efa3b144672efd1d16b06c93f1d343c93402e9f1001408a722dd7be00e0ab6d757b");
+
+	const CryptoPP::Integer DH_GENERATOR(0x2);
 }

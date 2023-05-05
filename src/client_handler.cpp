@@ -1,4 +1,5 @@
 #include <cryptopp/dh.h>
+#include <cryptopp/secblockfwd.h>
 #include <memory>
 #include <spdlog/spdlog.h>
 #include <sys/poll.h>
@@ -47,10 +48,15 @@ bool ClientThread::is_message_waiting()
 
 void ClientThread::handle_client_join(std::string&& message_content)
 {
-	CryptoPP::DH dh;
-	dh.AccessGroupParameters().Initialize(23142, 11);
-	
+	using namespace CryptoPP;
 
+	DH dh;
+	dh.AccessGroupParameters().Initialize(comms_constants::DH_MODULUS, comms_constants::DH_GENERATOR);
+
+	SecByteBlock my_public_key(dh.PublicKeyLength());
+	SecByteBlock my_private_key(dh.PrivateKeyLength());
+
+	spdlog::debug("public key length is {}, private key length is {}", my_public_key.SizeInBytes(), my_private_key.SizeInBytes());
 
 	this->m_is_joined = true;
 	comms::send_message(m_client, comms_constants::JOIN_SUCCESS_MESSAGE);
@@ -75,7 +81,7 @@ bool ClientThread::process_message(comms::message_t&& msg)
 			return true;
 			 
 		case CMD_QUERY:
-			handle_query(msg.content);
+			handle_query(std::move(msg.content));
 	}
 
 	return false;

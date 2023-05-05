@@ -9,6 +9,7 @@ import io
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import dh
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
 
 class BeekConnectionError(Exception):
     pass
@@ -65,11 +66,25 @@ class BeekDbConnection:
         if cmd != self.COMMANDS["server_join_success"]:
             raise BeekConnectionError("something went wrong")
 
-        # ok
-    
     def init_cryptography(self):
-        dh_params = dh.generate_parameters(generator=2, key_size=1024)
+        dh_params = dh.DHParameterNumbers(self.DH_P, self.DH_G).parameters()
+
+        # my keys
         my_private_key = dh_params.generate_private_key()
+        my_public_key = my_private_key.public_key()
+
+        # join client (with public key)
+        self.__send_message(self.COMMANDS['client_join'], my_public_key.public_bytes)
+
+        # wait for response
+        cmd, content = self.__recv_message()
+        assert cmd == self.COMMANDS['server_join_success']
+
+        server_public_key = load_pem_public_key(content)
+
+        # TODO is it aes key??
+        self.aes_key = my_private_key.exchange(server_public_key)
+        print(f"common key is {self.aes_key}")
 
 
     def query(self, sql_query: str) -> tuple[bool, str | dict | None]:
