@@ -7,7 +7,7 @@ import struct
 import io
 import ssl
 
-ssl_context = ssl.create_default_context()
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
 
 class BeekConnectionError(Exception):
     pass
