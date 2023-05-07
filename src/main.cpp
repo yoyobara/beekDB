@@ -21,6 +21,7 @@
 #include "tables_loader.h"
 
 std::vector<std::thread> running_client_threads;
+SSL_CTX* ssl_context;
 
 int create_socket()
 {
@@ -59,6 +60,7 @@ void handle_sigint(int dummy)
 		t.join();
 	}
 
+	SSL_CTX_free(ssl_context);
 	exit(EXIT_SUCCESS);
 }
 
@@ -76,7 +78,7 @@ int main()
 	OpenSSL_add_all_algorithms();
 	SSL_load_error_strings();
 
-	SSL_CTX* ssl_context = SSL_CTX_new(TLS_server_method());
+	ssl_context = SSL_CTX_new(TLS_server_method());
 
 	int server_fd = create_socket();
 
@@ -92,14 +94,16 @@ int main()
 		SSL *ssl = SSL_new(ssl_context);
 		SSL_set_fd(ssl, client_fd);
 
-		if (SSL_accept(ssl) < 0)
+		if (SSL_accept(ssl) != 1)
 		{
 			SSL_shutdown(ssl);
 			SSL_free(ssl);
 			close(client_fd);
+			return EXIT_FAILURE;
 		}
 
 		// add new ClientThread to the running threads (with the socket)
-		running_client_threads.emplace_back(ClientThread(client_fd));
+		ClientThread t(ssl);
+		running_client_threads.emplace_back(t);
 	}
 }

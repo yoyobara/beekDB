@@ -1,5 +1,6 @@
 #pragma once
 
+#include <openssl/types.h>
 #include <string>
 #include <sys/types.h>
 #include <utility>
@@ -21,12 +22,12 @@ namespace comms
 	/*
 	 * sends a message according to protocol. can override content length if needed, elsewhere it shall be according to the message's content size
 	 */
-	void send_message(int descriptor, const message_t& message);
+	void send_message(SSL* ssl, const message_t& message);
 
 	/*
 	 * recives a message according to protocol
 	 */
-	message_t recv_message(int descriptor);
+	message_t recv_message(SSL* ssl);
 	
 };
 

@@ -1,4 +1,5 @@
 #include <memory>
+#include <openssl/ssl.h>
 #include <spdlog/spdlog.h>
 #include <sys/poll.h>
 #include <iostream>
@@ -7,30 +8,21 @@
 #include "communication_protocol.h"
 #include "client_handler.h"
 
-std::vector<std::unique_ptr<ClientThread>> ClientThread::running_client_threads;
 std::atomic<bool> ClientThread::program_running = true;
 
 /* on constructor call, start thread */
-ClientThread::ClientThread(int client_socket_descriptor) : 
-	m_client_descriptor(client_socket_descriptor), 
+ClientThread::ClientThread(SSL* client_ssl) : 
+	client_ssl(client_ssl),
 	m_is_joined(false)
 {
-	spdlog::info("new client thread with fd={}", m_client_descriptor);
 }
 
-/* move */
-ClientThread::ClientThread(ClientThread&& moved) : 
-	m_client_descriptor(moved.m_client_descriptor),
-	m_is_joined(false)
-{
-	spdlog::debug("moved client thread");
-}
 /* checks whether a message is ready to be read from the client.
  * this enables checking for program interruption. (not freezing)
  */
 bool ClientThread::is_message_waiting()
 {
-	pollfd fds{m_client_descriptor, POLLIN};
+	pollfd fds{SSL_get_fd(client_ssl), POLLIN};
 	int pollres { poll(&fds, 1, 500) };
 
 	if (pollres < 0) spdlog::error("poll error");
@@ -49,7 +41,7 @@ bool ClientThread::process_message(comms::message_t&& msg)
 	switch (msg.command) {
 		case CMD_JOIN:
 			this->m_is_joined = true;
-			comms::send_message(m_client, JOIN_SUCCESS_MESSAGE);
+			comms::send_message(client_ssl, JOIN_SUCCESS_MESSAGE);
 			spdlog::info("client joined. confirmed.");
 			break;
 
@@ -72,12 +64,15 @@ void ClientThread::operator()()
 	while (ClientThread::program_running) {
 
 		// is_message_waiting shall block for some time
-		if (is_message_waiting() && process_message(comms::recv_message(m_client)))
+		if (is_message_waiting() && process_message(comms::recv_message(client_ssl)))
 			break;
 
-		spdlog::debug("my fd is {}", m_client_descriptor);
 	}
+}
 
-	std::cout << "called close\n";
-	close(m_client_descriptor);
+ClientThread::~ClientThread()
+{
+	int fd = SSL_get_fd(client_ssl);
+	SSL_free(client_ssl);
+	close(fd);
 }

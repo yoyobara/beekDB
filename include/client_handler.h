@@ -4,6 +4,7 @@
 #include <hsql/sql/CreateStatement.h>
 #include <hsql/sql/InsertStatement.h>
 #include <memory>
+#include <openssl/types.h>
 #include <thread>
 #include <vector>
 #include "communication_protocol.h"
@@ -12,7 +13,7 @@
 class ClientThread
 {
 	private:
-		int m_client_descriptor;
+		SSL* client_ssl;
 		bool m_is_joined;
 
 		bool is_message_waiting();
@@ -25,16 +26,16 @@ class ClientThread
 		void handle_create_statement(const hsql::CreateStatement* statement);
 		void handle_insert_statement(const hsql::InsertStatement* statement);
 
-		/* thread execution entry point */
-		void operator()();
-
 	public:
 		/* is false when the program should be terminated */
 		static std::atomic<bool> program_running;
 
 		void join();
 
-		ClientThread(int client_socket_descriptor);
+		ClientThread(SSL* client_ssl);
 
-		ClientThread(ClientThread&& moved);
+		~ClientThread();
+
+		/* thread execution entry point */
+		void operator()();
 };
