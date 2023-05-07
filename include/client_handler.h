@@ -7,14 +7,12 @@
 #include <thread>
 #include <vector>
 #include "communication_protocol.h"
-#include "cpp_socket.h"
 #include "hsql/sql/SelectStatement.h"
 
 class ClientThread
 {
-	public:
-		Socket m_client;
-		std::thread m_thread;
+	private:
+		int m_client_descriptor;
 		bool m_is_joined;
 
 		bool is_message_waiting();
@@ -28,18 +26,15 @@ class ClientThread
 		void handle_insert_statement(const hsql::InsertStatement* statement);
 
 		/* thread execution entry point */
-		void run();
+		void operator()();
 
 	public:
 		/* is false when the program should be terminated */
 		static std::atomic<bool> program_running;
 
-		/* vector of currently running client threads */
-		static std::vector<std::unique_ptr<ClientThread>> running_client_threads;
-
 		void join();
 
-		ClientThread(Socket client_socket);
+		ClientThread(int client_socket_descriptor);
 
 		ClientThread(ClientThread&& moved);
 };

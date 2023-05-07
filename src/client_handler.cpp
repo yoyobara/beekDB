@@ -3,6 +3,7 @@
 #include <sys/poll.h>
 #include <iostream>
 #include <thread>
+#include <unistd.h>
 #include "communication_protocol.h"
 #include "client_handler.h"
 
@@ -10,37 +11,29 @@ std::vector<std::unique_ptr<ClientThread>> ClientThread::running_client_threads;
 std::atomic<bool> ClientThread::program_running = true;
 
 /* on constructor call, start thread */
-ClientThread::ClientThread(Socket client_socket) : 
-	m_client(client_socket), 
-	m_thread(&ClientThread::run, this),
+ClientThread::ClientThread(int client_socket_descriptor) : 
+	m_client_descriptor(client_socket_descriptor), 
 	m_is_joined(false)
 {
-	spdlog::info("new client thread with fd={}", m_client.get_fd());
+	spdlog::info("new client thread with fd={}", m_client_descriptor);
 }
 
 /* move */
 ClientThread::ClientThread(ClientThread&& moved) : 
-	m_client(moved.m_client),
-	m_thread(std::move(moved.m_thread)),
+	m_client_descriptor(moved.m_client_descriptor),
 	m_is_joined(false)
 {
 	spdlog::debug("moved client thread");
 }
-
-void ClientThread::join()
-{
-	this->m_thread.join();
-}
-
 /* checks whether a message is ready to be read from the client.
  * this enables checking for program interruption. (not freezing)
  */
 bool ClientThread::is_message_waiting()
 {
-	pollfd fds{m_client.get_fd(), POLLIN};
+	pollfd fds{m_client_descriptor, POLLIN};
 	int pollres { poll(&fds, 1, 500) };
 
-	if (pollres < 0) throw socket_error("poll error");
+	if (pollres < 0) spdlog::error("poll error");
 
 	return pollres;
 }
@@ -74,7 +67,7 @@ bool ClientThread::process_message(comms::message_t&& msg)
 /*
  * run enrty point for a single client handler. will check if can read a message periodically.
  */
-void ClientThread::run()
+void ClientThread::operator()()
 {
 	while (ClientThread::program_running) {
 
@@ -82,9 +75,9 @@ void ClientThread::run()
 		if (is_message_waiting() && process_message(comms::recv_message(m_client)))
 			break;
 
-		spdlog::debug("my fd is {}", m_client.get_fd());
+		spdlog::debug("my fd is {}", m_client_descriptor);
 	}
 
 	std::cout << "called close\n";
-	m_client.close();
+	close(m_client_descriptor);
 }

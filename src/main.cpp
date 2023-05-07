@@ -2,8 +2,10 @@
 #include <iostream>
 #include <memory>
 #include <netinet/in.h>
+#include <openssl/evp.h>
 #include <spdlog/common.h>
 #include <sys/socket.h>
+#include <unistd.h>
 #include <vector>
 #include <thread>
 #include <csignal>
@@ -17,6 +19,8 @@
 #include "table/table.h"
 #include "table/types.h"
 #include "tables_loader.h"
+
+std::vector<std::thread> running_client_threads;
 
 int create_socket()
 {
@@ -36,6 +40,8 @@ int create_socket()
 	if (listen(sock, 1))
 		spdlog::error("socket listen error");
 
+	spdlog::info("listening to connections..");
+
 	return sock;
 }
 
@@ -49,8 +55,8 @@ void handle_sigint(int dummy)
 	ClientThread::program_running = false;
 
 	// wait for them all to join
-	for (auto&& ct: ClientThread::running_client_threads) {
-		ct->join();
+	for (std::thread& t : running_client_threads) {
+		t.join();
 	}
 
 	exit(EXIT_SUCCESS);
@@ -66,21 +72,34 @@ int main()
 {
 	setup_logger();
 
+	SSL_library_init();
+	OpenSSL_add_all_algorithms();
+	SSL_load_error_strings();
+
 	SSL_CTX* ssl_context = SSL_CTX_new(TLS_server_method());
 
-	server.bind(1337);
-	server.listen(2);
+	int server_fd = create_socket();
 
 	signal(SIGINT, handle_sigint);
-
-	spdlog::info("listening to connections..");
 
 	// repeatedly accept clients, handle them in seperate threads.
 	while (true)
 	{
-		Socket client{server.accept()};
+		int client_fd = accept(server_fd, NULL, NULL);
+		if (client_fd < 0)
+			spdlog::error("accept error");
+
+		SSL *ssl = SSL_new(ssl_context);
+		SSL_set_fd(ssl, client_fd);
+
+		if (SSL_accept(ssl) < 0)
+		{
+			SSL_shutdown(ssl);
+			SSL_free(ssl);
+			close(client_fd);
+		}
 
 		// add new ClientThread to the running threads (with the socket)
-		ClientThread::running_client_threads.push_back(std::make_unique<ClientThread>(client));
+		running_client_threads.emplace_back(ClientThread(client_fd));
 	}
 }

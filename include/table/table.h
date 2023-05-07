@@ -13,7 +13,6 @@
 #include <vector>
 #include <mutex>
 
-#include "cpp_socket.h"
 #include "storage.h"
 #include "table/types.h"
 #include "table_storage_constants.h"
