@@ -1,6 +1,8 @@
 #pragma once
 
 #include <openssl/ssl.h>
+#include <spdlog/fmt/bin_to_hex.h>
+#include <spdlog/spdlog.h>
 #include <sstream>
 #include <string>
 #include <sys/types.h>
@@ -31,8 +33,16 @@ namespace ssl_utils
 	inline std::string read_s(SSL* ssl, int n)
 	{
 		std::vector<char> buff(n);
-		SSL_read(ssl, buff.data(), buff.size());
 
+		spdlog::debug("shutdown: {}", SSL_get_shutdown(ssl));
+
+		// TODO bug
+		SSL_read(ssl, buff.data(), buff.size());
+		//
+
+		spdlog::debug("read res {}", spdlog::to_hex(buff.begin(), buff.end()));
+
+		spdlog::debug("recived by ssl: {}", spdlog::to_hex(buff.begin(), buff.end()));
 		return std::string(buff.begin(), buff.end());
 	}
 }

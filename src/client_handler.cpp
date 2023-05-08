@@ -1,5 +1,6 @@
 #include <memory>
 #include <openssl/ssl.h>
+#include <spdlog/fmt/bin_to_hex.h>
 #include <spdlog/spdlog.h>
 #include <sys/poll.h>
 #include <iostream>
@@ -15,6 +16,15 @@ ClientThread::ClientThread(SSL* client_ssl) :
 	client_ssl(client_ssl),
 	m_is_joined(false)
 {
+}
+
+/* move ctor. no deallocation of resources */
+ClientThread::ClientThread(ClientThread&& cli) :
+	client_ssl(cli.client_ssl),
+	m_is_joined(cli.m_is_joined)
+
+{
+	cli.client_ssl = nullptr;
 }
 
 /* checks whether a message is ready to be read from the client.
@@ -37,6 +47,8 @@ bool ClientThread::is_message_waiting()
 bool ClientThread::process_message(comms::message_t&& msg)
 {
 	using namespace comms_constants;
+
+	spdlog::debug("msgcmd: {}", msg.command);
 
 	switch (msg.command) {
 		case CMD_JOIN:
@@ -72,7 +84,5 @@ void ClientThread::operator()()
 
 ClientThread::~ClientThread()
 {
-	int fd = SSL_get_fd(client_ssl);
 	SSL_free(client_ssl);
-	close(fd);
 }

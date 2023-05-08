@@ -119,7 +119,6 @@ int main()
 		spdlog::debug("here?");
 
 		// add new ClientThread to the running threads (with the socket)
-		ClientThread t(ssl);
-		running_client_threads.emplace_back(t);
+		running_client_threads.emplace_back(ClientThread(ssl));
 	}
 }

@@ -33,6 +33,7 @@ class ClientThread
 		void join();
 
 		ClientThread(SSL* client_ssl);
+		ClientThread(ClientThread&& cli);
 
 		~ClientThread();
 
