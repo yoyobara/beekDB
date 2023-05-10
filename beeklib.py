@@ -134,7 +134,6 @@ class BeekDbConnection:
         recieves a message from the server. returns a tuple with the command and the content.
         """
         rc = self.__ssl_instance.recv(9)
-        print(rc)
         cmd, content_length = struct.unpack("<cQ", rc)
         content = self.__ssl_instance.recv(content_length)
 
