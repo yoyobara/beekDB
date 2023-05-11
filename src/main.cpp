@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
@@ -26,12 +27,12 @@
 std::vector<std::thread> running_client_threads;
 SSL_CTX* ssl_context;
 
-int create_socket()
+int create_socket(uint16_t port)
 {
 	struct sockaddr_in addr;
 
 	addr.sin_family = AF_INET;
-	addr.sin_port = htons(1337);
+	addr.sin_port = htons(port);
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -48,9 +49,17 @@ int create_socket()
 	if (listen(sock, 1))
 		spdlog::get("network")->critical("socket listen error");
 
-	spdlog::get("network")->info("listening to connections..");
+	spdlog::get("network")->info("listening to connections on port {} ...", port);
 
 	return sock;
+}
+
+uint16_t get_port_from_arg(int argc, char* argv[])
+{
+	if (argc == 1) // no port given
+		return comms_constants::DEFAULT_PORT;
+	
+	return atoi(argv[1]);
 }
 
 /**
@@ -71,7 +80,7 @@ void handle_sigint(int dummy)
 	exit(EXIT_SUCCESS);
 }
 
-int main()
+int main(int argc, char* argv[])
 {
 	setup_logger();
 
@@ -85,7 +94,7 @@ int main()
 	SSL_CTX_use_certificate_file(ssl_context, "cert/cert.pem", SSL_FILETYPE_PEM);
 	SSL_CTX_use_PrivateKey_file(ssl_context, "cert/key.pem", SSL_FILETYPE_PEM);
 
-	int server_fd = create_socket();
+	int server_fd = create_socket(get_port_from_arg(argc, argv));
 
 	signal(SIGINT, handle_sigint);
 
