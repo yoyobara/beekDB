@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <openssl/evp.h>
 #include <spdlog/common.h>
+#include <spdlog/spdlog.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <vector>
@@ -40,15 +41,15 @@ int create_socket()
 	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
 
 	if (sock < 0)
-		network_logger->critical("socket creation error");
+		spdlog::get("network")->critical("socket creation error");
 
 	if (bind(sock, (struct sockaddr*)&addr, sizeof addr) < 0 ) 
-		network_logger->critical("socket bind error");
+		spdlog::get("network")->critical("socket bind error");
 
 	if (listen(sock, 1))
-		network_logger->critical("socket listen error");
+		spdlog::get("network")->critical("socket listen error");
 
-	network_logger->info("listening to connections..");
+	spdlog::get("network")->info("listening to connections..");
 
 	return sock;
 }
@@ -94,7 +95,7 @@ int main()
 	{
 		int client_fd = accept(server_fd, NULL, NULL);
 		if (client_fd < 0)
-			network_logger->error("accept error");
+			spdlog::get("network")->error("accept error");
 
 		SSL *ssl = SSL_new(ssl_context);
 		SSL_set_fd(ssl, client_fd);
@@ -104,7 +105,7 @@ int main()
 			SSL_shutdown(ssl);
 			SSL_free(ssl);
 			close(client_fd);
-			network_logger->critical("ssl accept error");
+			spdlog::get("network")->critical("ssl accept error");
 		}
 
 		// add new ClientThread to the running threads (with the socket)

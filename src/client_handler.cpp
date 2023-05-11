@@ -36,7 +36,7 @@ bool ClientThread::is_message_waiting()
 	pollfd fds{SSL_get_fd(client_ssl), POLLIN};
 	int pollres { poll(&fds, 1, 500) };
 
-	if (pollres < 0) server_logger->error("poll error");
+	if (pollres < 0) spdlog::get("server")->error("poll error");
 
 	return pollres;
 }
@@ -53,11 +53,11 @@ bool ClientThread::process_message(comms::message_t&& msg)
 		case CMD_JOIN:
 			this->m_is_joined = true;
 			comms::send_message(client_ssl, JOIN_SUCCESS_MESSAGE);
-			server_logger->info("client joined. confirmed.");
+			spdlog::get("server")->info("client joined. confirmed.");
 			break;
 
 		case CMD_LEAVE:
-			server_logger->info("client left");
+			spdlog::get("server")->info("client left");
 			return true;
 			 
 		case CMD_QUERY:

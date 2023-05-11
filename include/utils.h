@@ -34,15 +34,8 @@ namespace ssl_utils
 	{
 		std::vector<char> buff(n);
 
-		spdlog::debug("shutdown: {}", SSL_get_shutdown(ssl));
-
-		// TODO bug
 		SSL_read(ssl, buff.data(), buff.size());
-		//
 
-		spdlog::debug("read res {}", spdlog::to_hex(buff.begin(), buff.end()));
-
-		spdlog::debug("recived by ssl: {}", spdlog::to_hex(buff.begin(), buff.end()));
 		return std::string(buff.begin(), buff.end());
 	}
 }
