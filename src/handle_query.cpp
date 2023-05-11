@@ -41,6 +41,8 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	return;
 	}
 
+	spdlog::get("handle")->info("target table is: '{}'", source_table->get_name());
+
 	// queried columns
 	std::vector<Column> result_columns;
 	for (const auto& col_ptr : *statement->selectList)
@@ -57,6 +59,10 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 			std::cerr << e.what() << std::endl;
 		}
 	}
+
+	spdlog::get("handle")->info("requested columns: ");
+	for (auto c : result_columns)
+		spdlog::get("handle")->info("{}", c.get_name());
 
 	// now we have required columns listed. create new result temporary table.
 	fs::create_directory(table_storage::TEMP_DIR);
@@ -108,7 +114,7 @@ void ClientThread::handle_create_statement(const hsql::CreateStatement* statemen
 	{
 		if (df->type.data_type == hsql::DataType::VARCHAR && df->type.length != table_storage::VARCHAR_50_SIZE)
 		{
-			spdlog::error("varchar length must be {} currently", table_storage::VARCHAR_50_SIZE);
+			spdlog::get("handle")->error("varchar length must be {} currently", table_storage::VARCHAR_50_SIZE);
 		}
 
 		columns.emplace_back(df->name, SQL_TYPE_TO_COLUMN_TYPE.at(df->type.data_type));
@@ -145,7 +151,7 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 		switch (column.get_type()) {
 			case INTEGER:
 				if (!value->isType(hsql::kExprLiteralInt)) 
-					spdlog::error("incorrect literal type for column {}", column.get_name());
+					spdlog::get("handle")->error("incorrect literal type for column {}", column.get_name());
 
 				new_record.put(column.get_name(), IntegerValue(value->ival));
 				break;
@@ -156,12 +162,12 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 				else if (value->isType(hsql::kExprLiteralFloat))
 					new_record.put(column.get_name(), RealValue(value->fval));
 				else
-					spdlog::error("incorrect literal type for column {}", column.get_name());
+					spdlog::get("handle")->error("incorrect literal type for column {}", column.get_name());
 				break;
 
 			case VARCHAR_50:
 				if (!value->isType(hsql::kExprLiteralString))
-					spdlog::error("incorrect literal type for column {}", column.get_name());
+					spdlog::get("handle")->error("incorrect literal type for column {}", column.get_name());
 
 				new_record.put(column.get_name(), VarChar50Value(value->getName()));
 				break;
@@ -178,7 +184,7 @@ void ClientThread::handle_query(const std::string& query)
 {
 	using namespace hsql;
 
-	spdlog::info("handling query: '{}'", query);
+	spdlog::get("handle")->info("handling query: '{}'", query);
 	SQLParserResult parsing_result;
 
 	// if query is illegal send error..
@@ -209,7 +215,7 @@ void ClientThread::handle_query(const std::string& query)
 				break;
 
 			default:
-				spdlog::error("feature not implemented yet..");
+				spdlog::get("handle")->error("feature not implemented yet..");
 		}
 	}
 }
