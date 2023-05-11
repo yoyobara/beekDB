@@ -1,6 +1,8 @@
 #pragma once
 
 #include "communication_protocol.h"
+#include <cstring>
+#include <openssl/err.h>
 #include <openssl/ssl.h>
 #include <spdlog/fmt/bin_to_hex.h>
 #include <spdlog/spdlog.h>
@@ -9,6 +11,7 @@
 #include <sys/types.h>
 #include <thread>
 #include <vector>
+#include <cerrno>
 
 template<typename T>
 inline std::string encode(T val)
@@ -44,5 +47,14 @@ namespace ssl_utils
 		SSL_read(ssl, buff.data(), buff.size());
 
 		return std::string(buff.begin(), buff.end());
+	}
+
+	inline std::string get_ssl_error()
+	{
+		unsigned long err = ERR_get_error();
+		char buff[256]{};
+		ERR_error_string(err, buff);
+
+		return std::string(buff);
 	}
 }

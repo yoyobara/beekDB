@@ -1,5 +1,7 @@
+#include <cerrno>
 #include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <memory>
 #include <netinet/in.h>
@@ -21,7 +23,9 @@
 #include "table/table.h"
 #include "table/types.h"
 #include "tables_loader.h"
+#include "utils.h"
 #include <logging.h>
+#include <spdlog/fmt/fmt.h>
 
 // threading and ssl
 std::vector<std::thread> running_client_threads;
@@ -41,13 +45,13 @@ int create_socket(uint16_t port)
 	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
 
 	if (sock < 0)
-		spdlog::get("network")->critical("socket creation error");
+		spdlog::get("network")->critical("socket creation error: {}", std::strerror(errno));
 
 	if (bind(sock, (struct sockaddr*)&addr, sizeof addr) < 0 ) 
-		spdlog::get("network")->critical("socket bind error");
+		spdlog::get("network")->critical("socket bind error: {}", std::strerror(errno));
 
 	if (listen(sock, 1))
-		spdlog::get("network")->critical("socket listen error");
+		spdlog::get("network")->critical("socket listen error: {}", std::strerror(errno));
 
 	spdlog::get("network")->info("listening to connections on port {} ...", port);
 
@@ -103,7 +107,7 @@ int main(int argc, char* argv[])
 	{
 		int client_fd = accept(server_fd, NULL, NULL);
 		if (client_fd < 0)
-			spdlog::get("network")->error("accept error");
+			spdlog::get("network")->critical("accept error: {}", std::strerror(errno));
 
 		SSL *ssl = SSL_new(ssl_context);
 		SSL_set_fd(ssl, client_fd);
@@ -113,7 +117,7 @@ int main(int argc, char* argv[])
 			SSL_shutdown(ssl);
 			SSL_free(ssl);
 			close(client_fd);
-			spdlog::get("network")->critical("ssl accept error");
+			spdlog::get("network")->critical("ssl accept error: {}", ssl_utils::get_ssl_error());
 		}
 
 		// add new ClientThread to the running threads (with the socket)
