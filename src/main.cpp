@@ -22,8 +22,8 @@
 #include "table/types.h"
 #include "tables_loader.h"
 
+// threading and ssl
 std::vector<std::thread> running_client_threads;
-
 SSL_CTX* ssl_context;
 
 int create_socket()
@@ -69,12 +69,6 @@ void handle_sigint(int dummy)
 
 	SSL_CTX_free(ssl_context);
 	exit(EXIT_SUCCESS);
-}
-
-void setup_logger()
-{
-	spdlog::set_level(spdlog::level::debug);
-	spdlog::set_pattern("[thread %t] %v");
 }
 
 int main()
