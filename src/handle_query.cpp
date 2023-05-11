@@ -33,7 +33,10 @@ using namespace comms_constants;
 void ClientThread::handle_select_statement(const hsql::SelectStatement* statement)
 { 
 	const Table* source_table;
+
 	try {
+		if (statement->fromTable == NULL) throw no_such_table("no table given");
+
 		source_table = &TablesLoader::get_instance().get_table(statement->fromTable->getName());
 	} catch (no_such_table& e)
 	{
@@ -197,6 +200,8 @@ void ClientThread::handle_query(const std::string& query)
 		comms::send_message(client_ssl, msg);
 		return;	
 	};
+
+	spdlog::get("handle")->info("query is valid!");
 
 	for (const SQLStatement* statement : parsing_result.getStatements())
 	{
