@@ -1,5 +1,6 @@
 #pragma once
 
+#include "communication_protocol.h"
 #include <openssl/ssl.h>
 #include <spdlog/fmt/bin_to_hex.h>
 #include <spdlog/spdlog.h>
@@ -21,6 +22,12 @@ inline std::string encode(T val)
 inline std::string get_thread_id()
 {
 	return (std::stringstream() << std::this_thread::get_id()).str();
+}
+
+inline void send_query_result(SSL* ssl, bool is_ok, std::string&& data)
+{
+	comms::message_t msg{comms_constants::CMD_QUERY_RESULT, (is_ok ? comms_constants::QUERY_RES_SUCCESS : comms_constants::QUERY_RES_ERROR) + data };
+	comms::send_message(ssl, msg);
 }
 
 namespace ssl_utils

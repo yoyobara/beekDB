@@ -28,7 +28,6 @@ namespace comms
 	 * recives a message according to protocol
 	 */
 	message_t recv_message(SSL* ssl);
-	
 };
 
 namespace comms_constants

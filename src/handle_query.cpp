@@ -59,7 +59,7 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 				result_columns.push_back(source_table->get_column(col_ptr->getName()));
 
 		} catch (no_such_column &e) { 
-			std::cerr << e.what() << std::endl;
+			spdlog::error(e.what());
 		}
 	}
 
