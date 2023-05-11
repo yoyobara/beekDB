@@ -62,9 +62,7 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	fs::create_directory(table_storage::TEMP_DIR);
 	std::string temp_table_path {table_storage::TEMP_DIR / ("tmp" + get_thread_id())};
 
-	spdlog::debug("here");
 	create_table(temp_table_path, result_columns);
-	spdlog::debug("not");
 
 	Table res_table(temp_table_path);
 

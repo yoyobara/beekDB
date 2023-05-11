@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include "communication_protocol.h"
 #include "client_handler.h"
+#include "logging.h"
 
 std::atomic<bool> ClientThread::program_running = true;
 
@@ -35,7 +36,7 @@ bool ClientThread::is_message_waiting()
 	pollfd fds{SSL_get_fd(client_ssl), POLLIN};
 	int pollres { poll(&fds, 1, 500) };
 
-	if (pollres < 0) spdlog::error("poll error");
+	if (pollres < 0) server_logger->error("poll error");
 
 	return pollres;
 }
@@ -48,17 +49,15 @@ bool ClientThread::process_message(comms::message_t&& msg)
 {
 	using namespace comms_constants;
 
-	spdlog::debug("msgcmd: {}", msg.command);
-
 	switch (msg.command) {
 		case CMD_JOIN:
 			this->m_is_joined = true;
 			comms::send_message(client_ssl, JOIN_SUCCESS_MESSAGE);
-			spdlog::info("client joined. confirmed.");
+			server_logger->info("client joined. confirmed.");
 			break;
 
 		case CMD_LEAVE:
-			spdlog::info("client left");
+			server_logger->info("client left");
 			return true;
 			 
 		case CMD_QUERY:

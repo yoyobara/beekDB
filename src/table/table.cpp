@@ -36,7 +36,6 @@ Record::Record(const Table* of_table, size_t data_pos) :
 	raw_data(new char[of_table->m_record_size]{}),
 	data_pos(data_pos)
 {
-	spdlog::debug("reading file at offset {} of size {}", data_pos, of_table->m_record_size);
 	of_table->m_file.read_at(data_pos, raw_data.get(), of_table->m_record_size);
 }
 
@@ -55,7 +54,6 @@ ValueType Record::get(int offset) const
 template<typename ValueType>
 ValueType Record::get(const std::string& column_name) const
 {
-	spdlog::debug("offst: {}", of_table->get_column_offset(column_name));
 	return get<ValueType>(of_table->get_column_offset(column_name));
 }
 

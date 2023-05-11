@@ -12,7 +12,6 @@
 #include <csignal>
 #include <atomic>
 
-#include <spdlog/spdlog.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
@@ -21,6 +20,7 @@
 #include "table/table.h"
 #include "table/types.h"
 #include "tables_loader.h"
+#include <logging.h>
 
 // threading and ssl
 std::vector<std::thread> running_client_threads;
@@ -40,15 +40,15 @@ int create_socket()
 	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
 
 	if (sock < 0)
-		spdlog::critical("socket creation error");
+		network_logger->critical("socket creation error");
 
 	if (bind(sock, (struct sockaddr*)&addr, sizeof addr) < 0 ) 
-		spdlog::critical("socket bind error");
+		network_logger->critical("socket bind error");
 
 	if (listen(sock, 1))
-		spdlog::critical("socket listen error");
+		network_logger->critical("socket listen error");
 
-	spdlog::info("listening to connections..");
+	network_logger->info("listening to connections..");
 
 	return sock;
 }
@@ -94,7 +94,7 @@ int main()
 	{
 		int client_fd = accept(server_fd, NULL, NULL);
 		if (client_fd < 0)
-			spdlog::error("accept error");
+			network_logger->error("accept error");
 
 		SSL *ssl = SSL_new(ssl_context);
 		SSL_set_fd(ssl, client_fd);
@@ -104,13 +104,8 @@ int main()
 			SSL_shutdown(ssl);
 			SSL_free(ssl);
 			close(client_fd);
-
-			char buff[250];
-			ERR_error_string(ERR_get_error(), buff);
-			spdlog::critical("{}", buff);
+			network_logger->critical("ssl accept error");
 		}
-
-		spdlog::debug("here?");
 
 		// add new ClientThread to the running threads (with the socket)
 		running_client_threads.emplace_back(ClientThread(ssl));
