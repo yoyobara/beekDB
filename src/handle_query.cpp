@@ -145,10 +145,7 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 		switch (column.get_type()) {
 			case INTEGER:
 				if (!value->isType(hsql::kExprLiteralInt)) 
-				{
-					spdlog::get("handle")->error({}", column.get_name());
-
-				}
+					throw incorrect_type_exception("incorrect literal type for column " + column.get_name());
 
 				new_record.put(column.get_name(), IntegerValue(value->ival));
 				break;
@@ -159,12 +156,12 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 				else if (value->isType(hsql::kExprLiteralFloat))
 					new_record.put(column.get_name(), RealValue(value->fval));
 				else
-					spdlog::get("handle")->error("incorrect literal type for column {}", column.get_name());
+					throw incorrect_type_exception("incorrect literal type for column " + column.get_name());
 				break;
 
 			case VARCHAR_50:
 				if (!value->isType(hsql::kExprLiteralString))
-					spdlog::get("handle")->error("incorrect literal type for column {}", column.get_name());
+					throw incorrect_type_exception("incorrect literal type for column " + column.get_name());
 
 				new_record.put(column.get_name(), VarChar50Value(value->getName()));
 				break;
