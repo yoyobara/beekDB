@@ -9,6 +9,8 @@
 #include "communication_protocol.h"
 #include "client_handler.h"
 #include "logging.h"
+#include "tables_loader.h"
+#include "utils.h"
 
 std::atomic<bool> ClientThread::program_running = true;
 
@@ -61,7 +63,13 @@ bool ClientThread::process_message(comms::message_t&& msg)
 			return true;
 			 
 		case CMD_QUERY:
-			handle_query(msg.content);
+			try { handle_query(msg.content); }
+			catch (std::exception& e)
+			{
+				// in case of failure, an exception is thrown and the appropriate response is sent and logged
+				spdlog::get("handle")->error("{}", e.what());
+				send_query_result(client_ssl, false, e.what());
+			}
 	}
 
 	return false;
