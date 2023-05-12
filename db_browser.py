@@ -16,7 +16,7 @@ class BeekGui(tk.Tk):
         super().__init__()
         self.query_entry: ttk.Entry = ttk.Entry(self)
         self.query_button: ttk.Button = ttk.Button(self, command=self.button_action)
-        self.table: ttk.Treeview = ttk.Treeview(self, columns=['ok', 'yes', 'sure', 'obviously'], show=['headings'])
+        self.table: ttk.Treeview = self.setup_table({'wow': [], 'sss': []})
 
     def grid_stuff(self) -> None:
         """
@@ -25,14 +25,38 @@ class BeekGui(tk.Tk):
 
         self.query_entry.grid(row=0, column=0)
         self.query_button.grid(row=0, column=1)
+        self.grid_table()
+
+    def grid_table(self) -> None:
+        """
+        grid the table Treeview
+        """
+
         self.table.grid(row=1, column=0, columnspan=2)
 
-    def setup_table(self, table_dict: dict[str, list[int | float | bytes]]) -> ttk.Treeview:
-        return ttk.Treeview(self, columns=table_dict.keys())
+    def setup_table(self, table_dict: dict[str, list[int | float | bytes]], records_count: int) -> ttk.Treeview:
+        """
+        create a new treeview from table data
+        """
+
+        tab = ttk.Treeview(self, columns=table_dict.keys(), show=['headings'])
+
+        for i in range(records_count):
+            values = [vals[i] for vals in table_dict.values()]
+            tab.insert('', 'end', values=values)
+
+        return tab
 
     def button_action(self) -> None:
-        self.table = self.setup_table({'only_me': [1, 2, 3]})
+        """
+        action of the send button
+        """
 
+        ...
+
+        self.table.destroy()
+        self.table = self.setup_table(..., ...)
+        self.grid_table()
 
 if __name__ == '__main__':
     gui = BeekGui()
