@@ -40,7 +40,7 @@ class BeekDbConnection:
 
     SIGNATURE = b'TABDEF'
 
-    def __init__(self, hostname: str, port: int = 1337):
+    def __init__(self, hostname: str, port: int):
         """
         creates a new connection object.
         
@@ -159,3 +159,6 @@ class BeekDbConnection:
         with statement support
         """
         self.close()
+
+def connect(addr: str, port: int = 1337):
+    return BeekDbConnection(addr, port)

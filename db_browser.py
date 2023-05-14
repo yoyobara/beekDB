@@ -16,7 +16,7 @@ class BeekGui(tk.Tk):
         super().__init__()
         self.query_entry: ttk.Entry = ttk.Entry(self)
         self.query_button: ttk.Button = ttk.Button(self, command=self.button_action)
-        self.table: ttk.Treeview = self.setup_table({'wow': [], 'sss': []})
+        self.table: ttk.Treeview = self.setup_table({'wow': [4], 'sss': [2]}, 1)
 
     def grid_stuff(self) -> None:
         """
@@ -58,7 +58,12 @@ class BeekGui(tk.Tk):
         self.table = self.setup_table(..., ...)
         self.grid_table()
 
-if __name__ == '__main__':
+def main():
+    
+    with 
     gui = BeekGui()
     gui.grid_stuff()
     gui.mainloop()
+
+if __name__ == '__main__':
+    main()
