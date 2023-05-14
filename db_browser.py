@@ -19,19 +19,22 @@ class BeekGui(tk.Tk):
     def __init__(self, db_connection: beeklib.BeekDbConnection):
         super().__init__()
 
+
         self.conn = db_connection
 
-        self.__query_entry: ttk.Entry = ttk.Entry(self)
-        self.__query_button: ttk.Button = ttk.Button(self, command=self.button_action)
+        self.__query_entry: ttk.Entry = ttk.Entry(self, width=70)
+        self.__query_button: ttk.Button = ttk.Button(self, command=self.button_action, text='SEND')
         self.__table: ttk.Treeview = self.setup_table({'wow': [4], 'sss': [2]}, 1)
+
+        self.bind("<Return>", self.button_action)
 
     def grid_stuff(self) -> None:
         """
         grids widgets to the screen
         """
 
-        self.__query_entry.grid(row=0, column=0)
-        self.__query_button.grid(row=0, column=1)
+        self.__query_entry.grid(row=0, column=0, padx=10, pady=10)
+        self.__query_button.grid(row=0, column=1, padx=10, pady=10)
         self.grid_table()
 
     def grid_table(self) -> None:
@@ -39,24 +42,27 @@ class BeekGui(tk.Tk):
         grid the table Treeview
         """
 
-        self.__table.grid(row=1, column=0, columnspan=2)
+        self.__table.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky='nsew')
 
     def setup_table(self, table_dict: dict[str, list[int | float | bytes]], records_count: int) -> ttk.Treeview:
         """
         create a new treeview from table data
         """
 
-        tab = ttk.Treeview(self, columns=table_dict.keys(), show=['headings'])
+        tab = ttk.Treeview(self, columns=list(table_dict.keys()), show=['headings'])
+
+        for col in tab['columns']:
+            tab.heading(col, text=col.upper())
 
         for i in range(records_count):
-            values = [vals[i] for vals in table_dict.values()]
+            values = [(vals[i] if not isinstance(vals[i], bytes) else vals[i].decode()) for vals in table_dict.values()]
             tab.insert('', 'end', values=values)
 
         return tab
 
-    def button_action(self) -> None:
+    def button_action(self, dummy=None) -> None:
         """
-        action of the send button
+        action of the send button. (dummy cause might be called from enter key)
         """
 
         # query from entry
@@ -72,7 +78,7 @@ class BeekGui(tk.Tk):
                 table = self.setup_table({}, 0)
             else:
                 # non empty table
-                table = self.setup_table(data, len(data.values()[0]))
+                table = self.setup_table(data, len(data[list(data.keys())[0]]))
         else:
             # error
             messagebox.showerror("SQL Query Error", data)
