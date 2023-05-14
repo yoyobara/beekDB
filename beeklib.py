@@ -117,7 +117,7 @@ class BeekDbConnection:
 
                 table_dict[name].append(unpacker.unpack(data)[0])
 
-        return (True, rows_count, table_dict)
+        return (True, table_dict)
 
     def __send_message(self, cmd: bytes, content: bytes) -> None:
         """
