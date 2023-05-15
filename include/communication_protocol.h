@@ -28,11 +28,12 @@ namespace comms
 	 * recives a message according to protocol
 	 */
 	message_t recv_message(SSL* ssl);
-	
 };
 
 namespace comms_constants
 {
+	const uint16_t DEFAULT_PORT { 1337 };
+
 	const int CMD_LENGTH {1};
 	const int LENGTH_LENGTH { sizeof(uint64_t) };
 	const int BATCH_SIZE {2048};

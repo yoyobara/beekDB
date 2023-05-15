@@ -10,6 +10,12 @@
 #include "communication_protocol.h"
 #include "hsql/sql/SelectStatement.h"
 
+struct incorrect_type_exception : std::runtime_error
+{
+	incorrect_type_exception(const std::string& msg) : std::runtime_error(msg){}
+};
+
+
 class ClientThread
 {
 	private:

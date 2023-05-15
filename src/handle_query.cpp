@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <exception>
 #include <hsql/SQLParser.h>
 #include <filesystem>
 #include <hsql/sql/ColumnType.h>
@@ -14,6 +15,7 @@
 #include <spdlog/fmt/bin_to_hex.h>
 #include <spdlog/spdlog.h>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -33,30 +35,27 @@ using namespace comms_constants;
 void ClientThread::handle_select_statement(const hsql::SelectStatement* statement)
 { 
 	const Table* source_table;
-	try {
-		source_table = &TablesLoader::get_instance().get_table(statement->fromTable->getName());
-	} catch (no_such_table& e)
-	{
-		comms::send_message(client_ssl, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_ERROR + e.msg));
-	return;
-	}
+
+	if (statement->fromTable == NULL) throw no_such_table("no table given");
+
+	source_table = &TablesLoader::get_instance().get_table(statement->fromTable->getName());
+
+	spdlog::get("handle")->info("target table is: '{}'", source_table->get_name());
 
 	// queried columns
 	std::vector<Column> result_columns;
 	for (const auto& col_ptr : *statement->selectList)
 	{
-		try {
-
-			// check star case 
-			if (col_ptr->isType(hsql::kExprStar))
-				result_columns.insert(result_columns.end(), source_table->get_columns().begin(), source_table->get_columns().end());
-			else
-				result_columns.push_back(source_table->get_column(col_ptr->getName()));
-
-		} catch (no_such_column &e) { 
-			std::cerr << e.what() << std::endl;
-		}
+		// check star case 
+		if (col_ptr->isType(hsql::kExprStar))
+			result_columns.insert(result_columns.end(), source_table->get_columns().begin(), source_table->get_columns().end());
+		else
+			result_columns.push_back(source_table->get_column(col_ptr->getName()));
 	}
+
+	spdlog::get("handle")->info("requested columns: ");
+	for (auto c : result_columns)
+		spdlog::get("handle")->info("{}", c.get_name());
 
 	// now we have required columns listed. create new result temporary table.
 	fs::create_directory(table_storage::TEMP_DIR);
@@ -88,7 +87,7 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	});
 
 	// send table response
-	comms::send_message(client_ssl, comms::message_t(comms_constants::CMD_QUERY_RESULT, comms_constants::QUERY_RES_SUCCESS + res_table.get_file_data()));
+	send_query_result(client_ssl, true, res_table.get_file_data());
 }
 
 void ClientThread::handle_create_statement(const hsql::CreateStatement* statement)
@@ -108,7 +107,7 @@ void ClientThread::handle_create_statement(const hsql::CreateStatement* statemen
 	{
 		if (df->type.data_type == hsql::DataType::VARCHAR && df->type.length != table_storage::VARCHAR_50_SIZE)
 		{
-			spdlog::error("varchar length must be {} currently", table_storage::VARCHAR_50_SIZE);
+			spdlog::get("handle")->error("varchar length must be {} currently", table_storage::VARCHAR_50_SIZE);
 		}
 
 		columns.emplace_back(df->name, SQL_TYPE_TO_COLUMN_TYPE.at(df->type.data_type));
@@ -121,7 +120,7 @@ void ClientThread::handle_create_statement(const hsql::CreateStatement* statemen
 	TablesLoader::get_instance().reload_tables();
 
 	// response
-	comms::send_message(client_ssl, QUERY_RESULT_SUCCESS_NO_CONTENT);
+	send_query_result(client_ssl, true, "");
 }
 
 void ClientThread::handle_insert_statement(const hsql::InsertStatement* statement)
@@ -142,10 +141,11 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 		hsql::Expr* value {statement->values->at(i)};
 		const Column& column {selected_columns.at(i)};
 
+
 		switch (column.get_type()) {
 			case INTEGER:
 				if (!value->isType(hsql::kExprLiteralInt)) 
-					spdlog::error("incorrect literal type for column {}", column.get_name());
+					throw incorrect_type_exception("incorrect literal type for column " + column.get_name());
 
 				new_record.put(column.get_name(), IntegerValue(value->ival));
 				break;
@@ -156,12 +156,12 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 				else if (value->isType(hsql::kExprLiteralFloat))
 					new_record.put(column.get_name(), RealValue(value->fval));
 				else
-					spdlog::error("incorrect literal type for column {}", column.get_name());
+					throw incorrect_type_exception("incorrect literal type for column " + column.get_name());
 				break;
 
 			case VARCHAR_50:
 				if (!value->isType(hsql::kExprLiteralString))
-					spdlog::error("incorrect literal type for column {}", column.get_name());
+					throw incorrect_type_exception("incorrect literal type for column " + column.get_name());
 
 				new_record.put(column.get_name(), VarChar50Value(value->getName()));
 				break;
@@ -170,7 +170,7 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 
 	dest_table.insert(new_record);
 
-	comms::send_message(client_ssl, QUERY_RESULT_SUCCESS_NO_CONTENT);
+	send_query_result(client_ssl, true, "");
 }
 
 /* handle a query from the client */
@@ -178,7 +178,7 @@ void ClientThread::handle_query(const std::string& query)
 {
 	using namespace hsql;
 
-	spdlog::info("handling query: '{}'", query);
+	spdlog::get("handle")->info("handling query: '{}'", query);
 	SQLParserResult parsing_result;
 
 	// if query is illegal send error..
@@ -191,6 +191,8 @@ void ClientThread::handle_query(const std::string& query)
 		comms::send_message(client_ssl, msg);
 		return;	
 	};
+
+	spdlog::get("handle")->info("query is valid!");
 
 	for (const SQLStatement* statement : parsing_result.getStatements())
 	{
@@ -209,7 +211,7 @@ void ClientThread::handle_query(const std::string& query)
 				break;
 
 			default:
-				spdlog::error("feature not implemented yet..");
+				spdlog::get("handle")->error("feature not implemented yet..");
 		}
 	}
 }
