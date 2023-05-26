@@ -211,7 +211,7 @@ void ClientThread::handle_query(const std::string& query)
 				break;
 
 			default:
-				spdlog::get("handle")->error("feature not implemented yet..");
+                throw not_implemented_exception("feature not implelmented yet..");
 		}
 	}
 }

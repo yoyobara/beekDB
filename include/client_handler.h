@@ -5,6 +5,7 @@
 #include <hsql/sql/InsertStatement.h>
 #include <memory>
 #include <openssl/types.h>
+#include <string>
 #include <thread>
 #include <vector>
 #include "communication_protocol.h"
@@ -13,6 +14,11 @@
 struct incorrect_type_exception : std::runtime_error
 {
 	incorrect_type_exception(const std::string& msg) : std::runtime_error(msg){}
+};
+
+struct not_implemented_exception : std::runtime_error
+{
+    not_implemented_exception(const std::string& msg) : std::runtime_error(msg){}
 };
 
 
