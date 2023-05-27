@@ -1,7 +1,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <vector>
+#include <list>
 #include <thread>
 #include <signal.h>
 
@@ -14,7 +14,7 @@
 #include "utils.h"
 
 // threading and ssl
-std::vector<std::thread> running_client_threads;
+std::list<std::thread> running_client_threads;
 SSL_CTX* ssl_context;
 
 int create_socket(uint16_t port)

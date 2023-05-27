@@ -29,7 +29,8 @@ class ClientThread
 		ClientThread(SSL* client_ssl);
 		ClientThread(ClientThread&& cli);
 
-		~ClientThread();
+        // cleanup ssl and stuff
+        void finalize();
 
 		/* thread execution entry point */
 		void operator()();

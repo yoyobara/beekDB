@@ -3,6 +3,7 @@
 #include <openssl/ssl.h>
 
 #include <spdlog/spdlog.h>
+#include <unistd.h>
 
 #include "client_handler.h"
 #include "exceptions.h"
@@ -83,9 +84,11 @@ void ClientThread::operator()()
 			break;
 
 	}
+    finalize();
 }
 
-ClientThread::~ClientThread()
+void ClientThread::finalize()
 {
-	SSL_free(client_ssl);
+    SSL_shutdown(client_ssl);
+    SSL_free(client_ssl);
 }
