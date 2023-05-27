@@ -1,35 +1,11 @@
-#include <algorithm>
-#include <cassert>
-#include <cstdint>
-#include <cstdlib>
-#include <exception>
-#include <hsql/SQLParser.h>
-#include <filesystem>
-#include <hsql/sql/ColumnType.h>
-#include <hsql/sql/CreateStatement.h>
-#include <hsql/sql/Expr.h>
-#include <hsql/sql/InsertStatement.h>
-#include <hsql/sql/SQLStatement.h>
-#include <iostream>
-#include <memory>
-#include <spdlog/fmt/bin_to_hex.h>
 #include <spdlog/spdlog.h>
-#include <sstream>
-#include <stdexcept>
-#include <string>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <thread>
-#include <vector>
-#include "communication_protocol.h"
-#include "table/table.h"
-#include "table/table_storage_constants.h"
-#include "table/types.h"
-#include "tables_loader.h"
+
 #include "client_handler.h"
-#include <sys/sendfile.h>
-#include "utils.h"
+#include "table/table.h"
+#include "communication_protocol.h"
 #include "exceptions.h"
+#include "tables_loader.h"
+#include "utils.h"
 
 using namespace comms_constants;
 

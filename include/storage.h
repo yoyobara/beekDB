@@ -1,11 +1,10 @@
 #pragma once
 
-#include <cassert>
 #include <fstream>
 #include <mutex>
-#include <string_view>
+#include <filesystem>
 
-#include "table/table_storage_constants.h"
+namespace fs = std::filesystem;
 
 /*
  * a class which represents a file that can be accessed at a specific position.

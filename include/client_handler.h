@@ -1,15 +1,8 @@
 #pragma once
 
-#include <atomic>
-#include <hsql/sql/CreateStatement.h>
-#include <hsql/sql/InsertStatement.h>
-#include <memory>
-#include <openssl/types.h>
-#include <string>
-#include <thread>
-#include <vector>
+#include <hsql/SQLParser.h>
+
 #include "communication_protocol.h"
-#include "hsql/sql/SelectStatement.h"
 
 class ClientThread
 {

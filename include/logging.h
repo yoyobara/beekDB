@@ -1,8 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <spdlog/logger.h>
-#include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 // loggers available to use

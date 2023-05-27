@@ -1,13 +1,9 @@
 #pragma once
 
-#include <exception>
 #include <memory>
-#include <stdexcept>
-#include <string>
 #include <vector>
-#include <iostream>
-#include "table/table.h"
 
+#include "table/table.h"
 
 /*
  * the singleton in charge of loading the tables handlers.
@@ -33,7 +29,6 @@ class TablesLoader
 		static TablesLoader& get_instance()
 		{
 			static TablesLoader instance;
-            std::cout << "HERE\n";
 
 			return instance;
 		}

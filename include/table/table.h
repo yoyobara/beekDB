@@ -1,22 +1,11 @@
 #pragma once
 
-#include <algorithm>
+#include <string>
 #include <functional>
-#include <cassert>
-#include <cstdint>
-#include <ios>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <stdexcept>
-#include <sys/types.h>
-#include <vector>
-#include <mutex>
 
 #include "storage.h"
+#include "table/table_storage_constants.h"
 #include "table/types.h"
-#include "table_storage_constants.h"
-#include "utils.h"
 
 /*
  * represents a column name, type, properties

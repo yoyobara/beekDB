@@ -1,16 +1,11 @@
-#include <memory>
-#include <openssl/ssl.h>
-#include <spdlog/fmt/bin_to_hex.h>
-#include <spdlog/spdlog.h>
+#include <atomic>
 #include <sys/poll.h>
-#include <iostream>
-#include <thread>
-#include <unistd.h>
-#include "communication_protocol.h"
+#include <openssl/ssl.h>
+
+#include <spdlog/spdlog.h>
+
 #include "client_handler.h"
 #include "exceptions.h"
-#include "logging.h"
-#include "tables_loader.h"
 #include "utils.h"
 
 std::atomic<bool> ClientThread::program_running = true;
@@ -68,9 +63,7 @@ bool ClientThread::process_message(comms::message_t&& msg)
 			catch (beek_exception& e)
 			{
 				// in case of failure, an exception is thrown and the appropriate response is sent and logged
-				std::cout << "log\n";
 				spdlog::get("handle")->error("{}", e.what());
-				std::cout << "log\n";
 				send_query_result(client_ssl, false, e.what());
 			}
 	}

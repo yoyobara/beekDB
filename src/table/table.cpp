@@ -1,23 +1,8 @@
-#include <algorithm>
-#include <array>
-#include <cstdint>
-#include <exception>
-#include <filesystem>
-#include <ios> 
-#include <memory> 
-#include <numeric>
-#include <spdlog/fmt/bin_to_hex.h>
-#include <spdlog/spdlog.h>
-#include <sstream>
-#include <iostream>
-#include <string>
-#include <vector>
+#include <ostream>
 
-#include "storage.h"
+#include <spdlog/spdlog.h>
+
 #include "table/table.h"
-#include "table/table_storage_constants.h"
-#include "table/types.h"
-#include "utils.h"
 #include "exceptions.h"
 
 using namespace table_storage;
