@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <fstream>
+#include <mutex>
 #include <string_view>
 
 #include "table/table_storage_constants.h"
@@ -11,6 +12,9 @@
  */
 class RandomAccessFile : public std::fstream
 {
+    // used to make operations thread-safe
+    std::mutex m_mutex;
+
 	public:
 		/*
 		 * constructs a new RandomAccessFile.
