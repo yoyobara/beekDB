@@ -87,7 +87,6 @@ struct Table
 
 	const std::string& get_name() const { return m_name; }
 	const int get_records_count() const { return m_records_count; }
-	const size_t get_new_record_offset() const {return m_data_offset + m_record_size * m_records_count; }
 
 	// get an unmodifiable vector of columns
 	const std::vector<Column>& get_columns() const { return m_columns; }
@@ -131,6 +130,7 @@ struct Table
 
 		size_t get_column_offset(const Column& c) const;
 		size_t get_column_offset(const std::string& column_name) const;
+        const size_t get_new_record_offset() const {return m_data_offset + m_record_size * m_records_count; }
 };
 
 void create_table(const fs::path& path, std::vector<Column> columns);
