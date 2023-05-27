@@ -13,15 +13,13 @@ std::atomic<bool> ClientThread::program_running = true;
 
 /* on constructor call, start thread */
 ClientThread::ClientThread(SSL* client_ssl) : 
-	client_ssl(client_ssl),
-	m_is_joined(false)
+	client_ssl(client_ssl)
 {
 }
 
 /* move ctor. no deallocation of resources */
 ClientThread::ClientThread(ClientThread&& cli) :
-	client_ssl(cli.client_ssl),
-	m_is_joined(cli.m_is_joined)
+	client_ssl(cli.client_ssl)
 
 {
 	cli.client_ssl = nullptr;
@@ -50,7 +48,6 @@ bool ClientThread::process_message(comms::message_t&& msg)
 
 	switch (msg.command) {
 		case CMD_JOIN:
-			this->m_is_joined = true;
 			comms::send_message(client_ssl, JOIN_SUCCESS_MESSAGE);
 			spdlog::get("server")->info("client joined. confirmed.");
 			break;

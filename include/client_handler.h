@@ -8,7 +8,6 @@ class ClientThread
 {
 	private:
 		SSL* client_ssl;
-		bool m_is_joined;
 
 		bool is_message_waiting();
 		
