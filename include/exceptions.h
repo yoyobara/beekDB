@@ -7,27 +7,33 @@ the program should not ACTUALLY throw anything, so they must be caught before th
 program
 */
 
-struct BeekException : std::runtime_error
+struct beek_exception : std::runtime_error
 {
-    BeekException(const std::string& message) : std::runtime_error(message) {}
+    beek_exception(const std::string& message) : std::runtime_error(message) {}
 };
 
-struct no_such_column : BeekException
+struct no_such_column : beek_exception
 {
-	no_such_column(const std::string& msg) : BeekException(msg){}
+	no_such_column(const std::string& msg) : beek_exception(msg){}
 };
 
-struct corrupted_table : BeekException
+struct corrupted_table : beek_exception
 {
-    corrupted_table(const std::string& msg) : BeekException(msg) {}
+    corrupted_table(const std::string& msg) : beek_exception(msg) {}
 };
 
-struct incorrect_type_exception : BeekException
+struct incorrect_type : beek_exception
 {
-	incorrect_type_exception(const std::string& msg) : BeekException(msg){}
+	incorrect_type(const std::string& msg) : beek_exception(msg){}
 };
 
-struct not_implemented_exception : BeekException
+struct not_implemented : beek_exception
 {
-    not_implemented_exception(const std::string& msg) : BeekException(msg){}
+    not_implemented(const std::string& msg) : beek_exception(msg){}
 };
+
+struct no_such_table : beek_exception
+{
+	no_such_table(const std::string& msg) : beek_exception(msg) {}
+};
+

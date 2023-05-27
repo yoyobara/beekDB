@@ -5,6 +5,7 @@
 #include <memory>
 #include <spdlog/spdlog.h>
 #include "table/table.h"
+#include "exceptions.h"
 #include "table/table_storage_constants.h"
 #include "tables_loader.h"
 

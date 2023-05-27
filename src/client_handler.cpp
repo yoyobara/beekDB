@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include "communication_protocol.h"
 #include "client_handler.h"
+#include "exceptions.h"
 #include "logging.h"
 #include "tables_loader.h"
 #include "utils.h"
@@ -64,7 +65,7 @@ bool ClientThread::process_message(comms::message_t&& msg)
 			 
 		case CMD_QUERY:
 			try { handle_query(msg.content); }
-			catch (std::exception& e)
+			catch (beek_exception& e)
 			{
 				// in case of failure, an exception is thrown and the appropriate response is sent and logged
 				std::cout << "log\n";
