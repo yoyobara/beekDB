@@ -38,6 +38,7 @@ Table& TablesLoader::get_table(const std::string& name) const
     Table& chosen_table = **find_result;
 
     // verify that it is not corrupted
+    chosen_table.verify_not_corrupted();
 
 	return chosen_table;
 }
