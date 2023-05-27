@@ -63,7 +63,7 @@ struct Record
 		Record(const Table* of_table, size_t file_pos); // link record with its table 
 		Record(const Table* of_table); // empty record probably for later insertion
 
-        const char* get_raw_data();
+        const char* get_raw_data() const;
 
 		/*
 		 * get a value of a column in the record.
