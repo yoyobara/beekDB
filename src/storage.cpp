@@ -36,11 +36,8 @@ RandomAccessFile::RandomAccessFile(const fs::path& filename, bool create)
 
 bool RandomAccessFile::verify_content(size_t position, const std::string& s)
 {
-    std::lock_guard<std::mutex> guard(m_mutex); // accuqire lock
- 
     std::array<char, 6> buff;
 	read_at(position, buff.data(), buff.size());
 
 	return std::equal(buff.begin(), buff.end(), table_storage::SIGNATURE.begin());
-    // lock released
 }
