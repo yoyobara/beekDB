@@ -58,9 +58,12 @@ void Record::put(const std::string& column_name, ValueType value)
 
 void Record::update() const
 {
-	// lock mutex
 	of_table->m_file.write_at(data_pos, raw_data.get(), of_table->m_record_size);
-	// unlock mutex
+}
+
+const char* Record::get_raw_data()
+{
+    return raw_data.get();
 }
 
 // template pre-declarations

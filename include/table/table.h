@@ -50,7 +50,7 @@ struct Table;
  * */
 struct Record
 {
-	public:
+	private:
 		const Table *of_table;
 		std::unique_ptr<char> raw_data;
 		long data_pos;
@@ -62,6 +62,8 @@ struct Record
 	public: 
 		Record(const Table* of_table, size_t file_pos); // link record with its table 
 		Record(const Table* of_table); // empty record probably for later insertion
+
+        const char* get_raw_data();
 
 		/*
 		 * get a value of a column in the record.
