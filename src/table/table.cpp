@@ -171,7 +171,7 @@ size_t Table::get_column_offset(const Column& column) const
 void Table::insert(const Record& rec)
 {
 	size_t new_offset { get_new_record_offset() };
-	m_file.write_at(new_offset, rec->get_raw_data(), m_record_size);
+	m_file.write_at(new_offset, rec.get_raw_data(), m_record_size);
 
 	m_records_count++;
 
