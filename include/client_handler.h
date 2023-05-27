@@ -23,8 +23,6 @@ class ClientThread
 		/* is false when the program should be terminated */
 		static std::atomic<bool> program_running;
 
-		void join();
-
 		ClientThread(SSL* client_ssl);
 		ClientThread(ClientThread&& cli);
 
