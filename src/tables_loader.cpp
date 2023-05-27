@@ -35,6 +35,9 @@ Table& TablesLoader::get_table(const std::string& name) const
 	if (find_result == tables.end())
 		throw no_such_table("no such table as '" + name + "'...");
 
+    Table& chosen_table = **find_result;
 
-	return **find_result;
+    // verify that it is not corrupted
+
+	return chosen_table;
 }

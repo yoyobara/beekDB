@@ -94,8 +94,7 @@ Table::Table(const fs::path& path) :
 	m_record_size(0)
 {
 	// verify signature
-	if (!m_file.verify_content(SIGNATURE_OFFSET, SIGNATURE))
-		spdlog::critical("table file is corrupted: {}", m_name);
+    try { verify_not_corrupted(); } catch(corrupted_table& e) {spdlog::error(e.what()); return;}
 
 	// read columns count
 	int columns_count;
@@ -205,4 +204,10 @@ void Table::for_each(std::function<void(Record&&)> func) const
 	{
 		func(Record(this, offset));
 	}
+}
+
+void Table::verify_not_corrupted()
+{
+    if (!m_file.verify_content(SIGNATURE_OFFSET, SIGNATURE))
+        throw corrupted_table("table `" + this->get_name() + "` is corrupted...");
 }

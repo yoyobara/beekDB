@@ -1,10 +1,13 @@
+#include <algorithm>
 #include <array>
 #include <fstream>
 #include <ios>
 #include <iostream>
 #include <string>
+#include <string_view>
 
 #include "storage.h"
+#include "table/table_storage_constants.h"
 
 using std::ios;
 
@@ -33,8 +36,8 @@ RandomAccessFile::RandomAccessFile(const fs::path& filename, bool create)
 
 bool RandomAccessFile::verify_content(size_t position, const std::string& s)
 {
-	std::string buff(s.size(), 0);
-	read_at(position, buff.data(), s.size());
+    std::array<char, 6> buff;
+	read_at(position, buff.data(), buff.size());
 
-	return buff == s;
+	return std::equal(buff.begin(), buff.end(), table_storage::SIGNATURE.begin());
 }

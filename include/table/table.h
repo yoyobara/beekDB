@@ -3,8 +3,7 @@
 #include <algorithm>
 #include <functional>
 #include <cassert>
-#include <cstdint>
-#include <ios>
+#include <cstdint> #include <ios>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -53,6 +52,11 @@ std::ostream& operator<<(std::ostream& out, const Column& c);
 struct no_such_column : std::runtime_error
 {
 	no_such_column(const std::string& msg) : std::runtime_error(msg){}
+};
+
+struct corrupted_table : std::runtime_error
+{
+    corrupted_table(const std::string& msg) : std::runtime_error(msg){}
 };
 
 struct Table;
@@ -117,12 +121,15 @@ struct Table
 	 */
 	void insert(const Record& rec);
 
-	friend class Record;
-
 	std::string get_file_data();
 
 	/* does specific stuff on each record of this table */
 	void for_each(std::function<void(Record&&)> func) const;
+
+    // throws an `corrupted_table` exception if the table is corrupted
+    void verify_not_corrupted();
+
+	friend class Record;
 
 	private:
 		// file that the table manages
