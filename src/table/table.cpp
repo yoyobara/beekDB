@@ -18,6 +18,7 @@
 #include "table/table_storage_constants.h"
 #include "table/types.h"
 #include "utils.h"
+#include "exceptions.h"
 
 using namespace table_storage;
 

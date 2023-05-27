@@ -29,6 +29,7 @@
 #include "client_handler.h"
 #include <sys/sendfile.h>
 #include "utils.h"
+#include "exceptions.h"
 
 using namespace comms_constants;
 

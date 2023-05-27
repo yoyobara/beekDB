@@ -50,16 +50,6 @@ class Column
 
 std::ostream& operator<<(std::ostream& out, const Column& c);
 
-struct no_such_column : std::runtime_error
-{
-	no_such_column(const std::string& msg) : std::runtime_error(msg){}
-};
-
-struct corrupted_table : std::runtime_error
-{
-    corrupted_table(const std::string& msg) : std::runtime_error(msg){}
-};
-
 struct Table;
 
 /* represents a record in the table 
