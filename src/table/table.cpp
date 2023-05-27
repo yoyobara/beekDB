@@ -94,7 +94,7 @@ Table::Table(const fs::path& path) :
 	m_record_size(0)
 {
 	// verify signature
-    try { verify_not_corrupted(); } catch(corrupted_table& e) {spdlog::error(e.what()); return;}
+    try { verify_not_corrupted(); } catch(corrupted_table& e) {spdlog::get("table")->error(e.what()); return;}
 
 	// read columns count
 	int columns_count;

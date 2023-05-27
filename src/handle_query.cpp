@@ -38,7 +38,9 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 
 	if (statement->fromTable == NULL) throw no_such_table("no table given");
 
+    std::cout << "start\n";
 	source_table = &TablesLoader::get_instance().get_table(statement->fromTable->getName());
+    std::cout << "end\n";
 
 	spdlog::get("handle")->info("target table is: '{}'", source_table->get_name());
 
