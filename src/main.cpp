@@ -11,6 +11,7 @@
 #include "communication_protocol.h"
 #include "client_handler.h"
 #include "logging.h"
+#include "tables_loader.h"
 #include "utils.h"
 
 // threading and ssl
@@ -87,6 +88,9 @@ int main(int argc, char* argv[])
 	int server_fd = create_socket(get_port_from_arg(argc, argv));
 
 	signal(SIGINT, handle_sigint);
+
+    // pre-load tables
+    TablesLoader::get_instance();
 
 	// repeatedly accept clients, handle them in seperate threads.
 	while (true)
