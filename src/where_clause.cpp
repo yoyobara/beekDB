@@ -23,7 +23,7 @@ Expr* expr_equals(Expr *a, Expr *b, const Record& record_ref)
 
 				case VARCHAR_50:
 					e->type = kExprLiteralString;
-					e->name = record_ref.get<RealValue>(e->name).real_val; // TODO
+					e->name = record_ref.get<VarChar50Value>(e->name).str_val.data(); // TODO
 			}
 		}
 	}
@@ -36,7 +36,7 @@ Expr* expr_equals(Expr *a, Expr *b, const Record& record_ref)
 
 	else if (a->isType(kExprLiteralString) && b->isType(kExprLiteralString))
 		return Expr::makeLiteral((bool)strcmp(a->name, b->name));
-
+    
 	else
-		throw "not implemented error";
+		throw 
 }

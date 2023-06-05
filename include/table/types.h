@@ -1,5 +1,4 @@
 #pragma once
-#include "table/table_storage_constants.h"
 #include <algorithm>
 #include <array>
 #include <cstring>
