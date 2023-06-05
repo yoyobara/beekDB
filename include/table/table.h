@@ -51,7 +51,6 @@ struct Table;
 struct Record
 {
 	private:
-		const Table *of_table;
 		std::unique_ptr<char> raw_data;
 		long data_pos;
 
@@ -64,6 +63,7 @@ struct Record
 		Record(const Table* of_table); // empty record probably for later insertion
 
         const char* get_raw_data() const;
+		const Table *of_table;
 
 		/*
 		 * get a value of a column in the record.

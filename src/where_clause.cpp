@@ -1,13 +1,14 @@
 #include "where_clause.h"
+#include "exceptions.h"
 #include "table/types.h"
 #include <cstring>
 #include <hsql/sql/Expr.h>
 #include <table/table.h>
 
-Expr* expr_equals(Expr *a, Expr *b, const Record& record_ref)
-{
-	using namespace hsql;
+using namespace hsql;
 
+void convert_to_values(Expr *a, Expr *b, const Record& record_ref)
+{
 	for (Expr* e : {a, b})
 	{
 		if (e->isType(kExprColumnRef))
@@ -28,6 +29,10 @@ Expr* expr_equals(Expr *a, Expr *b, const Record& record_ref)
 		}
 	}
 
+}
+
+Expr* expr_equals(Expr *a, Expr *b)
+{
 	if (a->isType(kExprLiteralInt) && b->isType(kExprLiteralInt))
 		return Expr::makeLiteral(a->ival == b->ival);
 
@@ -38,5 +43,30 @@ Expr* expr_equals(Expr *a, Expr *b, const Record& record_ref)
 		return Expr::makeLiteral((bool)strcmp(a->name, b->name));
     
 	else
-		throw 
+		throw not_implemented("checking equality here not implemented");
 }
+
+Expr* expr_plus(Expr* a, Expr* b)
+{
+    if (a->isType(kExprLiteralInt) && b->isType(hsql::kExprLiteralInt))
+        return Expr::makeLiteral(a->ival + b->ival);
+
+    else if (a->isType(kExprLiteralFloat) && b->isType(kExprLiteralFloat))
+        return Expr::makeLiteral(a->fval + b->fval);
+
+    else
+        throw not_implemented("such addition is not implemented.");
+}
+
+Expr* expr_minus(Expr* a, Expr* b)
+{
+    if (a->isType(kExprLiteralInt) && b->isType(hsql::kExprLiteralInt))
+        return Expr::makeLiteral(a->ival - b->ival);
+
+    else if (a->isType(kExprLiteralFloat) && b->isType(kExprLiteralFloat))
+        return Expr::makeLiteral(a->fval - b->fval);
+
+    else
+        throw not_implemented("such subtraction is not implemented.");
+}
+
