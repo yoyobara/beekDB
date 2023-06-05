@@ -1,33 +1,10 @@
-#include <algorithm>
-#include <cassert>
-#include <cstdint>
-#include <cstdlib>
-#include <exception>
-#include <hsql/SQLParser.h>
-#include <filesystem>
-#include <hsql/sql/ColumnType.h>
-#include <hsql/sql/CreateStatement.h>
-#include <hsql/sql/Expr.h>
-#include <hsql/sql/InsertStatement.h>
-#include <hsql/sql/SQLStatement.h>
-#include <iostream>
-#include <memory>
-#include <spdlog/fmt/bin_to_hex.h>
 #include <spdlog/spdlog.h>
-#include <sstream>
-#include <stdexcept>
-#include <string>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <thread>
-#include <vector>
-#include "communication_protocol.h"
-#include "table/table.h"
-#include "table/table_storage_constants.h"
-#include "table/types.h"
-#include "tables_loader.h"
+
 #include "client_handler.h"
-#include <sys/sendfile.h>
+#include "table/table.h"
+#include "communication_protocol.h"
+#include "exceptions.h"
+#include "tables_loader.h"
 #include "utils.h"
 
 using namespace comms_constants;
@@ -37,7 +14,7 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	const Table* source_table;
 
 	if (statement->fromTable == NULL) throw no_such_table("no table given");
-
+    
 	source_table = &TablesLoader::get_instance().get_table(statement->fromTable->getName());
 
 	spdlog::get("handle")->info("target table is: '{}'", source_table->get_name());
@@ -145,7 +122,7 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 		switch (column.get_type()) {
 			case INTEGER:
 				if (!value->isType(hsql::kExprLiteralInt)) 
-					throw incorrect_type_exception("incorrect literal type for column " + column.get_name());
+					throw incorrect_type("incorrect literal type for column " + column.get_name());
 
 				new_record.put(column.get_name(), IntegerValue(value->ival));
 				break;
@@ -156,12 +133,12 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 				else if (value->isType(hsql::kExprLiteralFloat))
 					new_record.put(column.get_name(), RealValue(value->fval));
 				else
-					throw incorrect_type_exception("incorrect literal type for column " + column.get_name());
+					throw incorrect_type("incorrect literal type for column " + column.get_name());
 				break;
 
 			case VARCHAR_50:
 				if (!value->isType(hsql::kExprLiteralString))
-					throw incorrect_type_exception("incorrect literal type for column " + column.get_name());
+					throw incorrect_type("incorrect literal type for column " + column.get_name());
 
 				new_record.put(column.get_name(), VarChar50Value(value->getName()));
 				break;
@@ -211,7 +188,7 @@ void ClientThread::handle_query(const std::string& query)
 				break;
 
 			default:
-				spdlog::get("handle")->error("feature not implemented yet..");
+                throw not_implemented("feature not implelmented yet..");
 		}
 	}
 }

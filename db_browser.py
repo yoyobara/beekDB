@@ -24,7 +24,7 @@ class BeekGui(tk.Tk):
 
         self.__query_entry: ttk.Entry = ttk.Entry(self, width=70)
         self.__query_button: ttk.Button = ttk.Button(self, command=self.button_action, text='SEND')
-        self.__table: ttk.Treeview = self.setup_table({'wow': [4], 'sss': [2]}, 1)
+        self.__table: ttk.Treeview = self.setup_table({}, 0)
 
         self.bind("<Return>", self.button_action)
 

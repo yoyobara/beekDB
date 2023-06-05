@@ -1,9 +1,7 @@
 #pragma once
 
-#include <cstdint>
-#include <map>
-#include <string>
 #include <filesystem>
+#include <map>
 
 #include "table/types.h"
 

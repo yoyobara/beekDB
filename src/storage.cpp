@@ -1,24 +1,27 @@
 #include <array>
-#include <fstream>
-#include <ios>
-#include <iostream>
-#include <string>
 
 #include "storage.h"
+#include "table/table_storage_constants.h"
 
 using std::ios;
 
 void RandomAccessFile::write_at(size_t position, const void* data, size_t size) 
 {
-	
+    std::lock_guard<std::mutex> guard(m_mutex); // accuqire lock
+
 	seekp(position, std::ios::beg);
 	std::fstream::write(static_cast<const char*>(data), size);
+
+    // lock released
 }
 
 void RandomAccessFile::read_at(size_t position, void* data, size_t size)
 {
+    std::lock_guard<std::mutex> guard(m_mutex); // accuqire lock
 	seekg(position, std::ios::beg);
 	read(static_cast<char*>(data), size);
+
+    // lock released
 }
 
 RandomAccessFile::RandomAccessFile(const fs::path& filename, bool create)
@@ -33,8 +36,8 @@ RandomAccessFile::RandomAccessFile(const fs::path& filename, bool create)
 
 bool RandomAccessFile::verify_content(size_t position, const std::string& s)
 {
-	std::string buff(s.size(), 0);
-	read_at(position, buff.data(), s.size());
+    std::array<char, 6> buff;
+	read_at(position, buff.data(), buff.size());
 
-	return buff == s;
+	return std::equal(buff.begin(), buff.end(), table_storage::SIGNATURE.begin());
 }

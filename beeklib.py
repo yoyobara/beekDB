@@ -1,5 +1,5 @@
 """
-the python API for a beekDB server
+the python API library for a beekDB server
 """
 
 import socket

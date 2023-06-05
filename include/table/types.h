@@ -1,10 +1,6 @@
 #pragma once
-#include <algorithm>
 #include <array>
 #include <cstring>
-#include <spdlog/fmt/bin_to_hex.h>
-#include <spdlog/spdlog.h>
-#include <string>
 
 /* the three possible column types */
 enum ColumnType

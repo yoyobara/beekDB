@@ -1,26 +1,9 @@
 #pragma once
 
-#include <exception>
 #include <memory>
-#include <stdexcept>
-#include <string>
 #include <vector>
-#include <iostream>
+
 #include "table/table.h"
-
-
-struct no_such_table : std::exception
-{
-	const std::string msg;
-
-	no_such_table(std::string&& msg) : msg(msg) {}
-
-	const char * what() const noexcept override 
-	{
-		std::cout << msg << std::endl;
-		return msg.c_str();
-	}
-};
 
 /*
  * the singleton in charge of loading the tables handlers.
@@ -43,7 +26,7 @@ class TablesLoader
 		void reload_tables();
 
 		// singleton essentials
-		inline static TablesLoader& get_instance()
+		static TablesLoader& get_instance()
 		{
 			static TablesLoader instance;
 

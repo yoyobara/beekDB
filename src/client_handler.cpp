@@ -1,30 +1,25 @@
-#include <memory>
-#include <openssl/ssl.h>
-#include <spdlog/fmt/bin_to_hex.h>
-#include <spdlog/spdlog.h>
+#include <atomic>
 #include <sys/poll.h>
-#include <iostream>
-#include <thread>
+#include <openssl/ssl.h>
+
+#include <spdlog/spdlog.h>
 #include <unistd.h>
-#include "communication_protocol.h"
+
 #include "client_handler.h"
-#include "logging.h"
-#include "tables_loader.h"
+#include "exceptions.h"
 #include "utils.h"
 
 std::atomic<bool> ClientThread::program_running = true;
 
 /* on constructor call, start thread */
 ClientThread::ClientThread(SSL* client_ssl) : 
-	client_ssl(client_ssl),
-	m_is_joined(false)
+	client_ssl(client_ssl)
 {
 }
 
 /* move ctor. no deallocation of resources */
 ClientThread::ClientThread(ClientThread&& cli) :
-	client_ssl(cli.client_ssl),
-	m_is_joined(cli.m_is_joined)
+	client_ssl(cli.client_ssl)
 
 {
 	cli.client_ssl = nullptr;
@@ -53,7 +48,6 @@ bool ClientThread::process_message(comms::message_t&& msg)
 
 	switch (msg.command) {
 		case CMD_JOIN:
-			this->m_is_joined = true;
 			comms::send_message(client_ssl, JOIN_SUCCESS_MESSAGE);
 			spdlog::get("server")->info("client joined. confirmed.");
 			break;
@@ -64,12 +58,10 @@ bool ClientThread::process_message(comms::message_t&& msg)
 			 
 		case CMD_QUERY:
 			try { handle_query(msg.content); }
-			catch (std::exception& e)
+			catch (beek_exception& e)
 			{
 				// in case of failure, an exception is thrown and the appropriate response is sent and logged
-				std::cout << "log\n";
 				spdlog::get("handle")->error("{}", e.what());
-				std::cout << "log\n";
 				send_query_result(client_ssl, false, e.what());
 			}
 	}
@@ -89,9 +81,11 @@ void ClientThread::operator()()
 			break;
 
 	}
+    finalize();
 }
 
-ClientThread::~ClientThread()
+void ClientThread::finalize()
 {
-	SSL_free(client_ssl);
+    SSL_shutdown(client_ssl);
+    SSL_free(client_ssl);
 }

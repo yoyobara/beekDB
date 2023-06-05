@@ -1,23 +1,9 @@
-#include <algorithm>
-#include <array>
-#include <cstdint>
-#include <exception>
-#include <filesystem>
-#include <ios> 
-#include <memory> 
-#include <numeric>
-#include <spdlog/fmt/bin_to_hex.h>
-#include <spdlog/spdlog.h>
-#include <sstream>
-#include <iostream>
-#include <string>
-#include <vector>
+#include <ostream>
 
-#include "storage.h"
+#include <spdlog/spdlog.h>
+
 #include "table/table.h"
-#include "table/table_storage_constants.h"
-#include "table/types.h"
-#include "utils.h"
+#include "exceptions.h"
 
 using namespace table_storage;
 
@@ -72,9 +58,12 @@ void Record::put(const std::string& column_name, ValueType value)
 
 void Record::update() const
 {
-	// lock mutex
 	of_table->m_file.write_at(data_pos, raw_data.get(), of_table->m_record_size);
-	// unlock mutex
+}
+
+const char* Record::get_raw_data() const
+{
+    return raw_data.get();
 }
 
 // template pre-declarations
@@ -94,8 +83,7 @@ Table::Table(const fs::path& path) :
 	m_record_size(0)
 {
 	// verify signature
-	if (!m_file.verify_content(SIGNATURE_OFFSET, SIGNATURE))
-		spdlog::critical("table file is corrupted: {}", m_name);
+    try { verify_not_corrupted(); } catch(corrupted_table& e) {spdlog::get("table")->error(e.what()); return;}
 
 	// read columns count
 	int columns_count;
@@ -183,7 +171,7 @@ size_t Table::get_column_offset(const Column& column) const
 void Table::insert(const Record& rec)
 {
 	size_t new_offset { get_new_record_offset() };
-	m_file.write_at(new_offset, rec.raw_data.get(), m_record_size);
+	m_file.write_at(new_offset, rec.get_raw_data(), m_record_size);
 
 	m_records_count++;
 
@@ -205,4 +193,10 @@ void Table::for_each(std::function<void(Record&&)> func) const
 	{
 		func(Record(this, offset));
 	}
+}
+
+void Table::verify_not_corrupted()
+{
+    if (!m_file.verify_content(SIGNATURE_OFFSET, SIGNATURE))
+        throw corrupted_table("table `" + this->get_name() + "` is corrupted...");
 }

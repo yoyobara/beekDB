@@ -1,34 +1,21 @@
-#include <cerrno>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <memory>
 #include <netinet/in.h>
-#include <openssl/evp.h>
-#include <spdlog/common.h>
-#include <spdlog/spdlog.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <vector>
+#include <list>
 #include <thread>
-#include <csignal>
-#include <atomic>
+#include <signal.h>
 
+#include <spdlog/spdlog.h>
 #include <openssl/ssl.h>
-#include <openssl/err.h>
 
 #include "communication_protocol.h"
 #include "client_handler.h"
-#include "table/table.h"
-#include "table/types.h"
+#include "logging.h"
 #include "tables_loader.h"
 #include "utils.h"
-#include <logging.h>
-#include <spdlog/fmt/fmt.h>
 
 // threading and ssl
-std::vector<std::thread> running_client_threads;
+std::list<std::thread> running_client_threads;
 SSL_CTX* ssl_context;
 
 int create_socket(uint16_t port)
@@ -101,6 +88,9 @@ int main(int argc, char* argv[])
 	int server_fd = create_socket(get_port_from_arg(argc, argv));
 
 	signal(SIGINT, handle_sigint);
+
+    // pre-load tables
+    TablesLoader::get_instance();
 
 	// repeatedly accept clients, handle them in seperate threads.
 	while (true)

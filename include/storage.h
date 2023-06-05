@@ -1,16 +1,19 @@
 #pragma once
 
-#include <cassert>
 #include <fstream>
-#include <string_view>
+#include <mutex>
+#include <filesystem>
 
-#include "table/table_storage_constants.h"
+namespace fs = std::filesystem;
 
 /*
  * a class which represents a file that can be accessed at a specific position.
  */
 class RandomAccessFile : public std::fstream
 {
+    // used to make operations thread-safe
+    std::mutex m_mutex;
+
 	public:
 		/*
 		 * constructs a new RandomAccessFile.

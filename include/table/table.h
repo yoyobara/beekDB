@@ -1,22 +1,11 @@
 #pragma once
 
-#include <algorithm>
+#include <string>
 #include <functional>
-#include <cassert>
-#include <cstdint>
-#include <ios>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <stdexcept>
-#include <sys/types.h>
-#include <vector>
-#include <mutex>
 
 #include "storage.h"
+#include "table/table_storage_constants.h"
 #include "table/types.h"
-#include "table_storage_constants.h"
-#include "utils.h"
 
 /*
  * represents a column name, type, properties
@@ -50,11 +39,6 @@ class Column
 
 std::ostream& operator<<(std::ostream& out, const Column& c);
 
-struct no_such_column : std::runtime_error
-{
-	no_such_column(const std::string& msg) : std::runtime_error(msg){}
-};
-
 struct Table;
 
 /* represents a record in the table 
@@ -66,7 +50,7 @@ struct Table;
  * */
 struct Record
 {
-	public:
+	private:
 		const Table *of_table;
 		std::unique_ptr<char> raw_data;
 		long data_pos;
@@ -78,6 +62,8 @@ struct Record
 	public: 
 		Record(const Table* of_table, size_t file_pos); // link record with its table 
 		Record(const Table* of_table); // empty record probably for later insertion
+
+        const char* get_raw_data() const;
 
 		/*
 		 * get a value of a column in the record.
@@ -103,7 +89,6 @@ struct Table
 
 	const std::string& get_name() const { return m_name; }
 	const int get_records_count() const { return m_records_count; }
-	const size_t get_new_record_offset() const {return m_data_offset + m_record_size * m_records_count; }
 
 	// get an unmodifiable vector of columns
 	const std::vector<Column>& get_columns() const { return m_columns; }
@@ -117,12 +102,15 @@ struct Table
 	 */
 	void insert(const Record& rec);
 
-	friend class Record;
-
 	std::string get_file_data();
 
 	/* does specific stuff on each record of this table */
 	void for_each(std::function<void(Record&&)> func) const;
+
+    // throws an `corrupted_table` exception if the table is corrupted
+    void verify_not_corrupted();
+
+	friend class Record;
 
 	private:
 		// file that the table manages
@@ -144,6 +132,7 @@ struct Table
 
 		size_t get_column_offset(const Column& c) const;
 		size_t get_column_offset(const std::string& column_name) const;
+        const size_t get_new_record_offset() const {return m_data_offset + m_record_size * m_records_count; }
 };
 
 void create_table(const fs::path& path, std::vector<Column> columns);

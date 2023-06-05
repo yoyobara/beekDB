@@ -1,17 +1,14 @@
 #pragma once
 
-#include "communication_protocol.h"
-#include <cstring>
-#include <openssl/err.h>
-#include <openssl/ssl.h>
-#include <spdlog/fmt/bin_to_hex.h>
-#include <spdlog/spdlog.h>
-#include <sstream>
 #include <string>
-#include <sys/types.h>
 #include <thread>
+#include <sstream>
 #include <vector>
-#include <cerrno>
+
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
+#include "communication_protocol.h"
 
 template<typename T>
 inline std::string encode(T val)

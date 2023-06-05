@@ -1,0 +1,39 @@
+#pragma once
+#include <stdexcept>
+
+/*
+this file contains all the exceptions that the program might throw.
+the program should not ACTUALLY throw anything, so they must be caught before they interrupt the 
+program
+*/
+
+struct beek_exception : std::runtime_error
+{
+    beek_exception(const std::string& message) : std::runtime_error(message) {}
+};
+
+struct no_such_column : beek_exception
+{
+	no_such_column(const std::string& msg) : beek_exception(msg){}
+};
+
+struct corrupted_table : beek_exception
+{
+    corrupted_table(const std::string& msg) : beek_exception(msg) {}
+};
+
+struct incorrect_type : beek_exception
+{
+	incorrect_type(const std::string& msg) : beek_exception(msg){}
+};
+
+struct not_implemented : beek_exception
+{
+    not_implemented(const std::string& msg) : beek_exception(msg){}
+};
+
+struct no_such_table : beek_exception
+{
+	no_such_table(const std::string& msg) : beek_exception(msg) {}
+};
+

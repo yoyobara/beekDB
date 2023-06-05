@@ -1,13 +1,8 @@
-#include "communication_protocol.h"
-#include <cstdint>
-#include <iostream>
-#include "table/table_storage_constants.h"
-#include "utils.h"
-#include <cstring>
-#include <openssl/types.h>
 #include <spdlog/spdlog.h>
-#include <sys/types.h>
 #include <spdlog/fmt/bin_to_hex.h>
+
+#include "communication_protocol.h"
+#include "utils.h"
 
 void comms::send_message(SSL* ssl, const message_t& message) // length is -1 by default
 {
