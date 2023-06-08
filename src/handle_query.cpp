@@ -1,3 +1,4 @@
+#include <hsql/sql/Expr.h>
 #include <spdlog/spdlog.h>
 
 #include "client_handler.h"
@@ -6,6 +7,7 @@
 #include "exceptions.h"
 #include "tables_loader.h"
 #include "utils.h"
+#include "where_clause.h"
 
 using namespace comms_constants;
 
@@ -44,6 +46,15 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 
 	// values into temp table
 	source_table->for_each([&](Record&& r) {
+
+        // should I? (where clause)
+        auto where_res = eval(statement->whereClause);
+        if (where_res->type != hsql::kExprLiteralInt)
+            throw where_clause_error("error in evaluating where clause.");
+
+        if (!where_res->ival)
+            return; // skip since not needed
+
 		Record new_record(&res_table);
 		for (const Column& col : result_columns)
 		{
