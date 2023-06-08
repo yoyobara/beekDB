@@ -47,13 +47,18 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	// values into temp table
 	source_table->for_each([&](Record&& r) {
 
-        // should I? (where clause)
-        auto where_res = eval(statement->whereClause, r);
-        if (where_res->type != hsql::kExprLiteralInt)
-            throw where_clause_error("error in evaluating where clause.");
+        // TODO from here problem
 
-        if (!where_res->ival)
-            return; // skip since not needed
+        // should I? (where clause)
+        if (statement->whereClause != NULL) {
+            auto where_res = eval(statement->whereClause, r);
+
+            if (where_res->type != hsql::kExprLiteralInt)
+                throw where_clause_error("error in evaluating where clause.");
+
+            if (!where_res->ival)
+                return; // skip since not needed
+        }
 
 		Record new_record(&res_table);
 		for (const Column& col : result_columns)
