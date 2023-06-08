@@ -16,4 +16,4 @@ Expr* expr_minus(Expr* a, Expr* b);
 
 Expr* perform_operation(Expr* ex1, Expr* ex2, hsql::OperatorType optype);
 
-Expr* eval(Expr* expression);
+Expr* eval(Expr* expression, const Record& record_ref);

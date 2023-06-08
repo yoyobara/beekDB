@@ -91,8 +91,8 @@ Expr* eval(Expr* expression, const Record& record_ref)
 {
     switch (expression->type) {
         case hsql::kExprOperator: {
-            Expr* ex1 = eval(expression->expr);
-            Expr* ex2 = eval(expression->expr2);
+            Expr* ex1 = eval(expression->expr, record_ref);
+            Expr* ex2 = eval(expression->expr2, record_ref);
 
             convert_to_values(ex1, ex2, record_ref);
 

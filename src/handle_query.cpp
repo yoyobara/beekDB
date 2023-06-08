@@ -48,7 +48,7 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	source_table->for_each([&](Record&& r) {
 
         // should I? (where clause)
-        auto where_res = eval(statement->whereClause);
+        auto where_res = eval(statement->whereClause, r);
         if (where_res->type != hsql::kExprLiteralInt)
             throw where_clause_error("error in evaluating where clause.");
 
