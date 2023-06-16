@@ -6,23 +6,24 @@
 
 using namespace hsql;
 
-void convert_to_values(Expr *a, Expr *b, const Record& record_ref)
+void convert_to_values(Expr **a, Expr **b, const Record& record_ref)
 {
-	for (Expr* e : {a, b})
+	for (Expr** e : {a, b})
 	{
-		if (e->isType(kExprColumnRef))
+		if ((*e)->isType(kExprColumnRef))
 		{
-			switch (record_ref.of_table->get_column(e->name).get_type()) {
+			switch (record_ref.of_table->get_column((*e)->name).get_type()) {
 				case INTEGER:
-					e->type = kExprLiteralInt;
-					e->ival = record_ref.get<IntegerValue>(e->name).int_val;
+                    *e = Expr::makeLiteral(static_cast<int64_t>(record_ref.get<IntegerValue>((*e)->name).int_val));
+                    break;
 
 				case REAL:
-					e->type = kExprLiteralFloat;
-					e->fval = record_ref.get<RealValue>(e->name).real_val;
-case VARCHAR_50:
-					e->type = kExprLiteralString;
-					e->name = record_ref.get<VarChar50Value>(e->name).str_val.data(); // TODO
+                    *e = Expr::makeLiteral(record_ref.get<RealValue>((*e)->name).real_val);
+                    break;
+                case VARCHAR_50:
+                    auto arrval = record_ref.get<VarChar50Value>((*e)->name).str_val;
+                    *e = Expr::makeLiteral(std::string(arrval.begin(), arrval.end()).c_str());
+                    break;
 			}
 		}
 	}
@@ -94,7 +95,7 @@ Expr* eval(Expr* expression, const Record& record_ref)
             Expr* ex1 = eval(expression->expr, record_ref);
             Expr* ex2 = eval(expression->expr2, record_ref);
 
-            convert_to_values(ex1, ex2, record_ref);
+            convert_to_values(&ex1, &ex2, record_ref);
 
             return perform_operation(ex1, ex2, expression->opType);
         }
