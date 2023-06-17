@@ -47,8 +47,6 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	// values into temp table
 	source_table->for_each([&](Record&& r) {
 
-        // TODO from here problem
-
         // should I? (where clause)
         if (statement->whereClause != NULL) {
             auto where_res = eval(statement->whereClause, r);
@@ -166,6 +164,22 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 	send_query_result(client_ssl, true, "");
 }
 
+/* handle the update statement */
+void ClientThread::handle_update_statement(const hsql::UpdateStatement* statement)
+{
+    Table& dest_table = TablesLoader::get_instance().get_table(statement->table->getName());
+
+    dest_table.for_each([&](Record&& r) {
+
+            for (auto col_val : *statement->updates) 
+            {
+                switch (condition) {
+                
+                }
+            }
+    });
+}
+
 /* handle a query from the client */
 void ClientThread::handle_query(const std::string& query)
 {
@@ -202,6 +216,10 @@ void ClientThread::handle_query(const std::string& query)
 			case hsql::kStmtInsert:
 				handle_insert_statement(static_cast<const InsertStatement*>(statement)); 
 				break;
+
+            case hsql::kStmtUpdate:
+                handle_update_statement(static_cast<const UpdateStatement*>(statement));
+                break;
 
 			default:
                 throw not_implemented("feature not implelmented yet..");

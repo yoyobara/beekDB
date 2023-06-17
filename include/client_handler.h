@@ -18,6 +18,7 @@ class ClientThread
 		void handle_select_statement(const hsql::SelectStatement* statement);
 		void handle_create_statement(const hsql::CreateStatement* statement);
 		void handle_insert_statement(const hsql::InsertStatement* statement);
+        void handle_update_statement(const hsql::UpdateStatement* statement);
 
         // cleanup ssl and stuff
         void finalize();
