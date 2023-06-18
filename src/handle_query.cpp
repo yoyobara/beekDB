@@ -5,6 +5,7 @@
 #include "table/table.h"
 #include "communication_protocol.h"
 #include "exceptions.h"
+#include "table/types.h"
 #include "tables_loader.h"
 #include "utils.h"
 #include "where_clause.h"
@@ -136,7 +137,7 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 		switch (column.get_type()) {
 			case INTEGER:
 				if (!value->isType(hsql::kExprLiteralInt)) 
-					throw incorrect_type("incorrect literal type for column " + column.get_name());
+					throw incorrect_type::classic(column.get_name());
 
 				new_record.put(column.get_name(), IntegerValue(value->ival));
 				break;
@@ -147,12 +148,12 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 				else if (value->isType(hsql::kExprLiteralFloat))
 					new_record.put(column.get_name(), RealValue(value->fval));
 				else
-					throw incorrect_type("incorrect literal type for column " + column.get_name());
+					throw incorrect_type::classic(column.get_name());
 				break;
 
 			case VARCHAR_50:
 				if (!value->isType(hsql::kExprLiteralString))
-					throw incorrect_type("incorrect literal type for column " + column.get_name());
+					throw incorrect_type::classic(column.get_name());
 
 				new_record.put(column.get_name(), VarChar50Value(value->getName()));
 				break;
@@ -169,15 +170,39 @@ void ClientThread::handle_update_statement(const hsql::UpdateStatement* statemen
 {
     Table& dest_table = TablesLoader::get_instance().get_table(statement->table->getName());
 
-    dest_table.for_each([&](Record&& r) {
+    // check columns literals in case something's wrong. convert int literals to float literals where appropriate.
+    for (hsql::UpdateClause* col_val : *statement->updates) 
+    {
+        const Column& col = dest_table.get_column(col_val->column);
 
-            for (auto col_val : *statement->updates) 
-            {
-                switch (condition) {
-                
-                }
-            }
-    });
+        switch (col.get_type()) {
+            case INTEGER:
+                if (!col_val->value->isType(hsql::kExprLiteralInt))
+                    throw incorrect_type::classic(col.get_name());
+                break;
+            case REAL:
+                if (col_val->value->isType(hsql::kExprLiteralInt)) 
+                    col_val->value = Expr::makeLiteral(static_cast<double>(col_val->value->ival));
+                else if (!col_val->value->isType(hsql::kExprLiteralFloat))
+                    throw incorrect_type::classic(col.get_name());
+                break;
+            case VARCHAR_50:
+                if (!col_val->value->isType(hsql::kExprLiteralString))
+                    throw incorrect_type::classic(col.get_name());
+                break;
+        }
+    }
+ 
+    // assign
+    // dest_table.for_each([&](record&& r) {
+    //
+    //         for (auto col_val : *statement->updates) 
+    //         {
+    //             switch (condition) {
+    //             
+    //             }
+    //         }
+    // });
 }
 
 /* handle a query from the client */
