@@ -93,6 +93,7 @@ Table::Table(const fs::path& path) :
 
 	// read records count
 	m_file.read_at(RECORDS_COUNT_OFFSET, &m_records_count, sizeof m_records_count);
+    spdlog::info("rec_Count = {}", m_records_count);
 
 	// read columns (file pos now at first col)
 	for (int i = 0 ; i < columns_count ; i++)
