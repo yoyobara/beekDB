@@ -194,6 +194,18 @@ void ClientThread::handle_update_statement(const hsql::UpdateStatement* statemen
     }
  
     dest_table.for_each([&](Record&& r) {
+
+            // should I? (where clause)
+            if (statement->where != NULL) {
+                auto where_res = eval(statement->where, r);
+
+                if (where_res->type != hsql::kExprLiteralInt)
+                    throw where_clause_error("error in evaluating where clause.");
+
+                if (!where_res->ival)
+                    return; // skip since not needed
+            }
+
             for (auto col_val : *statement->updates) 
             {
                 const Column& col = dest_table.get_column(col_val->column);
