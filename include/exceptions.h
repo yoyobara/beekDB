@@ -1,4 +1,5 @@
 #pragma once
+#include "table/table.h"
 #include <stdexcept>
 
 /*
@@ -25,6 +26,10 @@ struct corrupted_table : beek_exception
 struct incorrect_type : beek_exception
 {
 	incorrect_type(const std::string& msg) : beek_exception(msg){}
+    static inline incorrect_type classic(const std::string& column_name)
+    {
+        return incorrect_type("invalid literal type for column " + column_name);
+    }
 };
 
 struct not_implemented : beek_exception

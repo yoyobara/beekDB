@@ -5,6 +5,7 @@
 #include "table/table.h"
 #include "communication_protocol.h"
 #include "exceptions.h"
+#include "table/types.h"
 #include "tables_loader.h"
 #include "utils.h"
 #include "where_clause.h"
@@ -46,8 +47,6 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 
 	// values into temp table
 	source_table->for_each([&](Record&& r) {
-
-        // TODO from here problem
 
         // should I? (where clause)
         if (statement->whereClause != NULL) {
@@ -138,7 +137,7 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 		switch (column.get_type()) {
 			case INTEGER:
 				if (!value->isType(hsql::kExprLiteralInt)) 
-					throw incorrect_type("incorrect literal type for column " + column.get_name());
+					throw incorrect_type::classic(column.get_name());
 
 				new_record.put(column.get_name(), IntegerValue(value->ival));
 				break;
@@ -149,12 +148,12 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 				else if (value->isType(hsql::kExprLiteralFloat))
 					new_record.put(column.get_name(), RealValue(value->fval));
 				else
-					throw incorrect_type("incorrect literal type for column " + column.get_name());
+					throw incorrect_type::classic(column.get_name());
 				break;
 
 			case VARCHAR_50:
 				if (!value->isType(hsql::kExprLiteralString))
-					throw incorrect_type("incorrect literal type for column " + column.get_name());
+					throw incorrect_type::classic(column.get_name());
 
 				new_record.put(column.get_name(), VarChar50Value(value->getName()));
 				break;
@@ -164,6 +163,72 @@ void ClientThread::handle_insert_statement(const hsql::InsertStatement* statemen
 	dest_table.insert(new_record);
 
 	send_query_result(client_ssl, true, "");
+}
+
+/* handle the update statement */
+void ClientThread::handle_update_statement(const hsql::UpdateStatement* statement)
+{
+    Table& dest_table = TablesLoader::get_instance().get_table(statement->table->getName());
+
+    // check columns literals in case something's wrong. convert int literals to float literals where appropriate.
+    for (hsql::UpdateClause* col_val : *statement->updates) 
+    {
+        const Column& col = dest_table.get_column(col_val->column);
+
+        switch (col.get_type()) {
+            case INTEGER:
+                if (!col_val->value->isType(hsql::kExprLiteralInt))
+                    throw incorrect_type::classic(col.get_name());
+                break;
+            case REAL:
+                if (col_val->value->isType(hsql::kExprLiteralInt)) 
+                    col_val->value = Expr::makeLiteral(static_cast<double>(col_val->value->ival));
+                else if (!col_val->value->isType(hsql::kExprLiteralFloat))
+                    throw incorrect_type::classic(col.get_name());
+                break;
+            case VARCHAR_50:
+                if (!col_val->value->isType(hsql::kExprLiteralString))
+                    throw incorrect_type::classic(col.get_name());
+                break;
+        }
+    }
+ 
+    dest_table.for_each([&](Record&& r) {
+
+            // should I? (where clause)
+            if (statement->where != NULL) {
+                auto where_res = eval(statement->where, r);
+
+                if (where_res->type != hsql::kExprLiteralInt)
+                    throw where_clause_error("error in evaluating where clause.");
+
+                if (!where_res->ival)
+                    return; // skip since not needed
+            }
+
+            for (auto col_val : *statement->updates) 
+            {
+                const Column& col = dest_table.get_column(col_val->column);
+
+                switch (col.get_type()) {
+                    case INTEGER:
+                        r.put(col.get_name(), IntegerValue(col_val->value->ival));
+                        break;
+
+                    case REAL:
+                        r.put(col.get_name(), RealValue(col_val->value->fval));
+                        break;
+
+                    case VARCHAR_50:
+                        r.put(col.get_name(), VarChar50Value(col_val->value->getName()));
+                        break;
+                }
+            }
+
+            r.update();
+    });
+
+    send_query_result(client_ssl, true, "");
 }
 
 /* handle a query from the client */
@@ -202,6 +267,10 @@ void ClientThread::handle_query(const std::string& query)
 			case hsql::kStmtInsert:
 				handle_insert_statement(static_cast<const InsertStatement*>(statement)); 
 				break;
+
+            case hsql::kStmtUpdate:
+                handle_update_statement(static_cast<const UpdateStatement*>(statement));
+                break;
 
 			default:
                 throw not_implemented("feature not implelmented yet..");
