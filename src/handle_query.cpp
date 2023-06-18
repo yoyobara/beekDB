@@ -255,29 +255,28 @@ void ClientThread::handle_query(const std::string& query)
 
 	spdlog::get("handle")->info("query is valid!");
 
-	for (const SQLStatement* statement : parsing_result.getStatements())
-	{
-		// handle kinds of statements
-		switch (statement->type()) {
-			case hsql::kStmtSelect:
-				handle_select_statement(static_cast<const SelectStatement*>(statement));
-				break;
-			
-			case hsql::kStmtCreate:
-				handle_create_statement(static_cast<const CreateStatement*>(statement));
-				break;
+    auto statement = parsing_result.getStatement(0);
 
-			case hsql::kStmtInsert:
-				handle_insert_statement(static_cast<const InsertStatement*>(statement)); 
-				break;
+    // handle kinds of statements
+    switch (statement->type()) {
+        case hsql::kStmtSelect:
+            handle_select_statement(static_cast<const SelectStatement*>(statement));
+            break;
+        
+        case hsql::kStmtCreate:
+            handle_create_statement(static_cast<const CreateStatement*>(statement));
+            break;
 
-            case hsql::kStmtUpdate:
-                handle_update_statement(static_cast<const UpdateStatement*>(statement));
-                break;
+        case hsql::kStmtInsert:
+            handle_insert_statement(static_cast<const InsertStatement*>(statement)); 
+            break;
 
-			default:
-                throw not_implemented("feature not implelmented yet..");
-		}
+        case hsql::kStmtUpdate:
+            handle_update_statement(static_cast<const UpdateStatement*>(statement));
+            break;
+
+        default:
+            throw not_implemented("feature not implelmented yet..");
 	}
 }
 
