@@ -79,7 +79,10 @@ void ClientThread::handle_select_statement(const hsql::SelectStatement* statemen
 	});
 
 	// send table response
-	send_query_result(client_ssl, true, res_table.get_file_data());
+    std::string file_data = res_table.get_file_data();
+    spdlog::info("datasize: {}", file_data.size());
+
+	send_query_result(client_ssl, true, std::move(file_data));
 }
 
 void ClientThread::handle_create_statement(const hsql::CreateStatement* statement)

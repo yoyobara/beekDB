@@ -7,6 +7,8 @@ import struct
 import io
 import ssl
 
+RECV_BATCH_SIZE = 2048
+
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
 
 class BeekConnectionError(Exception):
@@ -75,6 +77,10 @@ class BeekDbConnection:
         # wait for response
         cmd, content = self.__recv_message()
 
+        # dumb Log TODO
+        with open("tablog", 'wb') as f:
+            f.write(content)
+
         assert cmd == BeekDbConnection.COMMANDS['server_query_result']
 
         if content[0] == BeekDbConnection.QUERY_ERROR:
@@ -135,7 +141,14 @@ class BeekDbConnection:
         """
         rc = self.__ssl_instance.recv(9)
         cmd, content_length = struct.unpack("<cQ", rc)
-        content = self.__ssl_instance.recv(content_length)
+
+        content = b''
+        for _ in range(content_length // RECV_BATCH_SIZE):
+            content += self.__ssl_instance.recv(RECV_BATCH_SIZE)
+        content += self.__ssl_instance.recv(content_length % RECV_BATCH_SIZE)
+
+        # hotfix for not fully received message
+        content += self.__ssl_instance.recv(content_length - len(content))
 
         return cmd, content
 

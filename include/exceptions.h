@@ -42,7 +42,6 @@ struct no_such_table : beek_exception
 	no_such_table(const std::string& msg) : beek_exception(msg) {}
 };
 
-
 struct where_clause_error : beek_exception
 {
     where_clause_error(const std::string& msg) : beek_exception(msg) {}
