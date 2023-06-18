@@ -77,10 +77,6 @@ class BeekDbConnection:
         # wait for response
         cmd, content = self.__recv_message()
 
-        # dumb Log TODO
-        with open("tablog", 'wb') as f:
-            f.write(content)
-
         assert cmd == BeekDbConnection.COMMANDS['server_query_result']
 
         if content[0] == BeekDbConnection.QUERY_ERROR:
