@@ -1,9 +1,11 @@
+#include <filesystem>
 #include <ostream>
 
 #include <spdlog/spdlog.h>
 
 #include "table/table.h"
 #include "exceptions.h"
+#include "table/table_storage_constants.h"
 
 using namespace table_storage;
 
@@ -119,6 +121,10 @@ Table::Table(const fs::path& path) :
 
 void create_table(const fs::path& path, std::vector<Column> columns)
 {
+    // check if path exists and is a non-temp table
+    if (path.parent_path() == TABLES_DIR && fs::exists(path))
+        throw table_name_taken("table path " + path.string() + "is already a table");
+
 	// create a random access file
 	RandomAccessFile f(path, true);
 
