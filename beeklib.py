@@ -147,6 +147,9 @@ class BeekDbConnection:
             content += self.__ssl_instance.recv(RECV_BATCH_SIZE)
         content += self.__ssl_instance.recv(content_length % RECV_BATCH_SIZE)
 
+        # hotfix for not fully received message
+        content += self.__ssl_instance.recv(content_length - len(content))
+
         return cmd, content
 
     def close(self) -> None:
