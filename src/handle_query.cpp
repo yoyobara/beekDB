@@ -193,16 +193,30 @@ void ClientThread::handle_update_statement(const hsql::UpdateStatement* statemen
         }
     }
  
-    // assign
-    // dest_table.for_each([&](record&& r) {
-    //
-    //         for (auto col_val : *statement->updates) 
-    //         {
-    //             switch (condition) {
-    //             
-    //             }
-    //         }
-    // });
+    dest_table.for_each([&](Record&& r) {
+            for (auto col_val : *statement->updates) 
+            {
+                const Column& col = dest_table.get_column(col_val->column);
+
+                switch (col.get_type()) {
+                    case INTEGER:
+                        r.put(col.get_name(), IntegerValue(col_val->value->ival));
+                        break;
+
+                    case REAL:
+                        r.put(col.get_name(), RealValue(col_val->value->fval));
+                        break;
+
+                    case VARCHAR_50:
+                        r.put(col.get_name(), VarChar50Value(col_val->value->getName()));
+                        break;
+                }
+            }
+
+            r.update();
+    });
+
+    send_query_result(client_ssl, true, "");
 }
 
 /* handle a query from the client */
