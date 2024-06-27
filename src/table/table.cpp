@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <ostream>
+#include <algorithm>
 
 #include <spdlog/spdlog.h>
 

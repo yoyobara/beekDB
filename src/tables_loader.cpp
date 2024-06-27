@@ -2,6 +2,7 @@
 
 #include "tables_loader.h"
 #include "exceptions.h"
+#include <algorithm>
 
 namespace fs = std::filesystem;
 
