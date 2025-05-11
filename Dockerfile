@@ -9,4 +9,6 @@ COPY . .
 
 RUN make
 
+EXPOSE 1337
+
 CMD ["./beekDB"]
