@@ -14,11 +14,11 @@ libs_cflags := $(shell pkg-config --cflags spdlog)
 all: $(EXECUTABLE)
 
 $(EXECUTABLE): $(objects)
-	$(CXX) -g -I $(HEADERS_DIR) -std=c++17 $(libs_cflags) $(objects) -o $@ $(libs)
+	$(CXX) -g -I $(HEADERS_DIR) -no-pie -std=c++17 $(libs_cflags) $(objects) -o $@ $(libs)
 
 $(objects): $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) -g $(libs_cflags) -std=c++17 -I $(HEADERS_DIR) -MMD -MP -c $< -o $@ $(libs)
+	$(CXX) -g $(libs_cflags) -no-pie -std=c++17 -I $(HEADERS_DIR) -MMD -MP -c $< -o $@ $(libs)
 
 .PHONY: clean
 clean:
