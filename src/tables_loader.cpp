@@ -15,6 +15,9 @@ void TablesLoader::reload_tables()
 {
 	for (const auto& table_file : fs::directory_iterator(table_storage::TABLES_DIR))
 	{
+        if (table_file.path().filename() == ".gitkeep") {
+            continue;
+        }
 		// if already there dont add it
 		if (std::find_if(tables.begin(), tables.end(), [table_file](const std::unique_ptr<Table>& ptr){ return ptr->get_name() == table_file.path(); }) == tables.end())
 		{
